@@ -2321,7 +2321,52 @@ async function roteasApi(
         const [mesas, turno, garcons] = await comErroDoCardapio(() =>
           Promise.all([listarMesas(venue.id), turnoDoDia(venue.id, dia), garconsRecentes(venue.id)]),
         );
-        return ok(res, { dia, mesas, turno, garcons });
+        // A equipe é a MESMA lista que a pesquisa usa em "quem te atendeu?".
+        // É gente da casa, não do módulo: cadastrar o garçom aqui e ele
+        // aparecer na pesquisa (quando a casa a tem) é o esperado.
+        const equipe = await comErroDePesquisa(() => listarAtendentes(venue.id, { incluirInativos: true }));
+        return ok(res, { dia, mesas, turno, garcons, equipe });
+      }
+
+      // POST /v1/venues/:slug/cardapio/equipe — cadastra quem atende
+      // PATCH | DELETE /v1/venues/:slug/cardapio/equipe/:id
+      if (acao === "equipe") {
+        const chave = await exigirChave(req, "reservations:write");
+        const venue = await findVenueBySlugInOrg(chave.org_id, slug);
+        if (metodo === "POST" && p.length === 4) {
+          const corpo = await lerJson(req);
+          return ok(
+            res,
+            await comErroDePesquisa(() =>
+              criarAtendente({
+                venueId: venue.id,
+                nome: texto(corpo, "nome"),
+                apelido: textoOpcional(corpo, "apelido") ?? null,
+                funcao: textoOpcional(corpo, "funcao") ?? "garçom",
+              }),
+            ),
+            201,
+          );
+        }
+        if (metodo === "PATCH" && p.length === 5) {
+          const corpo = await lerJson(req);
+          return ok(
+            res,
+            await comErroDePesquisa(() =>
+              atualizarAtendente({
+                venueId: venue.id,
+                id: p[4]!,
+                ...(corpo.nome !== undefined ? { nome: texto(corpo, "nome") } : {}),
+                ...(corpo.apelido !== undefined ? { apelido: textoOpcional(corpo, "apelido") ?? null } : {}),
+                ...(corpo.funcao !== undefined ? { funcao: textoOpcional(corpo, "funcao") ?? null } : {}),
+                ...(corpo.ativo !== undefined ? { ativo: Boolean(corpo.ativo) } : {}),
+              }),
+            ),
+          );
+        }
+        if (metodo === "DELETE" && p.length === 5) {
+          return ok(res, await comErroDePesquisa(() => removerAtendente(venue.id, p[4]!)));
+        }
       }
 
       // GET /v1/venues/:slug/cardapio/ao-vivo — o salão agora

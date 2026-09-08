@@ -254,37 +254,116 @@ export async function cardapioDigital(raiz, ctx) {
       },
     });
     const dia = el("input", { type: "date" });
-    const sugestoes = el("datalist", { id: "garcons-sugeridos" });
+    const equipeCaixa = el("div", { classe: "tabela" });
+    let equipe = [];
+
+    // ---- a equipe: quem pode ser escalado numa mesa ----
+    const novoNome = el("input", { placeholder: "Nome do garçom", style: "flex:2" });
+    const novoApelido = el("input", { placeholder: "Como o cliente chama (opcional)", style: "flex:2" });
+    const novaFuncao = el("input", { placeholder: "Função", value: "garçom", style: "flex:1" });
+    const cadastrar = el("button", {
+      classe: "btn btn-primario btn-peq",
+      type: "button",
+      texto: "Cadastrar",
+      onclick: async () => {
+        cadastrar.disabled = true;
+        try {
+          await post(`/v1/venues/${ctx.venue}/cardapio/equipe`, { nome: novoNome.value.trim(), apelido: novoApelido.value.trim(), funcao: novaFuncao.value.trim() });
+          novoNome.value = ""; novoApelido.value = "";
+          avisar("Cadastrado. Já dá para escalar nas mesas.", "ok");
+          await carregar();
+        } catch (e) {
+          avisar(e.message, "erro");
+        } finally {
+          cadastrar.disabled = false;
+        }
+      },
+    });
 
     corpo.append(
       el("div", { classe: "cabecalho-secao" }, [
         el("div", {}, [
           el("h2", { texto: "Mesas e quem atende cada uma" }),
-          el("p", { classe: "muted", texto: "Cadastre as mesas uma vez. A cada dia, escreva o garçom de cada mesa: o chamado do cliente sai com o nome dele, e o cliente vê quem o atende." }),
+          el("p", { classe: "muted", texto: "Cadastre a equipe e as mesas uma vez. A cada dia, escale o garçom de cada mesa: o chamado do cliente sai com o nome dele, e o cliente vê quem o atende." }),
         ]),
       ]),
       el("div", { classe: "cartao" }, [
-        el("div", { classe: "linha-campos", style: "align-items:center;flex-wrap:wrap" }, [
+        el("h3", { texto: "Equipe" }),
+        el("p", { classe: "muted", texto: "A mesma lista que a pesquisa de satisfação usa em “quem te atendeu?”. Quem sai da casa é desligado, não apagado, para o histórico ficar." }),
+        el("div", { classe: "linha-campos", style: "margin-top:10px;flex-wrap:wrap" }, [novoNome, novoApelido, novaFuncao, cadastrar]),
+        equipeCaixa,
+      ]),
+      el("div", { classe: "cartao" }, [
+        el("h3", { texto: "Mesas" }),
+        el("div", { classe: "linha-campos", style: "align-items:center;flex-wrap:wrap;margin-top:10px" }, [
           el("span", { texto: "Criar mesas de" }), de, el("span", { texto: "até" }), ate, criar,
           el("span", { style: "flex:1" }),
-          el("label", { classe: "campo-rotulado" }, [el("span", { texto: "Turno do dia" }), dia]),
+          el("label", { classe: "campo-rotulado" }, [el("span", { texto: "Escala do dia" }), dia]),
         ]),
       ]),
-      sugestoes,
       lista,
     );
 
+    function desenharEquipe() {
+      limpar(equipeCaixa);
+      equipeCaixa.style.marginTop = "10px";
+      if (!equipe.length) {
+        equipeCaixa.append(vazio("Ninguém cadastrado ainda", "Cadastre acima quem atende as mesas."));
+        return;
+      }
+      for (const a of equipe) {
+        const ativo = el("input", { type: "checkbox", checked: a.ativo });
+        ativo.addEventListener("change", async () => {
+          try { await patch(`/v1/venues/${ctx.venue}/cardapio/equipe/${a.id}`, { ativo: ativo.checked }); a.ativo = ativo.checked; desenharListaDeMesas(); } catch (e) { avisar(e.message, "erro"); }
+        });
+        const apelido = el("input", { value: a.apelido ?? "", placeholder: "apelido", style: "flex:1" });
+        apelido.addEventListener("change", async () => {
+          try { await patch(`/v1/venues/${ctx.venue}/cardapio/equipe/${a.id}`, { apelido: apelido.value.trim() }); a.apelido = apelido.value.trim() || null; desenharListaDeMesas(); } catch (e) { avisar(e.message, "erro"); }
+        });
+        equipeCaixa.append(
+          el("div", { classe: `linha-tabela${a.ativo ? "" : " linha-apagada"}` }, [
+            el("div", { classe: "linha-principal" }, [el("strong", { texto: a.nome }), el("span", { classe: "muted", texto: a.funcao || "garçom" })]),
+            apelido,
+            el("label", { classe: "campo-caixa", style: "align-items:center;white-space:nowrap" }, [ativo, el("span", { texto: "na casa" })]),
+            el("button", {
+              classe: "btn-icone",
+              type: "button",
+              texto: "🗑️",
+              title: "Remover",
+              onclick: async () => {
+                if (!confirm(`Remover ${a.nome} da equipe?`)) return;
+                try {
+                  const r = await del(`/v1/venues/${ctx.venue}/cardapio/equipe/${a.id}`);
+                  avisar(r.apagado ? "Removido." : "Desligado (tem avaliações no histórico, então fica guardado).", "ok");
+                  await carregar();
+                } catch (e) {
+                  avisar(e.message, "erro");
+                }
+              },
+            }),
+          ]),
+        );
+      }
+    }
+
+    let ultimo = null;
     async function carregar() {
       limpar(lista).append(el("p", { classe: "muted", style: "padding:12px", texto: "Carregando…" }));
-      let r;
       try {
-        r = await get(`/v1/venues/${ctx.venue}/cardapio/mesas${dia.value ? `?dia=${dia.value}` : ""}`);
+        ultimo = await get(`/v1/venues/${ctx.venue}/cardapio/mesas${dia.value ? `?dia=${dia.value}` : ""}`);
       } catch (e) {
         limpar(lista).append(el("p", { classe: "muted", style: "padding:12px", texto: e.message }));
         return;
       }
-      if (!dia.value) dia.value = r.dia;
-      limpar(sugestoes).append(...r.garcons.map((g) => el("option", { value: g })));
+      if (!dia.value) dia.value = ultimo.dia;
+      equipe = ultimo.equipe ?? [];
+      desenharEquipe();
+      desenharListaDeMesas();
+    }
+
+    function desenharListaDeMesas() {
+      const r = ultimo;
+      if (!r) return;
       const garcomDe = new Map(r.turno.map((t) => [t.mesa, t.garcom]));
       limpar(lista);
       if (!r.mesas.length) {
@@ -294,16 +373,25 @@ export async function cardapioDigital(raiz, ctx) {
       for (const m of r.mesas) lista.append(linhaDaMesa(m, garcomDe.get(m.numero) ?? "", r.dia));
     }
 
+    const nomeNaMesa = (a) => a.apelido?.trim() || a.nome;
+
     function linhaDaMesa(m, garcom, diaDoTurno) {
       const nome = el("input", { value: m.nome, placeholder: "apelido (opcional)", style: "flex:1" });
       nome.addEventListener("change", async () => {
         try { await patch(`/v1/venues/${ctx.venue}/cardapio/mesas/${m.id}`, { nome: nome.value.trim() }); } catch (e) { avisar(e.message, "erro"); }
       });
-      const campoGarcom = el("input", { value: garcom, placeholder: "garçom hoje", list: "garcons-sugeridos", style: "flex:1" });
+      // A escala escolhe da equipe. O nome gravado num dia antigo, de alguém
+      // que já saiu, continua aparecendo como opção para não sumir da tela.
+      const opcoes = equipe.filter((a) => a.ativo).map(nomeNaMesa);
+      if (garcom && !opcoes.includes(garcom)) opcoes.push(garcom);
+      const campoGarcom = el("select", { classe: "select", style: "flex:1" }, [
+        el("option", { value: "", texto: equipe.length ? "— sem garçom —" : "cadastre a equipe acima" }),
+        ...opcoes.map((n) => el("option", { value: n, texto: n, selected: n === garcom })),
+      ]);
       campoGarcom.addEventListener("change", async () => {
         try {
-          await put(`/v1/venues/${ctx.venue}/cardapio/turno`, { mesa: m.numero, garcom: campoGarcom.value.trim(), dia: dia.value || diaDoTurno });
-          avisar(campoGarcom.value.trim() ? `Mesa ${m.numero}: ${campoGarcom.value.trim()}.` : `Mesa ${m.numero} sem garçom.`, "ok");
+          await put(`/v1/venues/${ctx.venue}/cardapio/turno`, { mesa: m.numero, garcom: campoGarcom.value, dia: dia.value || diaDoTurno });
+          avisar(campoGarcom.value ? `Mesa ${m.numero}: ${campoGarcom.value}.` : `Mesa ${m.numero} sem garçom.`, "ok");
         } catch (e) {
           avisar(e.message, "erro");
         }
