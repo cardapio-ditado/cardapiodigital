@@ -134,7 +134,7 @@ async function enviarPorWhatsapp(destino: string, corpo: string): Promise<Result
  * do cliente. Fora dela a Meta exige template aprovado — o envio falha e a
  * notificação fica registrada como `failed` para reenvio ou contato manual.
  */
-async function enviarPelaCloudApi(destino: string, corpo: string): Promise<ResultadoEnvio> {
+export async function enviarPelaCloudApi(destino: string, corpo: string): Promise<ResultadoEnvio> {
   const token = process.env.WHATSAPP_TOKEN!;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID!;
   const versao = process.env.WHATSAPP_API_VERSION ?? "v21.0";

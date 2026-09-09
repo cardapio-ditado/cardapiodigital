@@ -120,6 +120,12 @@ import {
   verificarWebhook,
 } from "./channels/instagram.js";
 import {
+  assinaturaWhatsappValida,
+  estadoWhatsappCloud,
+  processarWebhookWhatsapp,
+  verificarWebhookWhatsapp,
+} from "./channels/whatsappCloud.js";
+import {
   LIMITE_FOTO_BYTES,
   concluirRun,
   conversarGeracao,
@@ -4409,6 +4415,46 @@ async function roteasApi(
   if (metodo === "GET" && p[0] === "instagram" && p[1] === "status" && p.length === 2) {
     await exigirChave(req, "reservations:write");
     return ok(res, estadoInstagram());
+  }
+
+  // ---- WhatsApp oficial (Cloud API da Meta) ----
+  // Mesmo desenho do Instagram: sem chave de API, a Meta é quem chama. A
+  // segurança é o verify token (GET) e a assinatura HMAC do corpo (POST).
+  // Fica ANTES do bloco do Baileys, que exige login em tudo sob /whatsapp.
+  if (p[0] === "whatsapp" && p[1] === "webhook" && p.length === 2) {
+    if (metodo === "GET") {
+      const challenge = verificarWebhookWhatsapp(url.searchParams);
+      if (challenge === null) {
+        throw erro(403, "forbidden", "Verificação do webhook recusada.");
+      }
+      res.writeHead(200, { "content-type": "text/plain" });
+      res.end(challenge);
+      return;
+    }
+
+    if (metodo === "POST") {
+      const bruto = await lerBinario(req, 1_000_000);
+      const assinatura = req.headers["x-hub-signature-256"];
+      if (!assinaturaWhatsappValida(bruto, Array.isArray(assinatura) ? assinatura[0] : assinatura)) {
+        throw erro(403, "forbidden", "Assinatura do webhook inválida.");
+      }
+      let corpo: unknown;
+      try {
+        corpo = JSON.parse(bruto.toString("utf8"));
+      } catch {
+        throw erro(400, "invalid_request", "Corpo do webhook não é JSON.");
+      }
+      // Processa antes de responder: em serverless, o trabalho morre junto
+      // com a resposta. Confirmações de entrega ("statuses") passam direto.
+      const r = await processarWebhookWhatsapp(corpo as Parameters<typeof processarWebhookWhatsapp>[0]);
+      return ok(res, { recebido: true, ...r });
+    }
+  }
+
+  // GET /v1/whatsapp/cloud/status — configuração do canal oficial, para a aba Canais
+  if (metodo === "GET" && p[0] === "whatsapp" && p[1] === "cloud" && p[2] === "status" && p.length === 3) {
+    await exigirChave(req, "reservations:write");
+    return ok(res, estadoWhatsappCloud());
   }
 
   // ---- WhatsApp (Baileys) ----

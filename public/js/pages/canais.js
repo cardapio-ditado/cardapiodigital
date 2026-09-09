@@ -32,6 +32,7 @@ export async function canais(raiz, ctx) {
   );
 
   const areaInstagram = el("div", {});
+  const areaCloud = el("div", {});
 
   raiz.append(
     el("div", { classe: "pilha" }, [
@@ -44,11 +45,51 @@ export async function canais(raiz, ctx) {
         }),
       ]),
       area,
+      areaCloud,
       areaInstagram,
     ]),
   );
 
   void desenharInstagram();
+  void desenharCloud();
+
+  async function desenharCloud() {
+    let estado;
+    try {
+      estado = await get("/v1/whatsapp/cloud/status");
+    } catch {
+      return; // API antiga sem a rota: o cartão simplesmente não aparece.
+    }
+
+    limpar(areaCloud).append(
+      el("section", { classe: "cartao" }, [
+        el("div", { classe: "cabecalho-secao" }, [
+          el("div", {}, [
+            el("h2", { texto: "WhatsApp oficial (Meta)" }),
+            el("p", {
+              classe: "muted",
+              texto: estado.configurado
+                ? `Número oficial atendido por "${estado.agente}" · sem QR, sem computador ligado e sem risco de banimento.`
+                : "Canal oficial da Meta (Cloud API): o cliente escreve para o número da casa e o agente responde direto na nuvem.",
+            }),
+          ]),
+          etiqueta(estado.configurado ? "Ativo" : "Não configurado", estado.configurado ? "etiqueta-ok" : ""),
+        ]),
+        el("p", { classe: "muted", texto: `Endereço do webhook para colar no painel da Meta: ${location.origin}/v1/whatsapp/webhook` }),
+        estado.configurado
+          ? null
+          : el("div", {}, [
+              el("p", { classe: "muted", texto: "Para ativar, falta configurar na Vercel:" }),
+              el("ul", { classe: "muted", style: "padding-left:18px;line-height:1.8" }, estado.faltando.map((v) => el("li", { texto: v }))),
+              el("p", {
+                classe: "muted",
+                texto:
+                  "Token e ID do número vêm do app em developers.facebook.com (WhatsApp > Configuração da API); o verify token você inventa e cola nos dois lugares; o App Secret é o mesmo do Instagram.",
+              }),
+            ]),
+      ]),
+    );
+  }
 
   async function desenharInstagram() {
     let estado;
