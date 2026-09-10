@@ -1,5 +1,5 @@
 import { del, get, patch, post, postArquivo } from "../api.js";
-import { avisar, dataHora, el, etiqueta, indicador, limpar, vazio } from "../ui.js";
+import { avisar, dataHora, dinheiro, el, etiqueta, indicador, limpar, vazio } from "../ui.js";
 
 /**
  * RH — Fase 1: a ficha de cada pessoa da casa.
@@ -30,13 +30,39 @@ const FORMAS = [
   ["transferencia", "Transferência"],
 ];
 
+/**
+ * Por qual valor cada coluna ordena.
+ *
+ * O nome é o padrão, porque é como se procura alguém. Mas "quem entrou por
+ * último" e "quem ganha mais" são perguntas de toda semana, e por isso cada
+ * coluna ordena.
+ *
+ * Mora FORA da função da tela de propósito: uma `const` declarada lá dentro,
+ * depois do primeiro desenho, não existe ainda na hora em que a tela desenha
+ * pela primeira vez — e a tela abre em branco, com "Cannot access before
+ * initialization" no console. Já aconteceu no cardápio.
+ */
+const VALOR_DA_COLUNA = {
+  nome: (p) => p.nome.toLowerCase(),
+  // Sem função vai para o fim da lista, não para o começo.
+  funcao: (p) => (p.ficha?.cargo || p.funcao || "zzz").toLowerCase(),
+  vinculo: (p) => p.ficha?.vinculo ?? "zzz",
+  admissao: (p) => p.ficha?.admissao ?? "",
+  salario: (p) => Number(p.ficha?.salario) || 0,
+};
+
 export async function rh(raiz, ctx) {
   let dados = null;
   let verDesligados = false;
   let abertaId = null;
+  let busca = "";
+  let ordem = { campo: "nome", desc: false };
 
   const cabecalho = el("div", { classe: "grade" });
-  const corpo = el("div", {});
+  // `min-width:0` não é enfeite: a planilha lá dentro tem largura mínima de
+  // 720px, e sem isto ela estica a coluna da pilha inteira — os indicadores
+  // do topo saem da tela do celular junto, e a página rola de lado.
+  const corpo = el("div", { style: "min-width:0" });
 
   raiz.append(el("div", { classe: "pilha" }, [cabecalho, corpo]));
   await recarregar();
@@ -60,21 +86,77 @@ export async function rh(raiz, ctx) {
 
   function desenharCabecalho() {
     const r = dados.resumo;
+    const naCasa = dados.pessoas.filter((p) => !p.ficha?.desligamento);
+    const folha = naCasa.reduce((soma, p) => soma + (Number(p.ficha?.salario) || 0), 0);
+    const semSalario = naCasa.filter((p) => !p.ficha?.salario).length;
+
+    // Quatro cartões, não cinco: no celular cada cartão a mais empurra a
+    // lista — que é o que o gestor veio ver — para fora da tela. Os
+    // desligados viram nota do primeiro em vez de ganhar cartão próprio.
     limpar(cabecalho).append(
-      indicador({ rotulo: "Na casa", valor: r.ativos }),
+      indicador({
+        rotulo: "Na casa",
+        valor: r.ativos,
+        nota: r.desligados ? `${r.desligados} desligado(s) no histórico` : null,
+      }),
+      indicador({
+        rotulo: "Salários combinados",
+        valor: dinheiro(folha),
+        // Sem encargos de propósito: quem calcula FGTS, INSS e férias é a
+        // contabilidade. Dizer "folha" aqui faria o dono planejar por um
+        // número que não é o que ele paga.
+        nota: semSalario ? `${semSalario} sem salário anotado` : "sem encargos",
+      }),
       indicador({ rotulo: "Com pendência", valor: r.com_pendencia, destaque: r.com_pendencia > 0 }),
       indicador({ rotulo: "Documento vencendo", valor: r.documentos_em_alerta, destaque: r.documentos_em_alerta > 0 }),
-      indicador({ rotulo: "Desligados", valor: r.desligados }),
     );
   }
 
   /* ================= A lista ================= */
 
+  function pessoasNaTela() {
+    const termo = busca.trim().toLowerCase();
+    const filtradas = termo
+      ? dados.pessoas.filter((p) =>
+          [p.nome, p.apelido, p.funcao, p.ficha?.cargo, p.ficha?.telefone]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase()
+            .includes(termo),
+        )
+      : dados.pessoas;
+
+    const valor = VALOR_DA_COLUNA[ordem.campo] ?? VALOR_DA_COLUNA.nome;
+    return [...filtradas].sort((a, b) => {
+      const va = valor(a);
+      const vb = valor(b);
+      const r = va < vb ? -1 : va > vb ? 1 : 0;
+      return ordem.desc ? -r : r;
+    });
+  }
+
   function desenharLista() {
     abertaId = null;
     limpar(corpo);
 
-    const lista = el("div", { classe: "tabela" });
+    const campoBusca = el("input", {
+      classe: "input",
+      type: "search",
+      placeholder: "Buscar por nome, função ou telefone…",
+      value: busca,
+      style: "max-width:320px",
+      oninput: (e) => {
+        busca = e.target.value;
+        desenharLista();
+        // Redesenhar troca o campo por um novo: sem devolver o cursor, quem
+        // digita a segunda letra digita no vazio.
+        const novo = corpo.querySelector('input[type="search"]');
+        if (novo) {
+          novo.focus();
+          novo.setSelectionRange(novo.value.length, novo.value.length);
+        }
+      },
+    });
 
     corpo.append(
       el("div", { classe: "cabecalho-secao" }, [
@@ -82,10 +164,11 @@ export async function rh(raiz, ctx) {
           el("h2", { texto: "Equipe" }),
           el("p", {
             classe: "muted",
-            texto: "Quem trabalha na casa, o que falta de documento e a ficha de cada um.",
+            texto: "Quem trabalha na casa, desde quando, quanto ganha e o que falta de documento. Clique numa linha para abrir a ficha.",
           }),
         ]),
         el("div", { classe: "reserva-acoes" }, [
+          campoBusca,
           el("button", {
             classe: "btn btn-peq",
             type: "button",
@@ -103,11 +186,10 @@ export async function rh(raiz, ctx) {
           }),
         ]),
       ]),
-      lista,
     );
 
     if (dados.pessoas.length === 0) {
-      lista.append(
+      corpo.append(
         vazio(
           "Ninguém cadastrado ainda",
           'Clique em "Admitir alguém" para abrir a primeira ficha. Quem você cadastrar aqui já aparece como garçom no cardápio.',
@@ -116,46 +198,112 @@ export async function rh(raiz, ctx) {
       return;
     }
 
-    for (const pessoa of dados.pessoas) {
-      const f = pessoa.ficha;
-      const desligado = Boolean(f?.desligamento);
-
-      lista.append(
-        el(
-          "div",
-          {
-            classe: "linha linha-clicavel",
-            onclick: () => abrirFicha(pessoa.id),
-          },
-          [
-            el("div", { style: "flex:1;min-width:200px" }, [
-              el("strong", { texto: pessoa.apelido ? `${pessoa.nome} (${pessoa.apelido})` : pessoa.nome }),
-              el("p", {
-                classe: "muted",
-                style: "margin:2px 0 0",
-                texto: [
-                  f?.cargo || pessoa.funcao || "sem função",
-                  f?.vinculo ? NOME_DO_VINCULO[f.vinculo] ?? f.vinculo : null,
-                  f?.admissao ? `desde ${diaBr(f.admissao)}` : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · "),
-              }),
-            ]),
-            el("div", { classe: "reserva-acoes" }, [
-              desligado ? etiqueta(`saiu em ${diaBr(f.desligamento)}`, "") : null,
-              pessoa.documentos_alerta
-                ? etiqueta(`${pessoa.documentos_alerta} documento(s) vencendo`, "etiqueta-alerta")
-                : null,
-              !desligado && pessoa.pendencias.length
-                ? etiqueta(`falta ${pessoa.pendencias.length}`, "etiqueta-alerta")
-                : null,
-              !desligado && !pessoa.pendencias.length ? etiqueta("completo", "etiqueta-ok") : null,
-            ]),
-          ],
-        ),
-      );
+    const pessoas = pessoasNaTela();
+    if (pessoas.length === 0) {
+      corpo.append(vazio("Ninguém com esse nome", "Tente outro pedaço do nome, da função ou do telefone."));
+      return;
     }
+
+    const naTela = pessoas.filter((p) => !p.ficha?.desligamento);
+    const desligadosNaTela = pessoas.length - naTela.length;
+    const somaVisivel = naTela.reduce((soma, p) => soma + (Number(p.ficha?.salario) || 0), 0);
+
+    corpo.append(
+      el("div", {}, [
+        el("div", { classe: "rolagem-x" }, [
+          el("table", { classe: "planilha" }, [
+            el("thead", {}, [
+              el("tr", {}, [
+                colunaOrdenavel("Nome", "nome"),
+                colunaOrdenavel("Função", "funcao"),
+                colunaOrdenavel("Vínculo", "vinculo"),
+                colunaOrdenavel("Admissão", "admissao"),
+                colunaOrdenavel("Salário", "salario", "col-num"),
+                el("th", { texto: "Telefone" }),
+                el("th", { texto: "Situação" }),
+              ]),
+            ]),
+            el(
+              "tbody",
+              {},
+              pessoas.map((pessoa) => linhaDaPessoa(pessoa)),
+            ),
+            el("tfoot", {}, [
+              el("tr", {}, [
+                el("td", {
+                  colspan: 4,
+                  // O total soma só quem está na casa: somar salário de quem
+                  // saiu daria um número que não existe.
+                  texto: `${naTela.length} na casa${desligadosNaTela ? ` · ${desligadosNaTela} desligado(s)` : ""}`,
+                }),
+                el("td", { classe: "col-num", texto: dinheiro(somaVisivel) }),
+                el("td", { colspan: 2, classe: "muted", texto: "soma de quem está na casa, sem encargos" }),
+              ]),
+            ]),
+          ]),
+        ]),
+      ]),
+    );
+  }
+
+  function colunaOrdenavel(rotulo, campo, classe = "") {
+    const ativa = ordem.campo === campo;
+    return el("th", {
+      classe: `${classe} coluna-ordenavel`.trim(),
+      style: "cursor:pointer;user-select:none",
+      texto: ativa ? `${rotulo} ${ordem.desc ? "▼" : "▲"}` : rotulo,
+      title: "Clique para ordenar por esta coluna",
+      onclick: () => {
+        // Clicar de novo na mesma coluna inverte; coluna nova começa de cima.
+        ordem = ativa ? { campo, desc: !ordem.desc } : { campo, desc: false };
+        desenharLista();
+      },
+    });
+  }
+
+  function linhaDaPessoa(pessoa) {
+    const f = pessoa.ficha;
+    const desligado = Boolean(f?.desligamento);
+
+    return el(
+      "tr",
+      {
+        style: "cursor:pointer",
+        classe: !desligado && pessoa.pendencias.length ? "linha-atencao" : "",
+        onclick: () => abrirFicha(pessoa.id),
+      },
+      [
+        el("td", {}, [
+          el("strong", { texto: pessoa.nome }),
+          pessoa.apelido ? el("small", { classe: "muted", texto: pessoa.apelido }) : null,
+        ]),
+        el("td", { texto: f?.cargo || pessoa.funcao || "—" }),
+        el("td", { texto: f?.vinculo ? NOME_DO_VINCULO[f.vinculo] ?? f.vinculo : "—" }),
+        el("td", {}, [
+          document.createTextNode(f?.admissao ? diaBr(f.admissao) : "—"),
+          f?.admissao && !desligado ? el("small", { classe: "muted", texto: tempoDeCasa(f.admissao) }) : null,
+          desligado ? el("small", { classe: "muted", texto: `saiu ${diaBr(f.desligamento)}` }) : null,
+        ]),
+        el("td", { classe: "col-num", texto: f?.salario ? dinheiro(f.salario) : "—" }),
+        el("td", { texto: telefoneBr(f?.telefone) }),
+        el("td", {}, [
+          desligado
+            ? etiqueta("desligado", "")
+            : pessoa.pendencias.length
+              ? // A lista inteira alargaria a coluna (a planilha não quebra
+                // linha): a primeira pendência conta a história, o resto vira
+                // número, e a ficha mostra tudo.
+                etiqueta(
+                  `falta ${pessoa.pendencias[0].toLowerCase()}${
+                    pessoa.pendencias.length > 1 ? ` +${pessoa.pendencias.length - 1}` : ""
+                  }`,
+                  "etiqueta-alerta",
+                )
+              : etiqueta("completo", "etiqueta-ok"),
+          pessoa.documentos_alerta ? etiqueta(`${pessoa.documentos_alerta} vencendo`, "etiqueta-alerta") : null,
+        ]),
+      ],
+    );
   }
 
   /* ================= Admissão ================= */
@@ -593,6 +741,26 @@ function diaBr(iso) {
   if (!iso) return "";
   const [ano, mes, dia] = String(iso).slice(0, 10).split("-");
   return `${dia}/${mes}/${ano}`;
+}
+
+/** "há 3 anos", "há 8 meses", "há 12 dias" — o tempo de casa em uma olhada. */
+function tempoDeCasa(admissao) {
+  const dias = Math.floor((Date.now() - new Date(`${admissao}T12:00:00Z`).getTime()) / 86_400_000);
+  if (dias < 0) return "começa em breve";
+  if (dias < 31) return `há ${dias} dia${dias === 1 ? "" : "s"}`;
+  const meses = Math.floor(dias / 30.44);
+  if (meses < 12) return `há ${meses} ${meses === 1 ? "mês" : "meses"}`;
+  const anos = Math.floor(meses / 12);
+  const resto = meses % 12;
+  return `há ${anos} ano${anos === 1 ? "" : "s"}${resto ? ` e ${resto} m` : ""}`;
+}
+
+/** "65999990000" vira "(65) 99999-0000". */
+function telefoneBr(digitos) {
+  const d = String(digitos ?? "").replace(/\D/g, "");
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return d || "—";
 }
 
 function formatarCpf(digitos) {

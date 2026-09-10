@@ -2161,6 +2161,16 @@ button.linha-tabela:hover { background: var(--marca-suave); }
 }
 .planilha .col-acoes { text-align: right; }
 
+/* Linha de total: fecha a planilha em vez de parecer mais um registro. */
+.planilha tfoot td {
+  font-weight: 600;
+  border-top: 2px solid var(--borda-forte);
+  border-bottom: 0;
+  background: var(--fundo);
+}
+/* Cabeçalho que ordena: o cursor já muda, o fundo confirma que é botão. */
+.planilha th.coluna-ordenavel:hover { background: var(--marca-suave); }
+
 /* Botão-ícone das ações da linha: alvo grande, sem moldura. */
 .btn-icone {
   border: 1px solid var(--borda);
