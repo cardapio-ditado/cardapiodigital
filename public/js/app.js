@@ -245,11 +245,17 @@ const MODULOS = [
   },
 ];
 
-/** Favos vazios: a colmeia mostra para onde ela ainda cresce. */
+/**
+ * Favos vazios: a colmeia mostra para onde ela ainda cresce.
+ *
+ * CUIDADO ao mexer: cada posição aqui tem que estar LIVRE em MODULOS. Os
+ * vazios são desenhados por último, então um vazio na mesma casa de um
+ * módulo cobre o módulo — e o favo some sem erro nenhum na tela. Foi o que
+ * aconteceu quando o RH nasceu em (0.75, -0.5), que era vazio.
+ */
 const FAVOS_VAZIOS = [
   { x: 1.5, y: 0 },
   { x: -1.5, y: 0 },
-  { x: 0.75, y: -0.5 },
 ];
 
 const app = document.getElementById("app");
@@ -525,7 +531,11 @@ function montarHub() {
   // cabeçalho: um é configuração da casa, o outro é a mesa da equipe — nenhum
   // dos dois é coisa que o cliente comprou.
   const visiveis = MODULOS.filter((m) => !m.interno);
-  const vazios = [...FAVOS_VAZIOS];
+  // Módulo novo ocupando uma casa que era vaga não pode ficar escondido
+  // embaixo do favo vazio: quem chegou depois manda. Sem isto, o favo some da
+  // tela sem erro nenhum — foi o que aconteceu com o RH.
+  const ocupadas = new Set(visiveis.map((m) => `${m.pos.x},${m.pos.y}`));
+  const vazios = FAVOS_VAZIOS.filter((f) => !ocupadas.has(`${f.x},${f.y}`));
 
   for (const m of visiveis) ligar(m.pos, moduloAceso(m) ? "linha linha-viva" : "linha");
   for (const f of vazios) ligar(f, "linha linha-apagada");
