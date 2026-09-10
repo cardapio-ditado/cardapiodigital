@@ -47,6 +47,7 @@ const MODULOS_VENDAVEIS = [
   ["avaliacoes", "Avaliações"],
   ["cmv", "CMV Inteligente"],
   ["pesquisa", "Voz do Cliente"],
+  ["rh", "RH"],
 ];
 
 // Os fusos que existem no Brasil. Lista curta de propósito: o seletor com as

@@ -70,6 +70,24 @@ import {
   type DadosDoItem,
 } from "./cardapioDigital.js";
 import {
+  ErroDoRh,
+  LIMITE_DOCUMENTO_BYTES,
+  TIPOS_DE_DOCUMENTO,
+  VINCULOS,
+  admitir,
+  apagarDocumento,
+  desligar,
+  guardarDocumento,
+  linkDoDocumento,
+  listarPessoas,
+  readmitir,
+  resumoDoRh,
+  // O CMV já tem `salvarFicha` (ficha TÉCNICA, de prato). Aqui é ficha de
+  // gente: o apelido evita que uma troque pela outra sem ninguém perceber.
+  salvarFicha as salvarFichaDoRh,
+  verPessoa,
+} from "./rh.js";
+import {
   apagarConversa,
   atendimentoDe,
   definirAtendimento,
@@ -732,6 +750,25 @@ async function comErroDePesquisa<T>(acao: () => Promise<T>): Promise<T> {
 }
 
 /** O mesmo tratamento para os erros do cardápio digital. */
+async function comErroDoRh<T>(acao: () => Promise<T>): Promise<T> {
+  try {
+    return await acao();
+  } catch (e) {
+    if (e instanceof ErroDoRh) {
+      const codigo =
+        e.status === 404
+          ? "not_found"
+          : e.status === 503
+            ? "migracao_pendente"
+            : e.status === 409
+              ? "conflito"
+              : "invalid_request";
+      throw erro(e.status, codigo, e.message);
+    }
+    throw e;
+  }
+}
+
 async function comErroDoCardapio<T>(acao: () => Promise<T>): Promise<T> {
   try {
     return await acao();
@@ -1329,6 +1366,7 @@ async function roteasApi(
       clientes: "clientes",
       aniversariantes: "clientes",
       cardapio: "cardapio-digital",
+      rh: "rh",
     };
     const moduloExigido = MODULO_DO_RECURSO[recurso];
     if (moduloExigido) {
@@ -2257,6 +2295,126 @@ async function roteasApi(
     // Tudo aqui passa pela trava de módulo lá em cima (recurso "cardapio").
     // Leitura com reservations:read, escrita com reservations:write — o mesmo
     // par que separa quem olha de quem mexe no resto do painel.
+    // ---- RH: ficha, documentos, admissão e desligamento ----
+    //
+    // Tudo aqui é dado sensível (CPF, endereço, salário, atestado). Por isso
+    // a trava é dupla: o módulo `rh` precisa estar contratado (a linha acima,
+    // em MODULO_DO_RECURSO) E quem entra precisa ser dono ou gerente. Um
+    // garçom com login de Operação não abre estas rotas nem sabendo o
+    // endereço — Fase 3 (o ponto) é que vai ter porta para a equipe toda.
+    if (recurso === "rh") {
+      const escrita = metodo !== "GET";
+      const chave = await exigirChave(req, escrita ? "reservations:write" : "reservations:read");
+      const venue = await findVenueBySlugInOrg(chave.org_id, slug);
+      if (!podeGerirEquipe(chave.papel ?? "", chave.plataformaAdmin)) {
+        throw erro(403, "forbidden", "O RH é do dono e do gerente: ficha, documento e salário não são de todo mundo.");
+      }
+
+      const alvo = p[3] ?? "";
+      const ehDocumentoSolto = alvo === "documentos";
+
+      // Id que não é uuid nunca chega ao banco: sem isto um `undefined` que
+      // escape da tela vira "invalid input syntax for type uuid" na cara de
+      // quem só queria abrir uma ficha.
+      const idParaConferir = ehDocumentoSolto ? p[4] : p[3];
+      if (p.length >= 4 && idParaConferir !== undefined && !/^[0-9a-f-]{36}$/i.test(idParaConferir)) {
+        throw erro(400, "invalid_request", "Cadastro não identificado. Recarregue a página e tente de novo.");
+      }
+
+      // GET /v1/venues/:slug/rh — a lista e o cabeçalho da tela
+      if (metodo === "GET" && p.length === 3) {
+        const incluirDesligados = url.searchParams.get("desligados") === "1";
+        const [pessoas, resumo] = await comErroDoRh(() =>
+          Promise.all([listarPessoas(venue.id, { incluirDesligados }), resumoDoRh(venue.id)]),
+        );
+        return ok(res, { pessoas, resumo, vinculos: VINCULOS, tipos_de_documento: TIPOS_DE_DOCUMENTO });
+      }
+
+      // POST /v1/venues/:slug/rh — admite alguém
+      if (metodo === "POST" && p.length === 3) {
+        const corpo = (await lerJson(req)) as Record<string, unknown>;
+        const r = await comErroDoRh(() =>
+          admitir({
+            venueId: venue.id,
+            nome: texto(corpo, "nome"),
+            apelido: textoOpcional(corpo, "apelido") ?? null,
+            funcao: textoOpcional(corpo, "funcao") ?? null,
+            ficha: (corpo.ficha ?? {}) as Record<string, unknown>,
+          }),
+        );
+        return ok(res, r, 201);
+      }
+
+      // GET | PATCH /v1/venues/:slug/rh/:atendenteId — a ficha de uma pessoa
+      if (p.length === 4 && !ehDocumentoSolto) {
+        if (metodo === "GET") {
+          return ok(res, await comErroDoRh(() => verPessoa(venue.id, p[3]!)));
+        }
+        if (metodo === "PATCH") {
+          const corpo = (await lerJson(req)) as Record<string, unknown>;
+          const ficha = await comErroDoRh(() =>
+            salvarFichaDoRh({
+              venueId: venue.id,
+              atendenteId: p[3]!,
+              campos: (corpo.ficha ?? {}) as Record<string, unknown>,
+              cadastro: (corpo.cadastro ?? undefined) as
+                | { nome?: string; apelido?: string | null; funcao?: string | null; ativo?: boolean }
+                | undefined,
+            }),
+          );
+          return ok(res, { salvo: true, ficha });
+        }
+      }
+
+      // POST /v1/venues/:slug/rh/:atendenteId/desligar | readmitir
+      if (metodo === "POST" && p.length === 5 && !ehDocumentoSolto && p[4] !== "documentos") {
+        const corpo = (await lerJson(req)) as Record<string, unknown>;
+        if (p[4] === "desligar") {
+          const ficha = await comErroDoRh(() =>
+            desligar({ venueId: venue.id, atendenteId: p[3]!, data: corpo.data, motivo: corpo.motivo }),
+          );
+          return ok(res, { desligado: true, ficha });
+        }
+        if (p[4] === "readmitir") {
+          const ficha = await comErroDoRh(() =>
+            readmitir({ venueId: venue.id, atendenteId: p[3]!, admissao: corpo.admissao }),
+          );
+          return ok(res, { readmitido: true, ficha });
+        }
+        throw erro(404, "not_found", `Ação "${p[4]}" não existe no RH.`);
+      }
+
+      // POST /v1/venues/:slug/rh/:atendenteId/documentos — o arquivo vem cru
+      // no corpo, e o que ele É vem na query (mesmo desenho das fotos do
+      // cardápio: sem multipart, que dobraria o tamanho em base64).
+      if (metodo === "POST" && p.length === 5 && p[4] === "documentos") {
+        const arquivo = await lerBinario(req, LIMITE_DOCUMENTO_BYTES);
+        const documento = await comErroDoRh(() =>
+          guardarDocumento({
+            venueId: venue.id,
+            atendenteId: p[3]!,
+            arquivo,
+            contentType: req.headers["content-type"] ?? "application/pdf",
+            tipo: url.searchParams.get("tipo") ?? "outro",
+            titulo: url.searchParams.get("titulo"),
+            validade: url.searchParams.get("validade"),
+            enviadoPor: chave.name,
+          }),
+        );
+        return ok(res, documento, 201);
+      }
+
+      // GET /v1/venues/:slug/rh/documentos/:id/link — endereço que expira
+      if (metodo === "GET" && p.length === 6 && ehDocumentoSolto && p[5] === "link") {
+        return ok(res, await comErroDoRh(() => linkDoDocumento({ venueId: venue.id, id: p[4]! })));
+      }
+
+      // DELETE /v1/venues/:slug/rh/documentos/:id
+      if (metodo === "DELETE" && p.length === 5 && ehDocumentoSolto) {
+        return ok(res, await comErroDoRh(() => apagarDocumento({ venueId: venue.id, id: p[4]! })));
+      }
+    }
+
     if (recurso === "cardapio") {
       const acao = p[3] ?? "";
 

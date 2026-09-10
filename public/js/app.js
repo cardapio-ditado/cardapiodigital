@@ -37,6 +37,7 @@ import { clientesDaCasa } from "./pages/clientesDaCasa.js";
 import { pesquisaRespostas } from "./pages/pesquisaRespostas.js";
 import { producao } from "./pages/producao.js";
 import { cardapioDigital } from "./pages/cardapioDigital.js";
+import { rh } from "./pages/rh.js";
 
 /**
  * Casca do painel: barra lateral, roteamento por hash e estado compartilhado.
@@ -72,6 +73,10 @@ const PAGINAS = [
   // O cardápio mora DENTRO do painel agora: era um deploy à parte, com link
   // externo por cliente. Uma tela só, com abas — é o que a casa mexe todo dia.
   { id: "cardapio", modulo: "cardapio-digital", rotulo: "Cardápio", icone: ICONES.caixa, render: cardapioDigital, subtitulo: "Itens, fotos, banners, promoções e os comentários dos clientes" },
+
+  // RH — Fase 1. Ficha, documento, admissão e desligamento. Não calcula folha:
+  // entrega os números prontos para quem já fecha a folha da casa.
+  { id: "rh", modulo: "rh", rotulo: "RH", icone: ICONES.pessoa, render: rh, subtitulo: "Ficha da equipe, documentos com validade, admissão e desligamento" },
 
   { id: "checklists", modulo: "checklist", rotulo: "Checklists", icone: ICONES.checklist, render: checklists, subtitulo: "Rotinas da equipe: monte, agende e dispare" },
   { id: "execucoes", modulo: "checklist", rotulo: "Execuções", icone: ICONES.relogio, render: execucoes, subtitulo: "Quem fez, quando, e o que a IA encontrou" },
@@ -173,6 +178,14 @@ const MODULOS = [
     // venue_modulos.url. Agora é tela do painel e página pública do próprio
     // Brasa (/cardapio/<casa>); a coluna `url` ficou sem uso.
     pos: { x: -0.75, y: 0.5 },
+  },
+  {
+    id: "rh",
+    nome: "RH",
+    descricao:
+      "A equipe organizada: ficha de cada um, documento com aviso de vencimento, admissão guiada e desligamento registrado. A folha continua com a contabilidade.",
+    icone: ICONES.pessoa,
+    pos: { x: 0.75, y: -0.5 },
   },
   {
     id: "checklist",

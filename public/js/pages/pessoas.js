@@ -20,6 +20,7 @@ const NOME_DO_MODULO = {
   checklist: "Checklist",
   avaliacoes: "Avaliações",
   cmv: "CMV Inteligente",
+  rh: "RH",
 };
 
 export async function pessoas(raiz, ctx) {
