@@ -2155,6 +2155,8 @@ button.linha-tabela:hover { background: var(--marca-suave); }
 .planilha tbody tr:last-child td { border-bottom: 0; }
 .planilha tbody tr:hover { background: var(--marca-suave); }
 .planilha td small { display: block; }
+/* Data embaixo do dia da semana no cabeçalho da escala, sem virar título. */
+.planilha th small { display: block; font-weight: 400; text-transform: none; letter-spacing: 0; }
 .planilha .col-num {
   text-align: right;
   font-variant-numeric: tabular-nums;

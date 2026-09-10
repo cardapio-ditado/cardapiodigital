@@ -88,6 +88,17 @@ import {
   verPessoa,
 } from "./rh.js";
 import {
+  apagarTurno,
+  atualizarTurno,
+  copiarSemana,
+  criarTurno,
+  escalaDaSemana,
+  listarTurnos,
+  marcarNaEscala,
+  publicarSemana,
+  tirarDaEscala,
+} from "./rhEscala.js";
+import {
   apagarConversa,
   atendimentoDe,
   definirAtendimento,
@@ -2312,13 +2323,106 @@ async function roteasApi(
 
       const alvo = p[3] ?? "";
       const ehDocumentoSolto = alvo === "documentos";
+      // Palavras reservadas em p[3]: tudo que não é uma delas é id de pessoa.
+      const ehSecaoPropria = alvo === "escala" || alvo === "turnos";
 
       // Id que não é uuid nunca chega ao banco: sem isto um `undefined` que
       // escape da tela vira "invalid input syntax for type uuid" na cara de
       // quem só queria abrir uma ficha.
       const idParaConferir = ehDocumentoSolto ? p[4] : p[3];
-      if (p.length >= 4 && idParaConferir !== undefined && !/^[0-9a-f-]{36}$/i.test(idParaConferir)) {
+      if (
+        !ehSecaoPropria &&
+        p.length >= 4 &&
+        idParaConferir !== undefined &&
+        !/^[0-9a-f-]{36}$/i.test(idParaConferir)
+      ) {
         throw erro(400, "invalid_request", "Cadastro não identificado. Recarregue a página e tente de novo.");
+      }
+
+      // ---- Turnos da casa: /v1/venues/:slug/rh/turnos[/:id] ----
+      if (alvo === "turnos") {
+        if (metodo === "GET" && p.length === 4) {
+          return ok(res, await comErroDoRh(() => listarTurnos(venue.id, { incluirInativos: true })));
+        }
+        if (metodo === "POST" && p.length === 4) {
+          const corpo = (await lerJson(req)) as Record<string, unknown>;
+          const turno = await comErroDoRh(() =>
+            criarTurno({
+              venueId: venue.id,
+              nome: texto(corpo, "nome"),
+              inicio: corpo.inicio,
+              fim: corpo.fim,
+              ordem: corpo.ordem,
+            }),
+          );
+          return ok(res, turno, 201);
+        }
+        if (metodo === "PATCH" && p.length === 5) {
+          const corpo = (await lerJson(req)) as Record<string, unknown>;
+          return ok(
+            res,
+            await comErroDoRh(() => atualizarTurno({ venueId: venue.id, id: p[4]!, ...corpo })),
+          );
+        }
+        if (metodo === "DELETE" && p.length === 5) {
+          return ok(res, await comErroDoRh(() => apagarTurno({ venueId: venue.id, id: p[4]! })));
+        }
+      }
+
+      // ---- Escala: /v1/venues/:slug/rh/escala[...] ----
+      if (alvo === "escala") {
+        // GET /rh/escala?semana=2026-09-14 — a grade inteira
+        if (metodo === "GET" && p.length === 4) {
+          const dia = url.searchParams.get("semana") ?? hojeNaCasa(venue.timezone ?? "America/Cuiaba");
+          return ok(res, await comErroDoRh(() => escalaDaSemana(venue.id, dia)));
+        }
+
+        // POST /rh/escala — põe alguém num dia (ou muda o que já estava lá)
+        if (metodo === "POST" && p.length === 4) {
+          const corpo = (await lerJson(req)) as Record<string, unknown>;
+          const linha = await comErroDoRh(() =>
+            marcarNaEscala({
+              venueId: venue.id,
+              data: corpo.data,
+              atendenteId: texto(corpo, "atendente_id"),
+              turnoId: (corpo.turno_id as string | null) ?? null,
+              situacao: corpo.situacao,
+              funcao: corpo.funcao,
+              observacao: corpo.observacao,
+            }),
+          );
+          return ok(res, linha, 201);
+        }
+
+        // POST /rh/escala/copiar — a semana anterior vira a de agora
+        if (metodo === "POST" && p.length === 5 && p[4] === "copiar") {
+          const corpo = (await lerJson(req)) as Record<string, unknown>;
+          return ok(
+            res,
+            await comErroDoRh(() =>
+              copiarSemana({ venueId: venue.id, de: texto(corpo, "de"), para: texto(corpo, "para") }),
+            ),
+          );
+        }
+
+        // POST /rh/escala/publicar — manda a semana para o WhatsApp de cada um
+        if (metodo === "POST" && p.length === 5 && p[4] === "publicar") {
+          const corpo = (await lerJson(req)) as Record<string, unknown>;
+          return ok(
+            res,
+            await comErroDoRh(() =>
+              publicarSemana({ venue, semana: texto(corpo, "semana"), quem: chave.name }),
+            ),
+          );
+        }
+
+        // DELETE /rh/escala/:id — tira da grade
+        if (metodo === "DELETE" && p.length === 5) {
+          if (!/^[0-9a-f-]{36}$/i.test(p[4] ?? "")) {
+            throw erro(400, "invalid_request", "Lançamento não identificado. Recarregue a página.");
+          }
+          return ok(res, await comErroDoRh(() => tirarDaEscala({ venueId: venue.id, id: p[4]! })));
+        }
       }
 
       // GET /v1/venues/:slug/rh — a lista e o cabeçalho da tela

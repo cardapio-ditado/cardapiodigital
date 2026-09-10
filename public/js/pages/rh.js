@@ -1,5 +1,6 @@
 import { del, get, patch, post, postArquivo } from "../api.js";
 import { avisar, dataHora, dinheiro, el, etiqueta, indicador, limpar, vazio } from "../ui.js";
+import { criarEscala } from "./rhEscala.js";
 
 /**
  * RH — Fase 1: a ficha de cada pessoa da casa.
@@ -58,14 +59,48 @@ export async function rh(raiz, ctx) {
   let busca = "";
   let ordem = { campo: "nome", desc: false };
 
+  let abaAtiva = sessionStorage.getItem("brasa.rh.aba") || "equipe";
+
   const cabecalho = el("div", { classe: "grade" });
   // `min-width:0` não é enfeite: a planilha lá dentro tem largura mínima de
   // 720px, e sem isto ela estica a coluna da pilha inteira — os indicadores
   // do topo saem da tela do celular junto, e a página rola de lado.
   const corpo = el("div", { style: "min-width:0" });
 
-  raiz.append(el("div", { classe: "pilha" }, [cabecalho, corpo]));
-  await recarregar();
+  // A escala cuida do próprio estado (semana aberta, célula em edição) e
+  // desenha dentro do mesmo corpo. Trocar de aba não perde o que ela sabe.
+  const escala = criarEscala(corpo, ctx);
+
+  const barra = el(
+    "div",
+    { classe: "abas" },
+    [
+      ["equipe", "Equipe"],
+      ["escala", "Escala"],
+    ].map(([id, rotulo]) =>
+      el("button", {
+        classe: `aba ${id === abaAtiva ? "aba-ativa" : ""}`.trim(),
+        type: "button",
+        "data-aba": id,
+        texto: rotulo,
+        onclick: () => trocarAba(id),
+      }),
+    ),
+  );
+
+  raiz.append(el("div", { classe: "pilha" }, [barra, cabecalho, corpo]));
+  await trocarAba(abaAtiva);
+
+  async function trocarAba(id) {
+    abaAtiva = id;
+    sessionStorage.setItem("brasa.rh.aba", id);
+    for (const b of barra.querySelectorAll(".aba")) b.classList.toggle("aba-ativa", b.dataset.aba === id);
+    // Os indicadores falam da equipe, não da semana: na escala eles só
+    // empurrariam a grade para baixo.
+    cabecalho.hidden = id !== "equipe";
+    if (id === "equipe") await recarregar();
+    else await escala.recarregar();
+  }
 
   async function recarregar() {
     try {

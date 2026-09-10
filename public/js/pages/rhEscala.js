@@ -1,0 +1,556 @@
+import { del, get, patch, post } from "../api.js";
+import { avisar, el, etiqueta, limpar, vazio } from "../ui.js";
+
+/**
+ * RH — Fase 2: a grade da semana.
+ *
+ * Uma tabela: pessoas nas linhas, os sete dias nas colunas. Clicar numa
+ * célula abre o editor daquele dia daquela pessoa — turno, folga, férias,
+ * atestado. Publicar manda para cada um o horário DELE no WhatsApp, não a
+ * foto da grade inteira.
+ *
+ * Enquanto não publica, é rascunho: dá para montar a semana aos poucos sem
+ * incomodar ninguém.
+ */
+
+const DIAS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+
+const SITUACOES = [
+  ["trabalha", "Trabalha"],
+  ["folga", "Folga"],
+  ["ferias", "Férias"],
+  ["atestado", "Atestado"],
+  ["falta", "Falta"],
+];
+
+const COR_DA_SITUACAO = {
+  folga: "",
+  ferias: "etiqueta-ok",
+  atestado: "etiqueta-alerta",
+  falta: "etiqueta-alerta",
+};
+
+/** Turnos que quase toda casa tem. Só sugestão: dá para apagar e criar outros. */
+const TURNOS_SUGERIDOS = [
+  { nome: "Almoço", inicio: "11:00", fim: "15:00", ordem: 1 },
+  { nome: "Noite", inicio: "18:00", fim: "00:00", ordem: 2 },
+  { nome: "Fechamento", inicio: "22:00", fim: "04:00", ordem: 3 },
+];
+
+export function criarEscala(corpo, ctx) {
+  let semana = null; // segunda-feira em ISO; null = deixa o servidor decidir
+  let dados = null;
+  let editando = null; // { atendenteId, data }
+  let mostrandoTurnos = false;
+
+  return { desenhar, recarregar };
+
+  async function recarregar() {
+    try {
+      const busca = semana ? `?semana=${semana}` : "";
+      dados = await get(`/v1/venues/${ctx.venue}/rh/escala${busca}`);
+      semana = dados.semana;
+    } catch (e) {
+      limpar(corpo).append(vazio("Não deu para carregar a escala", e.message));
+      return;
+    }
+    desenhar();
+  }
+
+  function desenhar() {
+    if (!dados) {
+      void recarregar();
+      return;
+    }
+    limpar(corpo);
+    corpo.append(cabecalhoDaSemana());
+
+    if (mostrandoTurnos) corpo.append(painelDeTurnos());
+
+    if (dados.turnos.length === 0) {
+      corpo.append(
+        el("section", { classe: "cartao alerta" }, [
+          el("strong", { texto: "Antes da escala, os turnos da casa" }),
+          el("p", {
+            classe: "muted",
+            texto: "Cada casa tem os seus horários. Crie os turnos uma vez e eles servem para todas as semanas.",
+          }),
+          el("div", { classe: "reserva-acoes" }, [
+            el("button", {
+              classe: "btn btn-primario",
+              type: "button",
+              texto: "Criar turnos sugeridos",
+              onclick: async (e) => {
+                e.target.disabled = true;
+                try {
+                  for (const t of TURNOS_SUGERIDOS) {
+                    await post(`/v1/venues/${ctx.venue}/rh/turnos`, t);
+                  }
+                  avisar("Turnos criados. Ajuste os horários se precisar.", "ok");
+                  await recarregar();
+                } catch (err) {
+                  avisar(err.message, "erro");
+                  e.target.disabled = false;
+                }
+              },
+            }),
+            el("button", {
+              classe: "btn",
+              type: "button",
+              texto: "Criar do meu jeito",
+              onclick: () => {
+                mostrandoTurnos = true;
+                desenhar();
+              },
+            }),
+          ]),
+        ]),
+      );
+      return;
+    }
+
+    if (dados.pessoas.length === 0) {
+      corpo.append(
+        vazio("Ninguém para escalar", 'Cadastre a equipe na aba "Equipe" e volte aqui para montar a semana.'),
+      );
+      return;
+    }
+
+    corpo.append(grade());
+    if (editando) corpo.append(editorDaCelula());
+  }
+
+  /* ================= Cabeçalho: semana, status, ações ================= */
+
+  function cabecalhoDaSemana() {
+    const fim = somarDias(dados.semana, 6);
+    const publicada = Boolean(dados.publicada_em);
+
+    return el("div", { classe: "cartao" }, [
+      el("div", { classe: "cabecalho-secao" }, [
+        el("div", {}, [
+          el("h2", { texto: `Semana de ${diaBr(dados.semana)} a ${diaBr(fim)}` }),
+          el("p", { classe: "muted", texto: textoDoStatus() }),
+        ]),
+        el("div", { classe: "reserva-acoes" }, [
+          el("button", {
+            classe: "btn btn-peq",
+            type: "button",
+            texto: "‹ Anterior",
+            onclick: () => trocarSemana(-7),
+          }),
+          el("button", { classe: "btn btn-peq", type: "button", texto: "Hoje", onclick: () => trocarSemana(null) }),
+          el("button", {
+            classe: "btn btn-peq",
+            type: "button",
+            texto: "Próxima ›",
+            onclick: () => trocarSemana(7),
+          }),
+        ]),
+      ]),
+      el("div", { classe: "reserva-acoes" }, [
+        el("button", {
+          classe: "btn btn-primario",
+          type: "button",
+          texto: publicada ? "Publicar de novo e avisar" : "Publicar e avisar no WhatsApp",
+          onclick: (e) => publicar(e.target),
+        }),
+        el("button", {
+          classe: "btn",
+          type: "button",
+          texto: "Copiar semana anterior",
+          onclick: (e) => copiarAnterior(e.target),
+        }),
+        el("button", {
+          classe: "btn btn-peq",
+          type: "button",
+          texto: mostrandoTurnos ? "Fechar turnos" : "Turnos da casa",
+          onclick: () => {
+            mostrandoTurnos = !mostrandoTurnos;
+            desenhar();
+          },
+        }),
+        publicada && dados.mudou_depois_de_publicar
+          ? etiqueta("mudou depois de publicar", "etiqueta-alerta")
+          : publicada
+            ? etiqueta("publicada", "etiqueta-ok")
+            : etiqueta("rascunho", ""),
+      ]),
+    ]);
+  }
+
+  function textoDoStatus() {
+    if (!dados.publicada_em) {
+      return "Rascunho: ninguém foi avisado ainda. Monte a semana e publique quando estiver pronta.";
+    }
+    const quando = new Date(dados.publicada_em).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+    const quem = dados.publicada_por ? ` por ${dados.publicada_por}` : "";
+    const base = `Publicada em ${quando}${quem} · ${dados.avisos_enviados} aviso(s) enviado(s).`;
+    return dados.mudou_depois_de_publicar
+      ? `${base} A grade mudou depois disso — publique de novo para a equipe saber.`
+      : base;
+  }
+
+  function trocarSemana(dias) {
+    semana = dias === null ? null : somarDias(dados.semana, dias);
+    editando = null;
+    void recarregar();
+  }
+
+  async function publicar(botao) {
+    botao.disabled = true;
+    try {
+      const r = await post(`/v1/venues/${ctx.venue}/rh/escala/publicar`, { semana: dados.semana });
+      const partes = [`${r.avisados} aviso(s) na fila do WhatsApp.`];
+      if (r.sem_telefone.length) {
+        partes.push(`Sem telefone na ficha: ${r.sem_telefone.join(", ")}.`);
+      }
+      if (r.sem_escala) partes.push(`${r.sem_escala} pessoa(s) sem nenhum dia nesta semana.`);
+      avisar(partes.join(" "), r.sem_telefone.length ? "info" : "ok");
+      await recarregar();
+    } catch (e) {
+      avisar(e.message, "erro");
+      botao.disabled = false;
+    }
+  }
+
+  async function copiarAnterior(botao) {
+    botao.disabled = true;
+    try {
+      const r = await post(`/v1/venues/${ctx.venue}/rh/escala/copiar`, {
+        de: somarDias(dados.semana, -7),
+        para: dados.semana,
+      });
+      avisar(
+        r.copiadas
+          ? `${r.copiadas} lançamento(s) copiado(s)${r.ignoradas ? `, ${r.ignoradas} já existia(m)` : ""}.`
+          : "Nada a copiar: esta semana já tem tudo que a anterior tinha.",
+        "ok",
+      );
+      await recarregar();
+    } catch (e) {
+      avisar(e.message, "erro");
+    } finally {
+      botao.disabled = false;
+    }
+  }
+
+  /* ================= A grade ================= */
+
+  function linhasDe(atendenteId, data) {
+    return dados.linhas.filter((l) => l.atendente_id === atendenteId && l.data === data);
+  }
+
+  function turnoPorId(id) {
+    return dados.turnos.find((t) => t.id === id) ?? null;
+  }
+
+  function grade() {
+    return el("div", { classe: "rolagem-x" }, [
+      el("table", { classe: "planilha" }, [
+        el("thead", {}, [
+          el("tr", {}, [
+            el("th", { texto: "Pessoa" }),
+            ...dados.dias.map((dia, i) =>
+              el("th", {}, [
+                document.createTextNode(DIAS[i]),
+                el("small", { classe: "muted", texto: diaBr(dia).slice(0, 5) }),
+              ]),
+            ),
+          ]),
+        ]),
+        el(
+          "tbody",
+          {},
+          dados.pessoas.map((pessoa) =>
+            el("tr", {}, [
+              el("td", {}, [
+                el("strong", { texto: pessoa.apelido || pessoa.nome }),
+                pessoa.funcao ? el("small", { classe: "muted", texto: pessoa.funcao }) : null,
+              ]),
+              ...dados.dias.map((dia) => celula(pessoa, dia)),
+            ]),
+          ),
+        ),
+      ]),
+    ]);
+  }
+
+  function celula(pessoa, dia) {
+    const minhas = linhasDe(pessoa.id, dia);
+    const aberta = editando && editando.atendenteId === pessoa.id && editando.data === dia;
+
+    return el(
+      "td",
+      {
+        style: `cursor:pointer;${aberta ? "outline:2px solid var(--marca);outline-offset:-2px" : ""}`,
+        title: "Clique para lançar ou mudar",
+        onclick: () => {
+          editando = aberta ? null : { atendenteId: pessoa.id, data: dia };
+          desenhar();
+          if (!aberta) corpo.querySelector(".editor-escala")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        },
+      },
+      minhas.length === 0
+        ? [el("span", { classe: "muted", texto: "—" })]
+        : minhas.map((linha) => {
+            if (linha.situacao !== "trabalha") {
+              const rotulo = SITUACOES.find(([id]) => id === linha.situacao)?.[1] ?? linha.situacao;
+              return etiqueta(rotulo, COR_DA_SITUACAO[linha.situacao] ?? "");
+            }
+            const turno = turnoPorId(linha.turno_id);
+            return el("div", {}, [
+              el("strong", { texto: turno ? turno.nome : "Turno" }),
+              el("small", {
+                classe: "muted",
+                texto: [turno ? `${horaCurta(turno.inicio)}–${horaCurta(turno.fim)}` : null, linha.funcao]
+                  .filter(Boolean)
+                  .join(" · "),
+              }),
+            ]);
+          }),
+    );
+  }
+
+  /* ================= Editor de uma célula ================= */
+
+  function editorDaCelula() {
+    const pessoa = dados.pessoas.find((p) => p.id === editando.atendenteId);
+    const dia = editando.data;
+    const minhas = linhasDe(editando.atendenteId, dia);
+
+    const situacao = el(
+      "select",
+      { classe: "select", onchange: () => (linhaDoTurno.hidden = situacao.value !== "trabalha") },
+      SITUACOES.map(([id, nome]) => el("option", { value: id, texto: nome })),
+    );
+    const turno = el(
+      "select",
+      { classe: "select" },
+      dados.turnos
+        .filter((t) => t.ativo)
+        .map((t) => el("option", { value: t.id, texto: `${t.nome} (${horaCurta(t.inicio)}–${horaCurta(t.fim)})` })),
+    );
+    const funcao = el("input", {
+      classe: "input",
+      type: "text",
+      placeholder: pessoa?.funcao || "Mesma função de sempre",
+    });
+    const observacao = el("input", { classe: "input", type: "text", placeholder: "Recado do dia (opcional)" });
+
+    const linhaDoTurno = el("div", { classe: "campo" }, [el("label", { texto: "Turno" }), turno]);
+
+    return el("section", { classe: "cartao editor-escala" }, [
+      el("div", { classe: "cabecalho-secao" }, [
+        el("div", {}, [
+          // Só `||`: misturar `||` com `??` sem parênteses é erro de sintaxe
+          // no navegador, e derruba a tela inteira em silêncio.
+          el("h3", { texto: `${pessoa?.apelido || pessoa?.nome || "Pessoa"} · ${diaBr(dia)}` }),
+          el("p", { classe: "muted", texto: "O que essa pessoa faz neste dia." }),
+        ]),
+        el("button", {
+          classe: "btn btn-peq",
+          type: "button",
+          texto: "Fechar",
+          onclick: () => {
+            editando = null;
+            desenhar();
+          },
+        }),
+      ]),
+
+      // O que já está lançado neste dia — inclusive dois turnos (almoço e noite).
+      minhas.length
+        ? el(
+            "div",
+            { classe: "tabela" },
+            minhas.map((linha) => {
+              const t = turnoPorId(linha.turno_id);
+              const rotulo =
+                linha.situacao === "trabalha"
+                  ? `${t ? t.nome : "Turno"}${linha.funcao ? ` · ${linha.funcao}` : ""}`
+                  : (SITUACOES.find(([id]) => id === linha.situacao)?.[1] ?? linha.situacao);
+              return el("div", { classe: "linha-tabela" }, [
+                el("div", { classe: "linha-principal", style: "flex:1" }, [
+                  el("strong", { texto: rotulo }),
+                  linha.observacao ? el("span", { classe: "muted", texto: linha.observacao }) : null,
+                ]),
+                el("button", {
+                  classe: "btn btn-peq btn-perigo",
+                  type: "button",
+                  texto: "Tirar",
+                  onclick: async (e) => {
+                    e.target.disabled = true;
+                    try {
+                      await del(`/v1/venues/${ctx.venue}/rh/escala/${linha.id}`);
+                      avisar("Tirado da escala.", "ok");
+                      await recarregar();
+                    } catch (err) {
+                      avisar(err.message, "erro");
+                      e.target.disabled = false;
+                    }
+                  },
+                }),
+              ]);
+            }),
+          )
+        : null,
+
+      el("div", { classe: "grade" }, [
+        el("div", { classe: "campo" }, [el("label", { texto: "Situação" }), situacao]),
+        linhaDoTurno,
+        el("div", { classe: "campo" }, [el("label", { texto: "Função no dia" }), funcao]),
+        el("div", { classe: "campo" }, [el("label", { texto: "Observação" }), observacao]),
+      ]),
+
+      el("div", { classe: "reserva-acoes" }, [
+        el("button", {
+          classe: "btn btn-primario",
+          type: "button",
+          texto: minhas.length ? "Adicionar neste dia" : "Lançar",
+          onclick: async (e) => {
+            e.target.disabled = true;
+            try {
+              await post(`/v1/venues/${ctx.venue}/rh/escala`, {
+                data: dia,
+                atendente_id: editando.atendenteId,
+                turno_id: situacao.value === "trabalha" ? turno.value : null,
+                situacao: situacao.value,
+                funcao: funcao.value,
+                observacao: observacao.value,
+              });
+              avisar("Escala salva.", "ok");
+              await recarregar();
+            } catch (err) {
+              avisar(err.message, "erro");
+              e.target.disabled = false;
+            }
+          },
+        }),
+      ]),
+    ]);
+  }
+
+  /* ================= Turnos da casa ================= */
+
+  function painelDeTurnos() {
+    const nome = el("input", { classe: "input", type: "text", placeholder: "Noite" });
+    const inicio = el("input", { classe: "input", type: "time", value: "18:00" });
+    const fim = el("input", { classe: "input", type: "time", value: "00:00" });
+
+    return el("section", { classe: "cartao" }, [
+      el("h3", { texto: "Turnos da casa" }),
+      el("p", {
+        classe: "muted",
+        texto: "Turno que termina antes de começar atravessa a meia-noite — é o normal em bar, e a grade entende assim.",
+      }),
+      dados.turnos.length
+        ? el(
+            "div",
+            { classe: "tabela" },
+            dados.turnos.map((t) =>
+              el("div", { classe: "linha-tabela" }, [
+                el("div", { classe: "linha-principal", style: "flex:1" }, [
+                  el("strong", { texto: t.nome }),
+                  el("span", {
+                    classe: "muted",
+                    texto: `${horaCurta(t.inicio)} → ${horaCurta(t.fim)}${t.fim < t.inicio ? " (vira o dia)" : ""}`,
+                  }),
+                ]),
+                t.ativo ? null : etiqueta("desativado", ""),
+                el("button", {
+                  classe: "btn btn-peq",
+                  type: "button",
+                  texto: t.ativo ? "Desativar" : "Reativar",
+                  onclick: async (e) => {
+                    e.target.disabled = true;
+                    try {
+                      await patch(`/v1/venues/${ctx.venue}/rh/turnos/${t.id}`, { ativo: !t.ativo });
+                      await recarregar();
+                    } catch (err) {
+                      avisar(err.message, "erro");
+                      e.target.disabled = false;
+                    }
+                  },
+                }),
+                el("button", {
+                  classe: "btn btn-peq btn-perigo",
+                  type: "button",
+                  texto: "Apagar",
+                  onclick: async (e) => {
+                    e.target.disabled = true;
+                    try {
+                      const r = await del(`/v1/venues/${ctx.venue}/rh/turnos/${t.id}`);
+                      avisar(
+                        r.apagado
+                          ? "Turno apagado."
+                          : "Este turno já tem escala lançada, então foi só desativado — o histórico fica.",
+                        "ok",
+                      );
+                      await recarregar();
+                    } catch (err) {
+                      avisar(err.message, "erro");
+                      e.target.disabled = false;
+                    }
+                  },
+                }),
+              ]),
+            ),
+          )
+        : null,
+      el("div", { classe: "grade" }, [
+        el("div", { classe: "campo" }, [el("label", { texto: "Nome" }), nome]),
+        el("div", { classe: "campo" }, [el("label", { texto: "Começa" }), inicio]),
+        el("div", { classe: "campo" }, [el("label", { texto: "Termina" }), fim]),
+      ]),
+      el("div", { classe: "reserva-acoes" }, [
+        el("button", {
+          classe: "btn btn-primario",
+          type: "button",
+          texto: "Criar turno",
+          onclick: async (e) => {
+            if (!nome.value.trim()) {
+              avisar("Dê um nome ao turno.", "erro");
+              return;
+            }
+            e.target.disabled = true;
+            try {
+              await post(`/v1/venues/${ctx.venue}/rh/turnos`, {
+                nome: nome.value.trim(),
+                inicio: inicio.value,
+                fim: fim.value,
+                ordem: dados.turnos.length + 1,
+              });
+              avisar("Turno criado.", "ok");
+              await recarregar();
+            } catch (err) {
+              avisar(err.message, "erro");
+              e.target.disabled = false;
+            }
+          },
+        }),
+      ]),
+    ]);
+  }
+}
+
+/* ================= Miudezas ================= */
+
+function somarDias(iso, dias) {
+  const d = new Date(`${iso}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + dias);
+  return d.toISOString().slice(0, 10);
+}
+
+function diaBr(iso) {
+  if (!iso) return "";
+  const [ano, mes, dia] = String(iso).slice(0, 10).split("-");
+  return `${dia}/${mes}/${ano}`;
+}
+
+function horaCurta(hora) {
+  const [h, m] = String(hora ?? "").split(":");
+  const hh = Number(h);
+  if (!Number.isFinite(hh)) return String(hora ?? "");
+  return m && m !== "00" ? `${hh}h${m}` : `${hh}h`;
+}
