@@ -1,6 +1,7 @@
 import { del, get, patch, post, postArquivo } from "../api.js";
 import { avisar, dataHora, dinheiro, el, etiqueta, indicador, limpar, vazio } from "../ui.js";
 import { criarEscala } from "./rhEscala.js";
+import { criarPonto } from "./rhPonto.js";
 
 /**
  * RH — Fase 1: a ficha de cada pessoa da casa.
@@ -70,6 +71,7 @@ export async function rh(raiz, ctx) {
   // A escala cuida do próprio estado (semana aberta, célula em edição) e
   // desenha dentro do mesmo corpo. Trocar de aba não perde o que ela sabe.
   const escala = criarEscala(corpo, ctx);
+  const ponto = criarPonto(corpo, ctx);
 
   const barra = el(
     "div",
@@ -77,6 +79,7 @@ export async function rh(raiz, ctx) {
     [
       ["equipe", "Equipe"],
       ["escala", "Escala"],
+      ["ponto", "Ponto"],
     ].map(([id, rotulo]) =>
       el("button", {
         classe: `aba ${id === abaAtiva ? "aba-ativa" : ""}`.trim(),
@@ -99,7 +102,8 @@ export async function rh(raiz, ctx) {
     // empurrariam a grade para baixo.
     cabecalho.hidden = id !== "equipe";
     if (id === "equipe") await recarregar();
-    else await escala.recarregar();
+    else if (id === "escala") await escala.recarregar();
+    else await ponto.recarregar();
   }
 
   async function recarregar() {
@@ -586,8 +590,56 @@ export async function rh(raiz, ctx) {
               onclick: () => desligarPessoa(id, pessoa.nome),
             }),
       ]),
+      secaoDoPin(id, pessoa),
       secaoDeDocumentos(id, documentos),
     );
+  }
+
+  /* ================= PIN do ponto ================= */
+
+  function secaoDoPin(id, pessoa) {
+    const pin = el("input", {
+      classe: "input",
+      type: "text",
+      inputmode: "numeric",
+      maxlength: 4,
+      placeholder: "4 números",
+      style: "max-width:160px;letter-spacing:6px;font-size:1.2rem",
+    });
+
+    return el("section", { classe: "cartao" }, [
+      el("h3", { texto: "PIN do ponto" }),
+      el("p", {
+        classe: "muted",
+        texto: `São os quatro números que ${
+          pessoa.apelido || pessoa.nome
+        } digita no tablet para bater o ponto. Combine com a pessoa e diga em voz alta — não guardamos o PIN em lugar nenhum, nem nós conseguimos ver depois.`,
+      }),
+      el("div", { classe: "reserva-acoes" }, [
+        pin,
+        el("button", {
+          classe: "btn btn-primario",
+          type: "button",
+          texto: "Definir PIN",
+          onclick: async (e) => {
+            if (!/^\d{4}$/.test(pin.value)) {
+              avisar("O PIN precisa ter exatamente 4 números.", "erro");
+              return;
+            }
+            e.target.disabled = true;
+            try {
+              await post(`/v1/venues/${ctx.venue}/rh/${id}/pin`, { pin: pin.value });
+              avisar("PIN definido. Passe os números para a pessoa.", "ok");
+              pin.value = "";
+            } catch (err) {
+              avisar(err.message, "erro");
+            } finally {
+              e.target.disabled = false;
+            }
+          },
+        }),
+      ]),
+    ]);
   }
 
   function desligarPessoa(id, nomeDaPessoa) {

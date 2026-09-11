@@ -28,6 +28,10 @@
       "destination": "/cardapio.html"
     },
     {
+      "source": "/ponto/:token",
+      "destination": "/ponto.html"
+    },
+    {
       "source": "/app",
       "destination": "/app.html"
     },
