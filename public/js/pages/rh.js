@@ -2,6 +2,7 @@ import { del, get, patch, post, postArquivo } from "../api.js";
 import { avisar, dataHora, dinheiro, el, etiqueta, indicador, limpar, vazio } from "../ui.js";
 import { criarEscala } from "./rhEscala.js";
 import { criarPonto } from "./rhPonto.js";
+import { criarFerias } from "./rhFerias.js";
 
 /**
  * RH — Fase 1: a ficha de cada pessoa da casa.
@@ -72,6 +73,7 @@ export async function rh(raiz, ctx) {
   // desenha dentro do mesmo corpo. Trocar de aba não perde o que ela sabe.
   const escala = criarEscala(corpo, ctx);
   const ponto = criarPonto(corpo, ctx);
+  const ferias = criarFerias(corpo, ctx);
 
   const barra = el(
     "div",
@@ -80,6 +82,7 @@ export async function rh(raiz, ctx) {
       ["equipe", "Equipe"],
       ["escala", "Escala"],
       ["ponto", "Ponto"],
+      ["ferias", "Férias"],
     ].map(([id, rotulo]) =>
       el("button", {
         classe: `aba ${id === abaAtiva ? "aba-ativa" : ""}`.trim(),
@@ -103,7 +106,8 @@ export async function rh(raiz, ctx) {
     cabecalho.hidden = id !== "equipe";
     if (id === "equipe") await recarregar();
     else if (id === "escala") await escala.recarregar();
-    else await ponto.recarregar();
+    else if (id === "ponto") await ponto.recarregar();
+    else await ferias.recarregar();
   }
 
   async function recarregar() {

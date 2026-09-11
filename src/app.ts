@@ -99,6 +99,14 @@ import {
   tirarDaEscala,
 } from "./rhEscala.js";
 import {
+  SITUACOES_DE_FERIAS,
+  apagarFerias,
+  calendario,
+  decidirFerias,
+  pedirFerias,
+  situacaoDaEquipe,
+} from "./rhFerias.js";
+import {
   apagarPonto,
   apagarTotem,
   atualizarTotem,
@@ -2337,7 +2345,8 @@ async function roteasApi(
       const alvo = p[3] ?? "";
       const ehDocumentoSolto = alvo === "documentos";
       // Palavras reservadas em p[3]: tudo que não é uma delas é id de pessoa.
-      const ehSecaoPropria = alvo === "escala" || alvo === "turnos" || alvo === "ponto" || alvo === "totens";
+      const ehSecaoPropria =
+        alvo === "escala" || alvo === "turnos" || alvo === "ponto" || alvo === "totens" || alvo === "ferias";
 
       // Id que não é uuid nunca chega ao banco: sem isto um `undefined` que
       // escape da tela vira "invalid input syntax for type uuid" na cara de
@@ -2379,6 +2388,61 @@ async function roteasApi(
         }
         if (metodo === "DELETE" && p.length === 5) {
           return ok(res, await comErroDoRh(() => apagarTurno({ venueId: venue.id, id: p[4]! })));
+        }
+      }
+
+      // ---- Férias: /v1/venues/:slug/rh/ferias[/:id] ----
+      if (alvo === "ferias") {
+        // "Hoje" é o da casa: um pedido lançado às 23h de Cuiabá não pode ser
+        // conferido contra a data de amanhã em UTC.
+        const hoje = hojeNaCasa(venue.timezone ?? "America/Cuiaba");
+
+        if (metodo === "GET" && p.length === 4) {
+          const de = url.searchParams.get("de");
+          const ate = url.searchParams.get("ate");
+          const [equipe, agenda] = await comErroDoRh(() =>
+            Promise.all([
+              situacaoDaEquipe({ venueId: venue.id, hoje }),
+              de && ate ? calendario({ venueId: venue.id, de, ate }) : Promise.resolve([]),
+            ]),
+          );
+          return ok(res, { ...equipe, calendario: agenda, situacoes: SITUACOES_DE_FERIAS });
+        }
+
+        if (metodo === "POST" && p.length === 4) {
+          const corpo = (await lerJson(req)) as Record<string, unknown>;
+          const r = await comErroDoRh(() =>
+            pedirFerias({
+              venueId: venue.id,
+              atendenteId: texto(corpo, "atendente_id"),
+              inicio: texto(corpo, "inicio"),
+              fim: texto(corpo, "fim"),
+              abonoDias: corpo.abono_dias,
+              observacao: corpo.observacao,
+              quem: chave.name,
+              hoje,
+            }),
+          );
+          return ok(res, r, 201);
+        }
+
+        // POST /rh/ferias/:id/aprovar | recusar | cancelar
+        if (metodo === "POST" && p.length === 6) {
+          const decisao = p[5];
+          if (decisao !== "aprovar" && decisao !== "recusar" && decisao !== "cancelar") {
+            throw erro(404, "not_found", `Ação "${decisao}" não existe nas férias.`);
+          }
+          const situacao = decisao === "aprovar" ? "aprovado" : decisao === "recusar" ? "recusado" : "cancelado";
+          return ok(
+            res,
+            await comErroDoRh(() =>
+              decidirFerias({ venueId: venue.id, id: p[4]!, situacao, quem: chave.name }),
+            ),
+          );
+        }
+
+        if (metodo === "DELETE" && p.length === 5) {
+          return ok(res, await comErroDoRh(() => apagarFerias({ venueId: venue.id, id: p[4]! })));
         }
       }
 
