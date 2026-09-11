@@ -85,7 +85,7 @@ export async function rh(raiz, ctx) {
       ["escala", "Escala"],
       ["ponto", "Ponto"],
       ["ferias", "Férias"],
-      ["fechamento", "Fechamento"],
+      ["fechamento", "Gorjeta"],
     ].map(([id, rotulo]) =>
       el("button", {
         classe: `aba ${id === abaAtiva ? "aba-ativa" : ""}`.trim(),

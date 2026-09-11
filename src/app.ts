@@ -108,6 +108,18 @@ import {
   listarPesos,
   participantesDoTurno,
 } from "./rhGorjeta.js";
+import {
+  CRITERIOS_DE_RATEIO,
+  METODOS,
+  acertoDaSemana,
+  apagarExtra,
+  apagarVenda,
+  lancarExtra,
+  lancarVenda,
+  salvarRegra,
+  semanaDoDia,
+  verRegra,
+} from "./rhAcerto.js";
 import { comoCsv, comoTexto, resumoDoMes } from "./rhResumo.js";
 import {
   SITUACOES_DE_FERIAS,
@@ -2364,6 +2376,10 @@ async function roteasApi(
         alvo === "ferias" ||
         alvo === "gorjetas" ||
         alvo === "pesos" ||
+        alvo === "acerto" ||
+        alvo === "vendas" ||
+        alvo === "extras" ||
+        alvo === "regra-da-gorjeta" ||
         alvo === "resumo";
 
       // Id que não é uuid nunca chega ao banco: sem isto um `undefined` que
@@ -2473,6 +2489,104 @@ async function roteasApi(
 
         if (metodo === "DELETE" && p.length === 5) {
           return ok(res, await comErroDoRh(() => apagarGorjeta({ venueId: venue.id, id: p[4]! })));
+        }
+      }
+
+      // ---- O acerto da semana: /v1/venues/:slug/rh/acerto?ano=&semana= ----
+      if (alvo === "acerto" && metodo === "GET" && p.length === 4) {
+        const fuso = venue.timezone ?? "America/Cuiaba";
+        // Sem parâmetro, a semana de hoje NA CASA: sexta às 23h em Cuiabá não
+        // pode abrir a semana seguinte porque em Londres já é sábado.
+        const agora = semanaDoDia(hojeNaCasa(fuso));
+        const ano = Number(url.searchParams.get("ano")) || agora.ano;
+        const semana = Number(url.searchParams.get("semana")) || agora.numero;
+
+        const [acerto, pesos, turnos, equipe] = await comErroDoRh(() =>
+          Promise.all([
+            acertoDaSemana({ venueId: venue.id, ano, semana, timezone: fuso }),
+            listarPesos(venue.id),
+            listarTurnos(venue.id, { incluirInativos: true }),
+            listarPessoas(venue.id),
+          ]),
+        );
+        return ok(res, {
+          ...acerto,
+          pesos,
+          turnos,
+          equipe: equipe
+            .filter((e) => e.ativo)
+            .map((e) => ({ atendente_id: e.id, nome: e.apelido || e.nome, funcao: e.funcao })),
+          metodos: METODOS,
+          criterios: CRITERIOS_DE_RATEIO,
+        });
+      }
+
+      // ---- A regra da casa: /v1/venues/:slug/rh/regra-da-gorjeta ----
+      if (alvo === "regra-da-gorjeta") {
+        if (metodo === "GET" && p.length === 4) {
+          return ok(res, await comErroDoRh(() => verRegra(venue.id)));
+        }
+        if (metodo === "PUT" && p.length === 4) {
+          const corpo = (await lerJson(req)) as Record<string, unknown>;
+          return ok(
+            res,
+            await comErroDoRh(() =>
+              salvarRegra({
+                venueId: venue.id,
+                metodo: corpo.metodo,
+                percentualServico: corpo.percentual_servico,
+                percentualRepasse: corpo.percentual_repasse,
+                criterioRateio: corpo.criterio_rateio,
+                percentualParaApoio: corpo.percentual_da_casa_para_apoio,
+                quem: chave.name,
+              }),
+            ),
+          );
+        }
+      }
+
+      // ---- Venda de cada pessoa: /v1/venues/:slug/rh/vendas[/:id] ----
+      if (alvo === "vendas") {
+        if (metodo === "POST" && p.length === 4) {
+          const corpo = (await lerJson(req)) as Record<string, unknown>;
+          const venda = await comErroDoRh(() =>
+            lancarVenda({
+              venueId: venue.id,
+              dia: texto(corpo, "dia"),
+              turnoId: (corpo.turno_id as string | null) ?? null,
+              atendenteId: texto(corpo, "atendente_id"),
+              valor: corpo.valor,
+              comandas: corpo.comandas,
+              observacao: corpo.observacao,
+              quem: chave.name,
+            }),
+          );
+          return ok(res, venda, 201);
+        }
+        if (metodo === "DELETE" && p.length === 5) {
+          return ok(res, await comErroDoRh(() => apagarVenda({ venueId: venue.id, id: p[4]! })));
+        }
+      }
+
+      // ---- Adicionais e descontos: /v1/venues/:slug/rh/extras[/:id] ----
+      if (alvo === "extras") {
+        if (metodo === "POST" && p.length === 4) {
+          const corpo = (await lerJson(req)) as Record<string, unknown>;
+          const extra = await comErroDoRh(() =>
+            lancarExtra({
+              venueId: venue.id,
+              dia: texto(corpo, "dia"),
+              atendenteId: texto(corpo, "atendente_id"),
+              tipo: texto(corpo, "tipo"),
+              descricao: corpo.descricao,
+              valor: corpo.valor,
+              quem: chave.name,
+            }),
+          );
+          return ok(res, extra, 201);
+        }
+        if (metodo === "DELETE" && p.length === 5) {
+          return ok(res, await comErroDoRh(() => apagarExtra({ venueId: venue.id, id: p[4]! })));
         }
       }
 

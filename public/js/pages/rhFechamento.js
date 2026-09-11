@@ -1,60 +1,57 @@
-import { del, get, post } from "../api.js";
+import { del, get, post, put } from "../api.js";
 import { avisar, dinheiro, el, etiqueta, indicador, limpar, vazio } from "../ui.js";
 
 /**
- * RH — Fase 5: o fechamento.
+ * RH — a gorjeta, semana a semana.
  *
- * Duas coisas que acontecem em momentos diferentes, na mesma tela porque são
- * a mesma conversa: o fim do TURNO (rateio da gorjeta) e o fim do MÊS (o
- * resumo que vai para o contador).
+ * A tela antiga pedia "o bolo do turno" mesmo na casa que paga comissão
+ * sobre a venda de cada garçom. Eram duas contas diferentes com o mesmo
+ * nome, e ninguém entendia qual estava vendo.
  *
- * A gorjeta é o assunto que mais azeda equipe em bar. Aqui a divisão aparece
- * antes de ser gravada, com o critério à vista — ninguém fica achando que
- * levou menos.
+ * Agora a casa escolhe o método uma vez, em Regras, e a tela inteira passa a
+ * falar a língua dela:
+ *
+ *   INDIVIDUAL — lança-se a venda de cada um; a comissão sai do percentual.
+ *   GLOBAL     — lança-se o bolo do turno; ele se reparte pelo critério da
+ *                casa (igual, por pontuação ou por horas).
+ *
+ * A unidade é a SEMANA porque é assim que bar acerta gorjeta. Os
+ * lançamentos continuam por dia; a semana só soma.
  */
 
 const NOME_DO_CRITERIO = {
-  igual: "Igual para todos",
-  peso: "Por peso da função",
-  horas: "Pelas horas trabalhadas",
-  venda: "Por venda individual",
+  igual: "igual para todos",
+  peso: "por pontuação da função",
+  horas: "pelas horas trabalhadas",
+};
+
+/**
+ * O estado do formulário vive FORA do desenho.
+ *
+ * Já foi bug: a cada prévia a tela era redesenhada e o gestor perdia o que
+ * tinha digitado no meio do lançamento.
+ */
+const formularios = {
+  venda: null,
+  adicional: null,
+  desconto: null,
 };
 
 export function criarFechamento(corpo, ctx) {
   let dados = null;
-  let mes = null;
-  let resumo = null;
-  let previa = null; // { participantes, criterio, arrecadado, repassado, retido }
-
-  /**
-   * O que está digitado no formulário.
-   *
-   * Mora FORA da função que desenha porque a tela se redesenha inteira a cada
-   * prévia: sem isto, o gestor via a divisão, trocava o critério, e descobria
-   * que a venda que ele tinha digitado havia sumido.
-   */
-  let form = {
-    dia: new Date().toISOString().slice(0, 10),
-    turnoId: "",
-    modo: "percentual",
-    base: "",
-    percentual: "10",
-    valor: "",
-    repasse: "100",
-    criterio: "igual",
-    observacao: "",
-  };
+  let semana = null; // { ano, numero } — null = a semana de hoje
+  let painel = null; // "regras" | "venda" | "adicional" | "desconto" | null
+  let verLancamentos = false;
 
   return { desenhar, recarregar };
 
   async function recarregar() {
+    const busca = semana ? `?ano=${semana.ano}&semana=${semana.numero}` : "";
     try {
-      dados = await get(`/v1/venues/${ctx.venue}/rh/gorjetas`);
-      const busca = mes ? `?mes=${mes}` : "";
-      resumo = await get(`/v1/venues/${ctx.venue}/rh/resumo${busca}`);
-      mes = resumo.mes;
+      dados = await get(`/v1/venues/${ctx.venue}/rh/acerto${busca}`);
+      semana = { ano: dados.ano, numero: dados.semana };
     } catch (e) {
-      limpar(corpo).append(vazio("Não deu para carregar o fechamento", e.message));
+      limpar(corpo).append(vazio("Não deu para carregar a gorjeta", e.message));
       return;
     }
     desenhar();
@@ -66,246 +63,163 @@ export function criarFechamento(corpo, ctx) {
       return;
     }
     limpar(corpo);
-    corpo.append(cartaoDaGorjeta());
-    if (previa) corpo.append(cartaoDaPrevia());
-    corpo.append(historico());
-    corpo.append(cartaoDoResumo());
+    corpo.append(cabecalho());
+
+    if (!dados.regra.configurada) {
+      corpo.append(escolhaInicial());
+      if (painel === "regras") corpo.append(painelDeRegras());
+      return;
+    }
+
+    if (painel === "regras") corpo.append(painelDeRegras());
+    if (painel === "venda") corpo.append(formularioDeVenda());
+    if (painel === "adicional") corpo.append(formularioDeExtra("adicional"));
+    if (painel === "desconto") corpo.append(formularioDeExtra("desconto"));
+
+    corpo.append(barraDaSemana(), tabelaDoAcerto(), lancamentosDaSemana());
   }
 
-  /* ================= Gorjeta do turno ================= */
+  /* ================= Topo ================= */
 
-  function cartaoDaGorjeta() {
-    // Cada campo escreve no `form` ao mudar: é o que faz o valor sobreviver
-    // ao redesenho da tela.
-    const guardar = (campo) => (e) => {
-      form[campo] = e.target.value;
-    };
+  function cabecalho() {
+    const r = dados.regra;
+    const frase = !r.configurada
+      ? "A casa ainda não escolheu como paga a gorjeta."
+      : r.metodo === "individual"
+        ? `Comissão de ${numeroCurto(r.percentual_servico)}% sobre a venda de cada um`
+          + (r.percentual_repasse < 100 ? `, com ${numeroCurto(r.percentual_repasse)}% repassados à equipe` : "")
+          + (r.percentual_da_casa_para_apoio > 0 ? ` · ${numeroCurto(r.percentual_da_casa_para_apoio)}% separados para o apoio` : "")
+        : `Bolo de ${numeroCurto(r.percentual_servico)}% sobre a venda da casa, repartido ${NOME_DO_CRITERIO[r.criterio_rateio]}`
+          + (r.percentual_repasse < 100 ? ` · ${numeroCurto(r.percentual_repasse)}% repassados à equipe` : "");
 
-    const dia = el("input", { classe: "input", type: "date", value: form.dia, onchange: guardar("dia") });
-    const turno = el(
-      "select",
-      { classe: "select", onchange: guardar("turnoId") },
-      [
-        el("option", { value: "", texto: "A noite toda", selected: form.turnoId === "" }),
-        ...dados.turnos
-          .filter((t) => t.ativo)
-          .map((t) => el("option", { value: t.id, texto: t.nome, selected: form.turnoId === t.id })),
-      ],
-    );
-    // Duas maneiras de dizer quanto entrou. A de porcentagem é a que a casa
-    // usa no dia a dia; a de valor fechado serve para quando alguém já fez a
-    // conta no caixa.
-    const modo = el(
-      "select",
-      {
-        classe: "select",
-        onchange: (e) => {
-          form.modo = e.target.value;
-          trocarModo();
+    const botao = (id, rotulo, primario = false) =>
+      el("button", {
+        classe: `btn btn-peq ${primario ? "btn-primario" : ""}`.trim(),
+        type: "button",
+        texto: painel === id ? "Fechar" : rotulo,
+        onclick: () => {
+          painel = painel === id ? null : id;
+          desenhar();
         },
-      },
-      [
-        el("option", { value: "percentual", texto: "Percentual sobre a venda", selected: form.modo === "percentual" }),
-        el("option", { value: "valor", texto: "Valor fechado", selected: form.modo === "valor" }),
-      ],
-    );
-    const base = el("input", {
-      classe: "input", type: "number", step: "0.01", min: "0",
-      placeholder: "Venda do turno", value: form.base, oninput: guardar("base"),
-    });
-    const percentual = el("input", {
-      classe: "input", type: "number", step: "0.5", min: "0", max: "100",
-      value: form.percentual, oninput: guardar("percentual"),
-    });
-    const valor = el("input", {
-      classe: "input", type: "number", step: "0.01", min: "0",
-      placeholder: "0,00", value: form.valor, oninput: guardar("valor"),
-    });
-    const repasse = el("input", {
-      classe: "input", type: "number", step: "1", min: "0", max: "100",
-      value: form.repasse, oninput: guardar("repasse"),
-    });
-    const criterio = el(
-      "select",
-      { classe: "select", onchange: guardar("criterio") },
-      dados.criterios.map((c) => el("option", { value: c.id, texto: c.nome, selected: form.criterio === c.id })),
-    );
-    const observacao = el("input", {
-      classe: "input", type: "text", placeholder: "Observação (opcional)",
-      value: form.observacao, oninput: guardar("observacao"),
-    });
+      });
 
-    const campoBase = el("div", { classe: "campo" }, [el("label", { texto: "Venda do turno" }), base]);
-    const campoPercentual = el("div", { classe: "campo" }, [el("label", { texto: "% de serviço" }), percentual]);
-    const campoValor = el("div", { classe: "campo" }, [el("label", { texto: "Valor arrecadado" }), valor]);
-
-    function trocarModo() {
-      const porPercentual = form.modo === "percentual";
-      campoBase.hidden = !porPercentual;
-      campoPercentual.hidden = !porPercentual;
-      campoValor.hidden = porPercentual;
-    }
-    trocarModo();
-
-    return el("section", { classe: "cartao" }, [
-      el("h2", { texto: "Gorjeta do turno" }),
-      el("p", {
-        classe: "muted",
-        texto:
-          "O serviço é um percentual sobre a venda, e nem tudo que entra é repassado. Lance a conta inteira e veja a divisão antes de gravar — entra quem estava escalado e quem bateu ponto.",
-      }),
-      el("div", { classe: "grade" }, [
-        el("div", { classe: "campo" }, [el("label", { texto: "Dia" }), dia]),
-        el("div", { classe: "campo" }, [el("label", { texto: "Turno" }), turno]),
-        el("div", { classe: "campo" }, [el("label", { texto: "Como entrou" }), modo]),
-        campoBase,
-        campoPercentual,
-        campoValor,
-        el("div", { classe: "campo" }, [el("label", { texto: "% repassado à equipe" }), repasse]),
-        el("div", { classe: "campo" }, [el("label", { texto: "Como dividir" }), criterio]),
-        el("div", { classe: "campo" }, [el("label", { texto: "Observação" }), observacao]),
+    return el("div", { classe: "cartao" }, [
+      el("div", { classe: "cabecalho-secao" }, [
+        el("div", {}, [
+          el("h2", { texto: "Gorjeta" }),
+          el("p", { classe: "muted", texto: frase }),
+        ]),
+        el("div", { classe: "reserva-acoes", style: "flex-wrap:wrap" }, [
+          dados.regra.configurada && dados.regra.metodo === "individual"
+            ? botao("venda", "Lançar venda", true)
+            : null,
+          dados.regra.configurada ? botao("adicional", "Adicional") : null,
+          dados.regra.configurada ? botao("desconto", "Desconto") : null,
+          botao("regras", "Regras"),
+        ]),
       ]),
-      el("div", { classe: "reserva-acoes" }, [
-        el("button", {
-          classe: "btn",
-          type: "button",
-          texto: "Ver a divisão",
-          onclick: async (e) => {
-            const porPercentual = form.modo === "percentual";
-            if (porPercentual && !(Number(form.base) > 0)) {
-              avisar("Informe a venda do turno.", "erro");
-              return;
-            }
-            if (!porPercentual && !(Number(form.valor) > 0)) {
-              avisar("Informe o valor arrecadado.", "erro");
-              return;
-            }
-            e.target.disabled = true;
-            try {
-              const busca = new URLSearchParams({ dia: form.dia });
-              if (form.turnoId) busca.set("turno", form.turnoId);
-              const r = await get(`/v1/venues/${ctx.venue}/rh/gorjetas?${busca}`);
-              const conta = contaDaGorjeta({
-                base: porPercentual ? Number(form.base) : null,
-                percentualServico: porPercentual ? Number(form.percentual) : null,
-                valorFechado: porPercentual ? null : Number(form.valor),
-                percentualRepasse: Number(form.repasse),
-              });
-              // Mantém a venda já digitada de quem continua no turno.
-              const vendaAnterior = new Map((previa?.participantes ?? []).map((p) => [p.atendente_id, p.venda]));
-              previa = {
-                participantes: r.participantes.map((p) => ({ ...p, venda: vendaAnterior.get(p.atendente_id) ?? 0 })),
-                criterio: form.criterio,
-                dia: form.dia,
-                turnoId: form.turnoId || null,
-                observacao: form.observacao,
-                baseVenda: porPercentual ? Number(form.base) : null,
-                percentualServico: porPercentual ? Number(form.percentual) : null,
-                percentualRepasse: Number(form.repasse),
-                valorFechado: porPercentual ? null : Number(form.valor),
-                ...conta,
-              };
-              desenhar();
-              corpo.querySelector(".previa-gorjeta")?.scrollIntoView({ behavior: "smooth", block: "center" });
-            } catch (err) {
-              avisar(err.message, "erro");
-            } finally {
-              e.target.disabled = false;
-            }
-          },
-        }),
-      ]),
-      dados.pesos.length
-        ? el("p", {
-            classe: "muted",
-            texto: `Pesos por função: ${dados.pesos.map((p) => `${p.funcao} ${p.peso}`).join(" · ")}. Quem não estiver na lista pesa 1.`,
-          })
-        : el("p", { classe: "muted", texto: "Nenhum peso cadastrado: no critério por peso, todo mundo pesa igual." }),
-      painelDePesos(),
     ]);
   }
 
-  /** A divisão na tela ANTES de gravar — é o que evita discussão depois. */
-  function cartaoDaPrevia() {
-    const soma = (lista) => lista.reduce((t, c) => t + c.valor, 0);
-    // Divide o REPASSADO: o que fica com a casa não entra no bolo de ninguém.
-    const cotas = dividirLocalmente({ ...previa, valor: previa.repassado });
-    const porVenda = previa.criterio === "venda";
-
-    return el("section", { classe: "cartao previa-gorjeta" }, [
-      el("div", { classe: "cabecalho-secao" }, [
-        el("div", {}, [
-          el("h3", { texto: `Divisão de ${dinheiro(previa.repassado)}` }),
-          el("p", {
-            classe: "muted",
-            texto: `${NOME_DO_CRITERIO[previa.criterio]} · ${cotas.length} pessoa(s) no turno.`,
-          }),
-        ]),
-        el("button", {
-          classe: "btn btn-peq",
-          type: "button",
-          texto: "Cancelar",
-          onclick: () => {
-            previa = null;
-            desenhar();
-          },
-        }),
-      ]),
-
-      // A conta inteira à vista: é o que responde "cadê o resto?" sem
-      // ninguém precisar perguntar.
-      el("div", { classe: "grade" }, [
-        indicador({
-          rotulo: "Serviço arrecadado",
-          valor: dinheiro(previa.arrecadado),
-          nota: previa.percentualServico ? `${previa.percentualServico}% sobre ${dinheiro(previa.baseVenda)}` : "valor lançado",
-        }),
-        indicador({
-          rotulo: "Repassado à equipe",
-          valor: dinheiro(previa.repassado),
-          nota: `${previa.percentualRepasse}% do arrecadado`,
-        }),
-        indicador({
-          rotulo: "Fica com a casa",
-          valor: dinheiro(previa.retido),
-          nota: previa.retido > 0 ? "taxa de cartão, quebra, o que a casa combinar" : "nada retido",
-        }),
-      ]),
-
-      porVenda
-        ? el("p", {
-            classe: "muted",
-            texto: "Digite a venda de cada um: a divisão acompanha o que você digitar, na hora.",
-          })
-        : null,
-
-      cotas.length === 0
-        ? vazio("Ninguém neste turno", "Monte a escala do dia ou espere as batidas do ponto.")
-        : tabelaDaPrevia(cotas, porVenda, soma),
+  /** Enquanto a casa não escolhe, a tela não finge que sabe. */
+  function escolhaInicial() {
+    return el("section", { classe: "cartao cartao-atencao" }, [
+      el("h3", { texto: "Escolha primeiro como a casa paga a gorjeta" }),
+      el("p", {
+        classe: "muted",
+        texto:
+          "São duas contas diferentes, e a tela muda conforme a sua. Na comissão individual, cada um recebe um "
+          + "percentual sobre o que ele mesmo vendeu. No bolo da casa, o serviço da noite inteira é repartido entre a "
+          + "equipe — igual, por pontuação da função ou pelas horas.",
+      }),
       el("div", { classe: "reserva-acoes" }, [
         el("button", {
           classe: "btn btn-primario",
           type: "button",
-          texto: "Confirmar e gravar",
-          disabled: cotas.length === 0,
+          texto: "Escolher agora",
+          onclick: () => {
+            painel = "regras";
+            desenhar();
+          },
+        }),
+      ]),
+    ]);
+  }
+
+  /* ================= Regras ================= */
+
+  function painelDeRegras() {
+    const r = dados.regra;
+
+    const metodo = el("select", { classe: "input", onchange: () => atualizarVisibilidade() },
+      dados.metodos.map((m) => el("option", { value: m.id, texto: m.nome, selected: r.metodo === m.id })));
+    const explicacaoDoMetodo = el("small", { classe: "muted" });
+    const servico = el("input", { classe: "input", type: "number", min: "0", max: "100", step: "0.01", value: String(r.percentual_servico) });
+    const repasse = el("input", { classe: "input", type: "number", min: "0", max: "100", step: "0.01", value: String(r.percentual_repasse) });
+    const criterio = el("select", { classe: "input" },
+      dados.criterios.map((c) => el("option", { value: c.id, texto: c.nome, selected: r.criterio_rateio === c.id })));
+    const apoio = el("input", { classe: "input", type: "number", min: "0", max: "100", step: "0.01", value: String(r.percentual_da_casa_para_apoio) });
+
+    const campoCriterio = el("div", { classe: "campo" }, [
+      el("label", { texto: "Como reparte o bolo" }),
+      criterio,
+      el("small", { classe: "muted", texto: "A pontuação por função se ajusta na lista de pesos, mais abaixo." }),
+    ]);
+    const campoApoio = el("div", { classe: "campo" }, [
+      el("label", { texto: "Separado para quem não vende (%)" }),
+      apoio,
+      el("small", { classe: "muted", texto: "Cozinha e copa não têm venda própria. Zero deixa a gorjeta só com quem vende." }),
+    ]);
+
+    function atualizarVisibilidade() {
+      const individual = metodo.value === "individual";
+      const escolhido = dados.metodos.find((m) => m.id === metodo.value);
+      explicacaoDoMetodo.textContent = escolhido ? escolhido.explicacao : "";
+      campoApoio.hidden = !individual;
+      // No individual o critério só decide a fatia do apoio; sem apoio, some.
+      campoCriterio.hidden = individual && Number(apoio.value || 0) <= 0;
+    }
+    apoio.addEventListener("input", atualizarVisibilidade);
+    atualizarVisibilidade();
+
+    return el("section", { classe: "cartao" }, [
+      el("h3", { texto: "Como esta casa paga a gorjeta" }),
+      el("p", {
+        classe: "muted",
+        texto: "Vale para os lançamentos daqui para frente. O que já foi pago continua como foi pago.",
+      }),
+      el("div", { classe: "grade" }, [
+        el("div", { classe: "campo" }, [el("label", { texto: "Método" }), metodo, explicacaoDoMetodo]),
+        el("div", { classe: "campo" }, [
+          el("label", { texto: "Serviço sobre a venda (%)" }),
+          servico,
+          el("small", { classe: "muted", texto: "Os 10% de praxe, ou o que a casa cobra." }),
+        ]),
+        el("div", { classe: "campo" }, [
+          el("label", { texto: "Repassado à equipe (%)" }),
+          repasse,
+          el("small", { classe: "muted", texto: "100 = a casa não retém nada. O que retém aparece na tela." }),
+        ]),
+        campoCriterio,
+        campoApoio,
+      ]),
+      el("div", { classe: "reserva-acoes" }, [
+        el("button", {
+          classe: "btn btn-primario",
+          type: "button",
+          texto: "Salvar regra",
           onclick: async (e) => {
             e.target.disabled = true;
             try {
-              await post(`/v1/venues/${ctx.venue}/rh/gorjetas`, {
-                dia: previa.dia,
-                turno_id: previa.turnoId,
-                valor: previa.valorFechado,
-                base_venda: previa.baseVenda,
-                percentual_servico: previa.percentualServico,
-                percentual_repasse: previa.percentualRepasse,
-                criterio: previa.criterio,
-                observacao: previa.observacao,
-                // A venda individual só existe aqui na tela: o servidor não
-                // tem de onde adivinhar quanto cada um vendeu.
-                participantes: previa.criterio === "venda" ? previa.participantes : undefined,
+              await put(`/v1/venues/${ctx.venue}/rh/regra-da-gorjeta`, {
+                metodo: metodo.value,
+                percentual_servico: Number(servico.value),
+                percentual_repasse: Number(repasse.value),
+                criterio_rateio: criterio.value,
+                percentual_da_casa_para_apoio: Number(apoio.value) || 0,
               });
-              avisar("Gorjeta registrada e dividida.", "ok");
-              previa = null;
+              avisar("Regra salva. A tela já está falando essa língua.", "ok");
+              painel = null;
               await recarregar();
             } catch (err) {
               avisar(err.message, "erro");
@@ -314,115 +228,46 @@ export function criarFechamento(corpo, ctx) {
           },
         }),
       ]),
+      tabelaDePesos(),
     ]);
   }
 
-  /**
-   * A tabela da prévia.
-   *
-   * Quando a divisão é por venda individual, cada linha tem um campo. Digitar
-   * atualiza só a coluna "Recebe" e o total — redesenhar a tela inteira a
-   * cada tecla tirava o cursor do lugar e piscava a página.
-   */
-  function tabelaDaPrevia(cotas, porVenda, soma) {
-    const celulas = new Map();
-    const totalCelula = el("td", { classe: "col-num", texto: dinheiro(soma(cotas)) });
-
-    function recalcular() {
-      const novas = dividirLocalmente({ ...previa, valor: previa.repassado });
-      for (const c of novas) {
-        const celula = celulas.get(c.atendente_id);
-        if (celula) celula.textContent = dinheiro(c.valor);
-      }
-      totalCelula.textContent = dinheiro(soma(novas));
-    }
-
-    return el("div", { classe: "rolagem-x" }, [
-      el("table", { classe: "planilha" }, [
-        el("thead", {}, [
-          el("tr", {}, [
-            el("th", { texto: "Pessoa" }),
-            el("th", { texto: "Função" }),
-            el("th", { classe: "col-num", texto: porVenda ? "Venda dele" : "Peso" }),
-            el("th", { classe: "col-num", texto: "Horas" }),
-            el("th", { classe: "col-num", texto: "Recebe" }),
-          ]),
-        ]),
-        el(
-          "tbody",
-          {},
-          cotas.map((c) => {
-            const recebe = el("td", { classe: "col-num", texto: dinheiro(c.valor) });
-            celulas.set(c.atendente_id, recebe);
-
-            return el("tr", {}, [
-              el("td", {}, [el("strong", { texto: c.nome })]),
-              el("td", { texto: c.funcao ?? "—" }),
-              el("td", { classe: "col-num" }, [
-                porVenda
-                  ? el("input", {
-                      classe: "input",
-                      type: "number",
-                      step: "0.01",
-                      min: "0",
-                      value: String(c.venda ?? 0),
-                      style: "max-width:130px;text-align:right",
-                      oninput: (e) => {
-                        const pessoa = previa.participantes.find((p) => p.atendente_id === c.atendente_id);
-                        if (pessoa) pessoa.venda = Number(e.target.value) || 0;
-                        recalcular();
-                      },
-                    })
-                  : document.createTextNode(String(c.peso)),
-              ]),
-              el("td", { classe: "col-num", texto: emHoras(c.minutos) }),
-              recebe,
-            ]);
-          }),
-        ),
-        el("tfoot", {}, [el("tr", {}, [el("td", { colspan: 4, texto: "Total repartido" }), totalCelula])]),
-      ]),
-    ]);
-  }
-
-  function painelDePesos() {
+  /** A pontuação por função: só aparece onde ela manda na conta. */
+  function tabelaDePesos() {
     const funcao = el("input", { classe: "input", type: "text", placeholder: "Garçom" });
-    const peso = el("input", { classe: "input", type: "number", step: "0.5", min: "0", value: "2" });
+    const peso = el("input", { classe: "input", type: "number", min: "0", step: "0.5", value: "1" });
 
-    return el("details", { style: "margin-top:10px" }, [
-      el("summary", { classe: "muted", style: "cursor:pointer", texto: "Ajustar peso por função" }),
+    return el("div", { style: "margin-top:22px" }, [
+      el("h4", { texto: "Pontuação por função", style: "margin:0 0 2px" }),
       el("p", {
         classe: "muted",
-        texto: '"Garçom pesa mais que apoio" é regra de casa, não lei. Só vale no critério por peso.',
+        texto: "Quem não estiver na lista pesa 1. Só entra na conta quando o rateio é por pontuação.",
       }),
       dados.pesos.length
-        ? el(
-            "div",
-            { classe: "tabela" },
-            dados.pesos.map((p) =>
-              el("div", { classe: "linha-tabela" }, [
-                el("div", { classe: "linha-principal", style: "flex:1" }, [
-                  el("strong", { texto: p.funcao }),
-                  el("span", { classe: "muted", texto: `peso ${p.peso}` }),
-                ]),
-                el("button", {
-                  classe: "btn btn-peq btn-perigo",
-                  type: "button",
-                  texto: "Apagar",
-                  onclick: async (e) => {
-                    e.target.disabled = true;
-                    try {
-                      await del(`/v1/venues/${ctx.venue}/rh/pesos/${p.id}`);
-                      await recarregar();
-                    } catch (err) {
-                      avisar(err.message, "erro");
-                      e.target.disabled = false;
-                    }
-                  },
-                }),
+        ? el("div", { classe: "tabela", style: "margin:10px 0" },
+          dados.pesos.map((p) =>
+            el("div", { classe: "linha-tabela" }, [
+              el("div", { classe: "linha-principal", style: "flex:1" }, [
+                el("strong", { texto: p.funcao }),
+                el("span", { classe: "muted", texto: `pesa ${numeroCurto(p.peso)}` }),
               ]),
-            ),
-          )
+              el("button", {
+                classe: "btn btn-peq btn-perigo",
+                type: "button",
+                texto: "Apagar",
+                onclick: async (e) => {
+                  e.target.disabled = true;
+                  try {
+                    await del(`/v1/venues/${ctx.venue}/rh/pesos/${p.id}`);
+                    await recarregar();
+                  } catch (err) {
+                    avisar(err.message, "erro");
+                    e.target.disabled = false;
+                  }
+                },
+              }),
+            ]),
+          ))
         : null,
       el("div", { classe: "grade" }, [
         el("div", { classe: "campo" }, [el("label", { texto: "Função" }), funcao]),
@@ -432,19 +277,12 @@ export function criarFechamento(corpo, ctx) {
         el("button", {
           classe: "btn btn-peq",
           type: "button",
-          texto: "Salvar peso",
+          texto: "Guardar peso",
           onclick: async (e) => {
-            if (!funcao.value.trim()) {
-              avisar("Diga a função.", "erro");
-              return;
-            }
+            if (!funcao.value.trim()) return avisar("Diga a função.", "erro");
             e.target.disabled = true;
             try {
-              await post(`/v1/venues/${ctx.venue}/rh/pesos`, {
-                funcao: funcao.value.trim(),
-                peso: Number(peso.value),
-              });
-              avisar("Peso salvo.", "ok");
+              await post(`/v1/venues/${ctx.venue}/rh/pesos`, { funcao: funcao.value, peso: Number(peso.value) });
               await recarregar();
             } catch (err) {
               avisar(err.message, "erro");
@@ -456,240 +294,409 @@ export function criarFechamento(corpo, ctx) {
     ]);
   }
 
-  /* ================= Histórico ================= */
+  /* ================= A semana ================= */
 
-  function historico() {
-    if (dados.gorjetas.length === 0) {
-      return el("section", { classe: "cartao" }, [
-        el("h3", { texto: "Gorjetas do mês" }),
-        vazio("Nenhum fechamento ainda", "O primeiro lançamento aparece aqui."),
-      ]);
-    }
+  function barraDaSemana() {
+    const andar = (passo) => {
+      const base = new Date(`${dados.inicio}T12:00:00Z`);
+      base.setUTCDate(base.getUTCDate() + passo * 7);
+      semana = semanaDe(base.toISOString().slice(0, 10));
+      void recarregar();
+    };
 
-    const total = dados.gorjetas.reduce((t, g) => t + g.valor, 0);
-    const totalRepassado = dados.gorjetas.reduce((t, g) => t + (g.valor_repassado ?? g.valor), 0);
-    const nomeDoTurno = (id) => dados.turnos.find((t) => t.id === id)?.nome ?? "A noite toda";
-
+    const t = dados.totais;
     return el("section", { classe: "cartao" }, [
       el("div", { classe: "cabecalho-secao" }, [
         el("div", {}, [
-          el("h3", { texto: "Gorjetas lançadas" }),
-          el("p", {
-            classe: "muted",
-            texto: `${diaBr(dados.de)} a ${diaBr(dados.ate)} · arrecadado ${dinheiro(total)} · repassado ${dinheiro(totalRepassado)}`,
-          }),
-        ]),
-      ]),
-      el(
-        "div",
-        { classe: "tabela" },
-        dados.gorjetas.map((g) =>
-          el("div", { classe: "linha-tabela" }, [
-            el("div", { classe: "linha-principal", style: "flex:1;min-width:240px" }, [
-              el("strong", {
-                texto: `${diaBr(g.dia)} · ${nomeDoTurno(g.turno_id)} · ${dinheiro(g.valor_repassado ?? g.valor)}`,
-              }),
-              g.percentual_servico
-                ? el("span", {
-                    classe: "muted",
-                    texto: `${g.percentual_servico}% sobre ${dinheiro(g.base_venda)} = ${dinheiro(g.valor)}; repasse de ${g.percentual_repasse}%`,
-                  })
-                : null,
-              el("span", {
-                classe: "muted",
-                texto: g.cotas.map((c) => `${c.nome} ${dinheiro(c.valor)}`).join(" · ") || "sem cotas",
-              }),
-              g.observacao ? el("span", { classe: "muted", texto: g.observacao }) : null,
-            ]),
-            etiqueta(NOME_DO_CRITERIO[g.criterio] ?? g.criterio, ""),
-            el("button", {
-              classe: "btn btn-peq btn-perigo",
-              type: "button",
-              texto: "Apagar",
-              onclick: async (e) => {
-                if (!confirm("Apagar este fechamento? As cotas somem junto.")) return;
-                e.target.disabled = true;
-                try {
-                  await del(`/v1/venues/${ctx.venue}/rh/gorjetas/${g.id}`);
-                  avisar("Fechamento apagado.", "ok");
-                  await recarregar();
-                } catch (err) {
-                  avisar(err.message, "erro");
-                  e.target.disabled = false;
-                }
-              },
-            }),
-          ]),
-        ),
-      ),
-    ]);
-  }
-
-  /* ================= Resumo do mês ================= */
-
-  function cartaoDoResumo() {
-    const seletor = el("input", { classe: "input", type: "month", value: mes, style: "max-width:200px" });
-
-    return el("section", { classe: "cartao" }, [
-      el("div", { classe: "cabecalho-secao" }, [
-        el("div", {}, [
-          el("h2", { texto: "Resumo do mês para a contabilidade" }),
-          el("p", {
-            classe: "muted",
-            texto:
-              "Dias, horas, noturno, faltas, atrasos, férias e gorjeta de cada um. São os números de fato; salário, encargos e adicionais continuam com quem fecha a folha.",
-          }),
+          el("h3", { texto: `Semana ${dados.semana}/${dados.ano}` }),
+          el("p", { classe: "muted", texto: `${diaBr(dados.inicio)} a ${diaBr(dados.fim)}` }),
         ]),
         el("div", { classe: "reserva-acoes" }, [
-          seletor,
+          el("button", { classe: "btn btn-peq", type: "button", texto: "← Anterior", onclick: () => andar(-1) }),
           el("button", {
             classe: "btn btn-peq",
             type: "button",
-            texto: "Ver mês",
-            onclick: async () => {
-              mes = seletor.value;
-              await recarregar();
+            texto: "Esta semana",
+            onclick: () => {
+              semana = null;
+              void recarregar();
             },
           }),
+          el("button", { classe: "btn btn-peq", type: "button", texto: "Próxima →", onclick: () => andar(1) }),
         ]),
       ]),
+      el("div", { classe: "grade", style: "margin-top:14px" }, [
+        indicador({
+          rotulo: "Vendas da semana",
+          valor: dinheiro(t.vendas),
+          nota: dados.regra.metodo === "global" ? "informativo: não é o que paga" : `${somaComandas()} comanda(s)`,
+        }),
+        indicador({
+          rotulo: `Serviço arrecadado (${numeroCurto(dados.regra.percentual_servico)}%)`,
+          valor: dinheiro(t.arrecadado),
+        }),
+        indicador({
+          rotulo: "Fica com a casa",
+          valor: dinheiro(t.retido),
+          nota: t.retido > 0 ? `${numeroCurto(100 - dados.regra.percentual_repasse)}% do arrecadado` : "repassa tudo",
+        }),
+        indicador({
+          rotulo: "A receber pela equipe",
+          valor: dinheiro(t.a_receber),
+          destaque: t.a_receber > 0,
+          nota: notaDoTotal(t),
+        }),
+      ]),
+    ]);
+  }
 
-      resumo.linhas.length === 0
-        ? vazio("Nada neste mês", "Sem ponto, escala ou gorjeta lançados no período.")
-        : el("div", { classe: "rolagem-x" }, [
-            el("table", { classe: "planilha" }, [
-              el("thead", {}, [
-                el("tr", {}, [
-                  el("th", { texto: "Pessoa" }),
-                  el("th", { classe: "col-num", texto: "Dias" }),
-                  el("th", { classe: "col-num", texto: "Horas" }),
-                  el("th", { classe: "col-num", texto: "Noturno" }),
-                  el("th", { classe: "col-num", texto: "Faltas" }),
-                  el("th", { classe: "col-num", texto: "Atrasos" }),
-                  el("th", { classe: "col-num", texto: "Férias" }),
-                  el("th", { classe: "col-num", texto: "Gorjeta" }),
-                ]),
-              ]),
-              el(
-                "tbody",
-                {},
-                resumo.linhas.map((l) =>
-                  el("tr", { classe: l.faltas > 0 ? "linha-atencao" : "" }, [
-                    el("td", {}, [
-                      el("strong", { texto: l.nome }),
-                      l.cargo ? el("small", { classe: "muted", texto: l.cargo }) : null,
-                    ]),
-                    el("td", { classe: "col-num", texto: String(l.dias_trabalhados) }),
-                    el("td", { classe: "col-num", texto: emHoras(l.minutos_trabalhados) }),
-                    el("td", { classe: "col-num", texto: l.minutos_noturnos ? emHoras(l.minutos_noturnos) : "—" }),
-                    el("td", { classe: "col-num", texto: l.faltas ? String(l.faltas) : "—" }),
-                    el("td", { classe: "col-num", texto: l.atrasos ? `${l.atrasos} (${emHoras(l.minutos_de_atraso)})` : "—" }),
-                    el("td", { classe: "col-num", texto: l.dias_de_ferias ? `${l.dias_de_ferias} d` : "—" }),
-                    el("td", { classe: "col-num", texto: l.gorjeta ? dinheiro(l.gorjeta) : "—" }),
-                  ]),
-                ),
-              ),
-            ]),
+  function notaDoTotal(t) {
+    const partes = [];
+    if (t.comissoes > 0) partes.push(`${dinheiro(t.comissoes)} de comissão`);
+    if (t.rateio > 0) partes.push(`${dinheiro(t.rateio)} de rateio`);
+    if (t.adicionais > 0) partes.push(`+ ${dinheiro(t.adicionais)}`);
+    if (t.descontos > 0) partes.push(`− ${dinheiro(t.descontos)}`);
+    return partes.join(" · ") || "nada lançado ainda";
+  }
+
+  // Declaração, e não const: o `return` do topo da fábrica sai antes desta
+  // linha, e um const aqui nunca chegaria a ser inicializado.
+  function somaComandas() {
+    return dados.linhas.reduce((s, l) => s + l.comandas, 0);
+  }
+
+  /* ================= A tabela ================= */
+
+  /**
+   * Uma coluna por parcela do acerto, como no sistema que a casa já usa.
+   *
+   * As colunas que não têm nada não aparecem: mostrar "Comissão · R$ 0,00"
+   * para a casa inteira numa casa que paga por bolo é exatamente o tipo de
+   * coluna que faz o gestor perguntar "mas então o que é isso aqui?".
+   */
+  function colunas() {
+    const individual = dados.regra.metodo === "individual";
+    const temRateio = dados.linhas.some((l) => l.rateio > 0);
+    const temAdicional = dados.linhas.some((l) => l.adicionais > 0);
+    const temDesconto = dados.linhas.some((l) => l.descontos > 0);
+
+    return [
+      { chave: "nome", rotulo: "Pessoa", texto: (l) => l.nome, forte: true },
+      { chave: "funcao", rotulo: "Função", texto: (l) => l.funcao || "—" },
+      { chave: "vendas", rotulo: "Vendas", num: true, valor: (l) => l.vendas, nota: (l) => (l.comandas ? `${l.comandas} comanda(s)` : null) },
+      individual
+        ? { chave: "comissao", rotulo: `Comissão`, num: true, valor: (l) => l.comissao }
+        : null,
+      temRateio || !individual
+        ? { chave: "rateio", rotulo: individual ? "Rateio à parte" : "Rateio do bolo", num: true, valor: (l) => l.rateio }
+        : null,
+      temAdicional ? { chave: "adicionais", rotulo: "Adicionais", num: true, valor: (l) => l.adicionais } : null,
+      temDesconto ? { chave: "descontos", rotulo: "Descontos", num: true, valor: (l) => l.descontos, negativo: true } : null,
+      { chave: "a_receber", rotulo: "A receber", num: true, valor: (l) => l.a_receber, forte: true },
+    ].filter(Boolean);
+  }
+
+  function tabelaDoAcerto() {
+    const cols = colunas();
+    const linhas = dados.linhas;
+
+    if (linhas.length === 0) {
+      return el("section", { classe: "cartao" }, [
+        vazio(
+          "Ninguém no acerto desta semana",
+          dados.regra.metodo === "individual"
+            ? 'Lance a venda de cada um em "Lançar venda" e a comissão aparece aqui.'
+            : "Feche o serviço de um turno e o rateio aparece aqui.",
+        ),
+      ]);
+    }
+
+    const total = (col) => (col.valor ? linhas.reduce((s, l) => s + col.valor(l), 0) : null);
+
+    return el("section", { classe: "cartao" }, [
+      el("div", { classe: "rolagem-x" }, [
+        el("table", { classe: "planilha" }, [
+          el("thead", {}, [
+            el("tr", {}, cols.map((c) => el("th", { classe: c.num ? "col-num" : "", texto: c.rotulo }))),
           ]),
+          el("tbody", {}, linhas.map((l) =>
+            el("tr", {}, cols.map((c) => celula(c, l))),
+          )),
+          el("tfoot", {}, [
+            el("tr", {}, cols.map((c, i) =>
+              el("td", { classe: c.num ? "col-num" : "", texto: i === 0 ? "Total" : c.valor ? dinheiroDaColuna(c, total(c)) : "" }),
+            )),
+          ]),
+        ]),
+      ]),
+    ]);
+  }
 
+  function celula(col, linha) {
+    if (!col.valor) {
+      const conteudo = col.texto(linha);
+      return col.forte
+        ? el("td", {}, [el("strong", { texto: conteudo })])
+        : el("td", { classe: "muted", texto: conteudo });
+    }
+    const valor = col.valor(linha);
+    const td = el("td", { classe: "col-num" });
+    const texto = dinheiroDaColuna(col, valor);
+    td.append(col.forte ? el("strong", { texto }) : el("span", { texto, classe: valor > 0 ? "" : "muted" }));
+    const nota = col.nota?.(linha);
+    if (nota) td.append(el("small", { classe: "muted", texto: nota }));
+    return td;
+  }
+
+  function dinheiroDaColuna(col, valor) {
+    return col.negativo && valor > 0 ? `− ${dinheiro(valor)}` : dinheiro(valor);
+  }
+
+  /* ================= Lançar ================= */
+
+  function seletorDePessoa(valorInicial) {
+    return el("select", { classe: "input" },
+      dados.equipe.map((p) =>
+        el("option", {
+          value: p.atendente_id,
+          texto: p.funcao ? `${p.nome} · ${p.funcao}` : p.nome,
+          selected: valorInicial === p.atendente_id,
+        }),
+      ));
+  }
+
+  function formularioDeVenda() {
+    const f = (formularios.venda ??= { dia: dados.fim, turnoId: "", atendenteId: "", valor: "", comandas: "", observacao: "" });
+
+    const dia = el("input", { classe: "input", type: "date", value: f.dia, min: dados.inicio, max: dados.fim, onchange: (e) => { f.dia = e.target.value; } });
+    const quem = seletorDePessoa(f.atendenteId);
+    quem.addEventListener("change", () => { f.atendenteId = quem.value; });
+    const turno = el("select", { classe: "input", onchange: (e) => { f.turnoId = e.target.value; } }, [
+      el("option", { value: "", texto: "A noite inteira" }),
+      ...dados.turnos.map((t) => el("option", { value: t.id, texto: t.nome, selected: f.turnoId === t.id })),
+    ]);
+    const valor = el("input", { classe: "input", type: "number", min: "0", step: "0.01", value: f.valor, placeholder: "0,00", oninput: (e) => { f.valor = e.target.value; atualizarPrevia(); } });
+    const comandas = el("input", { classe: "input", type: "number", min: "0", value: f.comandas, oninput: (e) => { f.comandas = e.target.value; } });
+    const previa = el("p", { classe: "muted" });
+
+    function atualizarPrevia() {
+      const v = Number(valor.value) || 0;
+      const r = dados.regra;
+      const bruto = (v * r.percentual_servico) / 100;
+      const liquido = (bruto * r.percentual_repasse) / 100;
+      const daPessoa = (liquido * (100 - r.percentual_da_casa_para_apoio)) / 100;
+      previa.textContent = v > 0
+        ? `Vende ${dinheiro(v)} → serviço de ${dinheiro(bruto)} → ${dinheiro(daPessoa)} para esta pessoa.`
+        : "Digite a venda para ver quanto vira gorjeta.";
+    }
+    atualizarPrevia();
+
+    return el("section", { classe: "cartao" }, [
+      el("h3", { texto: "Lançar venda", style: "margin:0 0 2px" }),
+      previa,
+      el("div", { classe: "grade" }, [
+        el("div", { classe: "campo" }, [el("label", { texto: "Quem" }), quem]),
+        el("div", { classe: "campo" }, [el("label", { texto: "Dia" }), dia]),
+        el("div", { classe: "campo" }, [el("label", { texto: "Turno" }), turno]),
+        el("div", { classe: "campo" }, [el("label", { texto: "Quanto vendeu (R$)" }), valor]),
+        el("div", { classe: "campo" }, [el("label", { texto: "Comandas" }), comandas]),
+      ]),
+      el("p", {
+        classe: "muted",
+        texto: "Uma venda por pessoa em cada turno. Lançar de novo no mesmo turno corrige o valor, não soma outro.",
+      }),
       el("div", { classe: "reserva-acoes" }, [
         el("button", {
           classe: "btn btn-primario",
           type: "button",
-          texto: "Copiar texto para o contador",
-          onclick: async () => {
+          texto: "Lançar",
+          onclick: async (e) => {
+            const alvo = quem.value;
+            if (!alvo) return avisar("Escolha de quem é a venda.", "erro");
+            if (!(Number(valor.value) >= 0) || valor.value === "") return avisar("Informe quanto a pessoa vendeu.", "erro");
+            e.target.disabled = true;
             try {
-              await navigator.clipboard.writeText(resumo.texto);
-              avisar("Texto copiado. Cole no WhatsApp da contabilidade.", "ok");
-            } catch {
-              avisar("Não deu para copiar. Selecione o texto abaixo à mão.", "erro");
+              await post(`/v1/venues/${ctx.venue}/rh/vendas`, {
+                dia: dia.value,
+                turno_id: turno.value || null,
+                atendente_id: alvo,
+                valor: Number(valor.value),
+                comandas: Number(comandas.value) || 0,
+              });
+              avisar("Venda lançada.", "ok");
+              // Zera só o valor: o gestor costuma lançar a mesma noite em
+              // sequência, pessoa por pessoa.
+              f.valor = "";
+              f.comandas = "";
+              await recarregar();
+            } catch (err) {
+              avisar(err.message, "erro");
+              e.target.disabled = false;
             }
           },
-        }),
-        el("button", {
-          classe: "btn",
-          type: "button",
-          texto: "Copiar planilha (CSV)",
-          onclick: async () => {
-            try {
-              await navigator.clipboard.writeText(resumo.csv);
-              avisar("Planilha copiada. Cole num arquivo .csv e abra no Excel.", "ok");
-            } catch {
-              avisar("Não deu para copiar.", "erro");
-            }
-          },
-        }),
-      ]),
-
-      el("details", { style: "margin-top:10px" }, [
-        el("summary", { classe: "muted", style: "cursor:pointer", texto: "Ver o texto que vai para o contador" }),
-        el("pre", {
-          style: "white-space:pre-wrap;font-size:0.85rem;background:var(--fundo);padding:12px;border-radius:10px;overflow-x:auto",
-          texto: resumo.texto,
         }),
       ]),
     ]);
   }
-}
 
-/* ================= Miudezas ================= */
+  function formularioDeExtra(tipo) {
+    const f = (formularios[tipo] ??= { dia: dados.fim, atendenteId: "", descricao: "", valor: "" });
+    const adicional = tipo === "adicional";
 
-/**
- * A mesma divisão que o servidor faz, só para a prévia.
- *
- * Duplicar conta é ruim; mostrar ao gestor um número diferente do que será
- * gravado é pior. O servidor continua sendo a fonte da verdade: ele refaz a
- * conta ao gravar, e é a dele que vai para o banco.
- */
-function dividirLocalmente({ participantes, criterio, valor }) {
-  const centavos = Math.round(valor * 100);
-  const fatia = (p) =>
-    criterio === "peso"
-      ? Math.max(0, p.peso)
-      : criterio === "horas"
-        ? Math.max(0, p.minutos)
-        : criterio === "venda"
-          ? Math.max(0, Number(p.venda) || 0)
-          : 1;
-  const soma = participantes.reduce((t, p) => t + fatia(p), 0);
-  if (soma <= 0) return participantes.map((p) => ({ ...p, valor: 0 }));
-
-  const exatos = participantes.map((p) => ({ p, exato: (centavos * fatia(p)) / soma }));
-  const cotas = exatos.map((e) => ({ ...e, centavos: Math.floor(e.exato) }));
-  let sobra = centavos - cotas.reduce((t, c) => t + c.centavos, 0);
-
-  const fila = [...cotas]
-    .filter((c) => c.exato > 0)
-    .sort((a, b) => {
-      const fa = a.exato - Math.floor(a.exato);
-      const fb = b.exato - Math.floor(b.exato);
-      if (fb !== fa) return fb - fa;
-      return a.p.nome.localeCompare(b.p.nome, "pt-BR");
+    const quem = seletorDePessoa(f.atendenteId);
+    quem.addEventListener("change", () => { f.atendenteId = quem.value; });
+    const dia = el("input", { classe: "input", type: "date", value: f.dia, min: dados.inicio, max: dados.fim, onchange: (e) => { f.dia = e.target.value; } });
+    const descricao = el("input", {
+      classe: "input",
+      type: "text",
+      value: f.descricao,
+      placeholder: adicional ? "Gorjeta do evento de sábado" : "Consumo no bar",
+      oninput: (e) => { f.descricao = e.target.value; },
     });
-  for (let i = 0; sobra > 0 && fila.length > 0; i += 1, sobra -= 1) fila[i % fila.length].centavos += 1;
+    const valor = el("input", { classe: "input", type: "number", min: "0", step: "0.01", value: f.valor, oninput: (e) => { f.valor = e.target.value; } });
 
-  return cotas.map((c) => ({ ...c.p, valor: c.centavos / 100 }));
+    return el("section", { classe: "cartao" }, [
+      el("h3", { texto: adicional ? "Adicional" : "Desconto", style: "margin:0 0 2px" }),
+      el("p", {
+        classe: "muted",
+        texto: adicional
+          ? "O que não sai de percentual nenhum: a gorjeta deixada na mão, o acerto de um evento fechado."
+          : "O que sai do acerto da pessoa: consumo no bar, quebra combinada. O valor entra positivo; a tela é que subtrai.",
+      }),
+      el("div", { classe: "grade" }, [
+        el("div", { classe: "campo" }, [el("label", { texto: "Quem" }), quem]),
+        el("div", { classe: "campo" }, [el("label", { texto: "Dia" }), dia]),
+        el("div", { classe: "campo" }, [el("label", { texto: "Descrição" }), descricao]),
+        el("div", { classe: "campo" }, [el("label", { texto: "Valor (R$)" }), valor]),
+      ]),
+      el("div", { classe: "reserva-acoes" }, [
+        el("button", {
+          classe: "btn btn-primario",
+          type: "button",
+          texto: "Lançar",
+          onclick: async (e) => {
+            if (!quem.value) return avisar("Escolha a pessoa.", "erro");
+            if (!(Number(valor.value) > 0)) return avisar("Informe um valor maior que zero.", "erro");
+            e.target.disabled = true;
+            try {
+              await post(`/v1/venues/${ctx.venue}/rh/extras`, {
+                dia: dia.value,
+                atendente_id: quem.value,
+                tipo,
+                descricao: descricao.value,
+                valor: Number(valor.value),
+              });
+              avisar(adicional ? "Adicional lançado." : "Desconto lançado.", "ok");
+              f.valor = "";
+              f.descricao = "";
+              await recarregar();
+            } catch (err) {
+              avisar(err.message, "erro");
+              e.target.disabled = false;
+            }
+          },
+        }),
+      ]),
+    ]);
+  }
+
+  /* ================= O que foi lançado ================= */
+
+  function lancamentosDaSemana() {
+    const nomeDe = new Map(dados.equipe.map((p) => [p.atendente_id, p.nome]));
+    const itens = [
+      ...dados.vendas.map((v) => ({
+        id: v.id,
+        rota: "vendas",
+        dia: v.dia,
+        titulo: `${nomeDe.get(v.atendente_id) ?? "—"} vendeu ${dinheiro(v.valor)}`,
+        detalhe: [v.comandas ? `${v.comandas} comanda(s)` : null, nomeDoTurno(v.turno_id)].filter(Boolean).join(" · "),
+        cor: "",
+      })),
+      ...dados.extras.map((x) => ({
+        id: x.id,
+        rota: "extras",
+        dia: x.dia,
+        titulo: `${nomeDe.get(x.atendente_id) ?? "—"}: ${x.tipo === "adicional" ? "+" : "−"} ${dinheiro(x.valor)}`,
+        detalhe: x.descricao || (x.tipo === "adicional" ? "adicional" : "desconto"),
+        cor: x.tipo === "adicional" ? "etiqueta-ok" : "etiqueta-alerta",
+      })),
+    ].sort((a, b) => b.dia.localeCompare(a.dia));
+
+    const fechamentos = dados.fechamentos.map((g) => ({
+      id: g.id,
+      rota: "gorjetas",
+      dia: g.dia,
+      titulo: `Bolo do turno: ${dinheiro(g.valor_repassado)} repartidos`,
+      detalhe: `${nomeDoTurno(g.turno_id) || "a noite inteira"} · ${g.cotas.length} pessoa(s)`,
+      cor: "etiqueta-info",
+    }));
+
+    const tudo = [...itens, ...fechamentos].sort((a, b) => b.dia.localeCompare(a.dia));
+    if (tudo.length === 0) return el("div", {});
+
+    return el("section", { classe: "cartao" }, [
+      el("div", { classe: "cabecalho-secao" }, [
+        el("h3", { texto: "Lançamentos da semana" }),
+        el("button", {
+          classe: "btn btn-peq",
+          type: "button",
+          texto: verLancamentos ? "Esconder" : `Ver os ${tudo.length}`,
+          onclick: () => {
+            verLancamentos = !verLancamentos;
+            desenhar();
+          },
+        }),
+      ]),
+      verLancamentos
+        ? el("div", { classe: "tabela", style: "margin-top:10px" },
+          tudo.map((i) =>
+            el("div", { classe: "linha-tabela" }, [
+              el("div", { classe: "linha-principal", style: "flex:1;min-width:200px" }, [
+                el("strong", { texto: i.titulo }),
+                el("span", { classe: "muted", texto: [diaBr(i.dia), i.detalhe].filter(Boolean).join(" · ") }),
+              ]),
+              i.cor ? etiqueta(i.rota === "gorjetas" ? "bolo" : i.titulo.includes("+") ? "adicional" : "desconto", i.cor) : null,
+              el("button", {
+                classe: "btn btn-peq btn-perigo",
+                type: "button",
+                texto: "Apagar",
+                onclick: async (e) => {
+                  if (!confirm(`Apagar "${i.titulo}"?`)) return;
+                  e.target.disabled = true;
+                  try {
+                    await del(`/v1/venues/${ctx.venue}/rh/${i.rota}/${i.id}`);
+                    avisar("Lançamento apagado.", "ok");
+                    await recarregar();
+                  } catch (err) {
+                    avisar(err.message, "erro");
+                    e.target.disabled = false;
+                  }
+                },
+              }),
+            ]),
+          ))
+        : null,
+    ]);
+  }
+
+  function nomeDoTurno(id) {
+    if (!id) return "";
+    const turno = dados.turnos.find((t) => t.id === id);
+    return turno ? turno.nome : "";
+  }
 }
 
-/**
- * A mesma conta do servidor: venda × serviço = arrecadado; × repasse = bolso.
- *
- * Existe aqui só para a prévia responder na hora, sem ida e volta. O servidor
- * refaz tudo ao gravar, e é a conta dele que vai para o banco.
- */
-function contaDaGorjeta({ base, percentualServico, valorFechado, percentualRepasse }) {
-  const centavos = (n) => Math.round((Number(n) || 0) * 100);
-  const arrecadadoCentavos =
-    valorFechado !== null && valorFechado !== undefined && valorFechado !== ""
-      ? centavos(valorFechado)
-      : Math.round(centavos(base) * ((Number(percentualServico) || 0) / 100));
-  const repasse = percentualRepasse === null || percentualRepasse === undefined || percentualRepasse === "" ? 100 : Number(percentualRepasse);
-  const repassadoCentavos = Math.round(arrecadadoCentavos * (repasse / 100));
-  return {
-    arrecadado: arrecadadoCentavos / 100,
-    repassado: repassadoCentavos / 100,
-    retido: (arrecadadoCentavos - repassadoCentavos) / 100,
-  };
+/* ================= Formatação ================= */
+
+/** A semana ISO de um dia — a mesma conta do servidor, para a navegação. */
+function semanaDe(iso) {
+  const d = new Date(`${iso}T12:00:00Z`);
+  const diaDaSemana = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - diaDaSemana);
+  const ano = d.getUTCFullYear();
+  const primeiro = new Date(Date.UTC(ano, 0, 1, 12));
+  return { ano, numero: Math.ceil(((d - primeiro) / 86400000 + 1) / 7) };
 }
 
 function diaBr(iso) {
@@ -698,9 +705,8 @@ function diaBr(iso) {
   return `${dia}/${mes}/${ano}`;
 }
 
-function emHoras(minutos) {
-  const m = Number(minutos) || 0;
-  const h = Math.floor(Math.abs(m) / 60);
-  const resto = Math.abs(m) % 60;
-  return resto === 0 ? `${h}h` : `${h}h${String(resto).padStart(2, "0")}`;
+/** 10.00 vira "10"; 12.50 continua "12,5". Percentual redondo não precisa de casa. */
+function numeroCurto(valor) {
+  const n = Number(valor) || 0;
+  return Number.isInteger(n) ? String(n) : String(n).replace(".", ",");
 }
