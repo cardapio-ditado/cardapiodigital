@@ -3,6 +3,7 @@ import { avisar, dataHora, dinheiro, el, etiqueta, indicador, limpar, vazio } fr
 import { criarEscala } from "./rhEscala.js";
 import { criarPonto } from "./rhPonto.js";
 import { criarFerias } from "./rhFerias.js";
+import { criarFechamento } from "./rhFechamento.js";
 
 /**
  * RH — Fase 1: a ficha de cada pessoa da casa.
@@ -74,6 +75,7 @@ export async function rh(raiz, ctx) {
   const escala = criarEscala(corpo, ctx);
   const ponto = criarPonto(corpo, ctx);
   const ferias = criarFerias(corpo, ctx);
+  const fechamento = criarFechamento(corpo, ctx);
 
   const barra = el(
     "div",
@@ -83,6 +85,7 @@ export async function rh(raiz, ctx) {
       ["escala", "Escala"],
       ["ponto", "Ponto"],
       ["ferias", "Férias"],
+      ["fechamento", "Fechamento"],
     ].map(([id, rotulo]) =>
       el("button", {
         classe: `aba ${id === abaAtiva ? "aba-ativa" : ""}`.trim(),
@@ -107,7 +110,8 @@ export async function rh(raiz, ctx) {
     if (id === "equipe") await recarregar();
     else if (id === "escala") await escala.recarregar();
     else if (id === "ponto") await ponto.recarregar();
-    else await ferias.recarregar();
+    else if (id === "ferias") await ferias.recarregar();
+    else await fechamento.recarregar();
   }
 
   async function recarregar() {

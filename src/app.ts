@@ -99,6 +99,17 @@ import {
   tirarDaEscala,
 } from "./rhEscala.js";
 import {
+  CRITERIOS,
+  apagarGorjeta,
+  apagarPeso,
+  definirPeso,
+  lancarGorjeta,
+  listarGorjetas,
+  listarPesos,
+  participantesDoTurno,
+} from "./rhGorjeta.js";
+import { comoCsv, comoTexto, resumoDoMes } from "./rhResumo.js";
+import {
   SITUACOES_DE_FERIAS,
   apagarFerias,
   calendario,
@@ -2346,7 +2357,14 @@ async function roteasApi(
       const ehDocumentoSolto = alvo === "documentos";
       // Palavras reservadas em p[3]: tudo que não é uma delas é id de pessoa.
       const ehSecaoPropria =
-        alvo === "escala" || alvo === "turnos" || alvo === "ponto" || alvo === "totens" || alvo === "ferias";
+        alvo === "escala" ||
+        alvo === "turnos" ||
+        alvo === "ponto" ||
+        alvo === "totens" ||
+        alvo === "ferias" ||
+        alvo === "gorjetas" ||
+        alvo === "pesos" ||
+        alvo === "resumo";
 
       // Id que não é uuid nunca chega ao banco: sem isto um `undefined` que
       // escape da tela vira "invalid input syntax for type uuid" na cara de
@@ -2389,6 +2407,84 @@ async function roteasApi(
         if (metodo === "DELETE" && p.length === 5) {
           return ok(res, await comErroDoRh(() => apagarTurno({ venueId: venue.id, id: p[4]! })));
         }
+      }
+
+      // ---- Gorjeta do turno: /v1/venues/:slug/rh/gorjetas[...] ----
+      if (alvo === "gorjetas") {
+        const fuso = venue.timezone ?? "America/Cuiaba";
+
+        // GET /rh/gorjetas?de=&ate= — histórico; ?dia=&turno= — quem entra no rateio
+        if (metodo === "GET" && p.length === 4) {
+          const dia = url.searchParams.get("dia");
+          if (dia) {
+            const participantes = await comErroDoRh(() =>
+              participantesDoTurno({
+                venueId: venue.id,
+                dia,
+                turnoId: url.searchParams.get("turno"),
+                timezone: fuso,
+              }),
+            );
+            return ok(res, { participantes, criterios: CRITERIOS });
+          }
+          const de = url.searchParams.get("de") ?? hojeNaCasa(fuso).slice(0, 8) + "01";
+          const ate = url.searchParams.get("ate") ?? hojeNaCasa(fuso);
+          const [gorjetas, pesos, turnos] = await comErroDoRh(() =>
+            Promise.all([
+              listarGorjetas({ venueId: venue.id, de, ate }),
+              listarPesos(venue.id),
+              listarTurnos(venue.id, { incluirInativos: true }),
+            ]),
+          );
+          return ok(res, { de, ate, gorjetas, pesos, turnos, criterios: CRITERIOS });
+        }
+
+        if (metodo === "POST" && p.length === 4) {
+          const corpo = (await lerJson(req)) as Record<string, unknown>;
+          const gorjeta = await comErroDoRh(() =>
+            lancarGorjeta({
+              venueId: venue.id,
+              dia: texto(corpo, "dia"),
+              turnoId: (corpo.turno_id as string | null) ?? null,
+              valor: corpo.valor,
+              criterio: texto(corpo, "criterio"),
+              observacao: corpo.observacao,
+              timezone: fuso,
+              quem: chave.name,
+            }),
+          );
+          return ok(res, gorjeta, 201);
+        }
+
+        if (metodo === "DELETE" && p.length === 5) {
+          return ok(res, await comErroDoRh(() => apagarGorjeta({ venueId: venue.id, id: p[4]! })));
+        }
+      }
+
+      // ---- Peso por função: /v1/venues/:slug/rh/pesos[/:id] ----
+      if (alvo === "pesos") {
+        if (metodo === "POST" && p.length === 4) {
+          const corpo = (await lerJson(req)) as Record<string, unknown>;
+          return ok(
+            res,
+            await comErroDoRh(() =>
+              definirPeso({ venueId: venue.id, funcao: texto(corpo, "funcao"), peso: corpo.peso }),
+            ),
+          );
+        }
+        if (metodo === "DELETE" && p.length === 5) {
+          return ok(res, await comErroDoRh(() => apagarPeso({ venueId: venue.id, id: p[4]! })));
+        }
+      }
+
+      // ---- Resumo do mês para a contabilidade ----
+      if (alvo === "resumo" && metodo === "GET" && p.length === 4) {
+        const fuso = venue.timezone ?? "America/Cuiaba";
+        const mes = url.searchParams.get("mes") ?? hojeNaCasa(fuso).slice(0, 7);
+        const resumo = await comErroDoRh(() =>
+          resumoDoMes({ venueId: venue.id, casa: venue.name, mes, timezone: fuso }),
+        );
+        return ok(res, { ...resumo, texto: comoTexto(resumo), csv: comoCsv(resumo) });
       }
 
       // ---- Férias: /v1/venues/:slug/rh/ferias[/:id] ----
