@@ -35,6 +35,7 @@ export const CRITERIOS = [
   { id: "igual", nome: "Igual para todos" },
   { id: "peso", nome: "Por peso da função" },
   { id: "horas", nome: "Pelas horas trabalhadas" },
+  { id: "venda", nome: "Por venda individual" },
 ] as const;
 
 const IDS_DE_CRITERIO = new Set<string>(CRITERIOS.map((c) => c.id));
@@ -45,6 +46,57 @@ export interface Participante {
   funcao: string | null;
   peso: number;
   minutos: number;
+  /** Venda própria no turno. Só entra na conta no critério por venda. */
+  venda?: number;
+}
+
+/**
+ * A conta da gorjeta, do faturamento até o bolso.
+ *
+ *   base de venda  ×  % de serviço  =  arrecadado
+ *   arrecadado     ×  % de repasse  =  repassado (é isto que se divide)
+ *
+ * A diferença entre arrecadado e repassado fica com a casa — taxa de cartão,
+ * quebra, o que a casa combinar. Mostrar os dois números é o que impede a
+ * conversa de "então cadê o resto?".
+ */
+export function calcularGorjeta(params: {
+  base?: unknown;
+  percentualServico?: unknown;
+  /** Quando a casa lança o valor fechado, sem percentual. */
+  valorFechado?: unknown;
+  percentualRepasse?: unknown;
+}): { arrecadado: number; repassado: number; retido: number } {
+  const emCentavos = (n: number) => Math.round(n * 100);
+
+  let arrecadadoCentavos: number;
+  if (params.valorFechado !== undefined && params.valorFechado !== null && params.valorFechado !== "") {
+    const valor = Number(params.valorFechado);
+    if (!Number.isFinite(valor) || valor < 0) throw new ErroDoRh(400, "Valor da gorjeta inválido.");
+    arrecadadoCentavos = emCentavos(valor);
+  } else {
+    const base = Number(params.base);
+    const percentual = Number(params.percentualServico);
+    if (!Number.isFinite(base) || base < 0) throw new ErroDoRh(400, "Informe a venda do turno.");
+    if (!Number.isFinite(percentual) || percentual < 0 || percentual > 100) {
+      throw new ErroDoRh(400, "O percentual de serviço precisa estar entre 0 e 100.");
+    }
+    arrecadadoCentavos = Math.round(emCentavos(base) * (percentual / 100));
+  }
+
+  const repasse = params.percentualRepasse === undefined || params.percentualRepasse === null || params.percentualRepasse === ""
+    ? 100
+    : Number(params.percentualRepasse);
+  if (!Number.isFinite(repasse) || repasse < 0 || repasse > 100) {
+    throw new ErroDoRh(400, "O percentual repassado precisa estar entre 0 e 100.");
+  }
+
+  const repassadoCentavos = Math.round(arrecadadoCentavos * (repasse / 100));
+  return {
+    arrecadado: arrecadadoCentavos / 100,
+    repassado: repassadoCentavos / 100,
+    retido: (arrecadadoCentavos - repassadoCentavos) / 100,
+  };
 }
 
 export interface Cota extends Participante {
@@ -79,6 +131,9 @@ export function ratear(params: {
   const fatia = (p: Participante): number => {
     if (params.criterio === "peso") return Math.max(0, Number(p.peso) || 0);
     if (params.criterio === "horas") return Math.max(0, Number(p.minutos) || 0);
+    // Por venda individual: quem vendeu mais leva mais, que é a comissão de
+    // garçom como a maioria das casas combina.
+    if (params.criterio === "venda") return Math.max(0, Number(p.venda) || 0);
     return 1;
   };
 
@@ -237,30 +292,48 @@ export interface GorjetaGravada {
   id: string;
   dia: string;
   turno_id: string | null;
+  /** O total arrecadado de serviço. */
   valor: number;
+  /** O que foi dividido entre a equipe. */
+  valor_repassado: number;
+  base_venda: number | null;
+  percentual_servico: number | null;
+  percentual_repasse: number;
   criterio: string;
   observacao: string | null;
   criado_por: string | null;
   cotas: Cota[];
 }
 
+const COLUNAS_DA_GORJETA =
+  "id, dia, turno_id, valor, valor_repassado, base_venda, percentual_servico, percentual_repasse, criterio, observacao, criado_por";
+
 export async function lancarGorjeta(params: {
   venueId: string;
   dia: string;
   turnoId?: string | null;
-  valor: unknown;
+  /** Valor fechado. Quando vem, manda sobre base × percentual. */
+  valor?: unknown;
+  baseVenda?: unknown;
+  percentualServico?: unknown;
+  percentualRepasse?: unknown;
   criterio: string;
   observacao?: unknown;
   timezone: string;
   quem: string;
-  /** Quando a tela manda a lista já ajustada à mão. */
+  /** Quando a tela manda a lista já ajustada à mão (venda individual). */
   participantes?: Participante[];
 }): Promise<GorjetaGravada> {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(params.dia))) throw new ErroDoRh(400, "Data inválida.");
   if (!IDS_DE_CRITERIO.has(params.criterio)) throw new ErroDoRh(400, "Critério de rateio desconhecido.");
 
-  const valor = Number(params.valor);
-  if (!Number.isFinite(valor) || valor <= 0) throw new ErroDoRh(400, "Informe o valor arrecadado no turno.");
+  const conta = calcularGorjeta({
+    valorFechado: params.valor,
+    base: params.baseVenda,
+    percentualServico: params.percentualServico,
+    percentualRepasse: params.percentualRepasse,
+  });
+  if (conta.arrecadado <= 0) throw new ErroDoRh(400, "Informe o valor arrecadado ou a venda do turno.");
 
   const participantes =
     params.participantes && params.participantes.length > 0
@@ -275,8 +348,13 @@ export async function lancarGorjeta(params: {
   if (participantes.length === 0) {
     throw new ErroDoRh(400, "Ninguém escalado nem com ponto batido neste turno — não há entre quem dividir.");
   }
+  if (params.criterio === "venda" && !participantes.some((p) => Number(p.venda) > 0)) {
+    throw new ErroDoRh(400, "No rateio por venda individual, informe quanto cada um vendeu.");
+  }
 
-  const cotas = ratear({ valor, criterio: params.criterio, participantes });
+  // Divide o REPASSADO, não o arrecadado: o que fica com a casa não entra no
+  // bolo de ninguém.
+  const cotas = ratear({ valor: conta.repassado, criterio: params.criterio, participantes });
 
   const { data, error } = await cliente()
     .from("rh_gorjetas")
@@ -285,18 +363,28 @@ export async function lancarGorjeta(params: {
         venue_id: params.venueId,
         dia: params.dia,
         turno_id: params.turnoId ?? null,
-        valor,
+        valor: conta.arrecadado,
+        valor_repassado: conta.repassado,
+        base_venda: params.baseVenda === undefined || params.baseVenda === null || params.baseVenda === "" ? null : Number(params.baseVenda),
+        percentual_servico:
+          params.percentualServico === undefined || params.percentualServico === null || params.percentualServico === ""
+            ? null
+            : Number(params.percentualServico),
+        percentual_repasse:
+          params.percentualRepasse === undefined || params.percentualRepasse === null || params.percentualRepasse === ""
+            ? 100
+            : Number(params.percentualRepasse),
         criterio: params.criterio,
         observacao: String(params.observacao ?? "").trim() || null,
         criado_por: params.quem,
       } as never,
       { onConflict: "venue_id,dia,turno_id" },
     )
-    .select("id, dia, turno_id, valor, criterio, observacao, criado_por")
+    .select(COLUNAS_DA_GORJETA)
     .single();
   if (error) falhar(500, "Falha ao lançar a gorjeta", error.message);
 
-  const gorjeta = data as { id: string; dia: string; turno_id: string | null; valor: string | number; criterio: string; observacao: string | null; criado_por: string | null };
+  const gorjeta = data as Record<string, unknown> & { id: string };
 
   // Relançar o mesmo turno refaz a divisão: as cotas velhas saem antes.
   await cliente().from("rh_gorjeta_cotas").delete().eq("venue_id", params.venueId).eq("gorjeta_id", gorjeta.id);
@@ -310,12 +398,31 @@ export async function lancarGorjeta(params: {
         atendente_id: c.atendente_id,
         peso: c.peso,
         minutos: c.minutos,
+        venda: Number(c.venda) || 0,
         valor: c.valor,
       })) as never,
     );
   if (erroCotas) falhar(500, "Falha ao gravar o rateio", erroCotas.message);
 
-  return { ...gorjeta, valor: Number(gorjeta.valor), cotas };
+  return { ...emGorjeta(gorjeta), cotas };
+}
+
+/** Os números do banco chegam como texto no numeric; aqui viram número. */
+function emGorjeta(linha: Record<string, unknown>): Omit<GorjetaGravada, "cotas"> {
+  return {
+    id: String(linha.id),
+    dia: String(linha.dia),
+    turno_id: (linha.turno_id as string | null) ?? null,
+    valor: Number(linha.valor),
+    valor_repassado: linha.valor_repassado === null || linha.valor_repassado === undefined ? Number(linha.valor) : Number(linha.valor_repassado),
+    base_venda: linha.base_venda === null || linha.base_venda === undefined ? null : Number(linha.base_venda),
+    percentual_servico:
+      linha.percentual_servico === null || linha.percentual_servico === undefined ? null : Number(linha.percentual_servico),
+    percentual_repasse: linha.percentual_repasse === undefined || linha.percentual_repasse === null ? 100 : Number(linha.percentual_repasse),
+    criterio: String(linha.criterio),
+    observacao: (linha.observacao as string | null) ?? null,
+    criado_por: (linha.criado_por as string | null) ?? null,
+  };
 }
 
 export async function listarGorjetas(params: {
@@ -325,28 +432,20 @@ export async function listarGorjetas(params: {
 }): Promise<GorjetaGravada[]> {
   const { data, error } = await cliente()
     .from("rh_gorjetas")
-    .select("id, dia, turno_id, valor, criterio, observacao, criado_por")
+    .select(COLUNAS_DA_GORJETA)
     .eq("venue_id", params.venueId)
     .gte("dia", params.de)
     .lte("dia", params.ate)
     .order("dia", { ascending: false });
   if (error) falhar(500, "Falha ao listar as gorjetas", error.message);
 
-  const gorjetas = (data ?? []) as Array<{
-    id: string;
-    dia: string;
-    turno_id: string | null;
-    valor: string | number;
-    criterio: string;
-    observacao: string | null;
-    criado_por: string | null;
-  }>;
+  const gorjetas = (data ?? []) as Array<Record<string, unknown> & { id: string }>;
   if (gorjetas.length === 0) return [];
 
   const [{ data: cotas }, { data: pessoas }] = await Promise.all([
     cliente()
       .from("rh_gorjeta_cotas")
-      .select("gorjeta_id, atendente_id, peso, minutos, valor")
+      .select("gorjeta_id, atendente_id, peso, minutos, venda, valor")
       .in("gorjeta_id", gorjetas.map((g) => g.id)),
     cliente().from("pesquisa_atendentes").select("id, nome, apelido, funcao").eq("venue_id", params.venueId),
   ]);
@@ -364,6 +463,7 @@ export async function listarGorjetas(params: {
     atendente_id: string;
     peso: string | number;
     minutos: number;
+    venda: string | number | null;
     valor: string | number;
   }>) {
     const pessoa = nomes.get(c.atendente_id);
@@ -374,14 +474,14 @@ export async function listarGorjetas(params: {
       funcao: pessoa?.funcao ?? null,
       peso: Number(c.peso),
       minutos: c.minutos,
+      venda: Number(c.venda) || 0,
       valor: Number(c.valor),
     });
     porGorjeta.set(c.gorjeta_id, lista);
   }
 
   return gorjetas.map((g) => ({
-    ...g,
-    valor: Number(g.valor),
+    ...emGorjeta(g),
     cotas: (porGorjeta.get(g.id) ?? []).sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")),
   }));
 }

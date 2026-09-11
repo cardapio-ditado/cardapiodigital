@@ -1,5 +1,5 @@
 import { del, get, post } from "../api.js";
-import { avisar, dinheiro, el, etiqueta, limpar, vazio } from "../ui.js";
+import { avisar, dinheiro, el, etiqueta, indicador, limpar, vazio } from "../ui.js";
 
 /**
  * RH — Fase 5: o fechamento.
@@ -17,13 +17,33 @@ const NOME_DO_CRITERIO = {
   igual: "Igual para todos",
   peso: "Por peso da função",
   horas: "Pelas horas trabalhadas",
+  venda: "Por venda individual",
 };
 
 export function criarFechamento(corpo, ctx) {
   let dados = null;
   let mes = null;
   let resumo = null;
-  let previa = null; // { participantes, criterio, valor }
+  let previa = null; // { participantes, criterio, arrecadado, repassado, retido }
+
+  /**
+   * O que está digitado no formulário.
+   *
+   * Mora FORA da função que desenha porque a tela se redesenha inteira a cada
+   * prévia: sem isto, o gestor via a divisão, trocava o critério, e descobria
+   * que a venda que ele tinha digitado havia sumido.
+   */
+  let form = {
+    dia: new Date().toISOString().slice(0, 10),
+    turnoId: "",
+    modo: "percentual",
+    base: "",
+    percentual: "10",
+    valor: "",
+    repasse: "100",
+    criterio: "igual",
+    observacao: "",
+  };
 
   return { desenhar, recarregar };
 
@@ -55,35 +75,93 @@ export function criarFechamento(corpo, ctx) {
   /* ================= Gorjeta do turno ================= */
 
   function cartaoDaGorjeta() {
-    const hoje = new Date().toISOString().slice(0, 10);
-    const dia = el("input", { classe: "input", type: "date", value: hoje });
+    // Cada campo escreve no `form` ao mudar: é o que faz o valor sobreviver
+    // ao redesenho da tela.
+    const guardar = (campo) => (e) => {
+      form[campo] = e.target.value;
+    };
+
+    const dia = el("input", { classe: "input", type: "date", value: form.dia, onchange: guardar("dia") });
     const turno = el(
       "select",
-      { classe: "select" },
+      { classe: "select", onchange: guardar("turnoId") },
       [
-        el("option", { value: "", texto: "A noite toda" }),
-        ...dados.turnos.filter((t) => t.ativo).map((t) => el("option", { value: t.id, texto: t.nome })),
+        el("option", { value: "", texto: "A noite toda", selected: form.turnoId === "" }),
+        ...dados.turnos
+          .filter((t) => t.ativo)
+          .map((t) => el("option", { value: t.id, texto: t.nome, selected: form.turnoId === t.id })),
       ],
     );
-    const valor = el("input", { classe: "input", type: "number", step: "0.01", min: "0", placeholder: "0,00" });
+    // Duas maneiras de dizer quanto entrou. A de porcentagem é a que a casa
+    // usa no dia a dia; a de valor fechado serve para quando alguém já fez a
+    // conta no caixa.
+    const modo = el(
+      "select",
+      {
+        classe: "select",
+        onchange: (e) => {
+          form.modo = e.target.value;
+          trocarModo();
+        },
+      },
+      [
+        el("option", { value: "percentual", texto: "Percentual sobre a venda", selected: form.modo === "percentual" }),
+        el("option", { value: "valor", texto: "Valor fechado", selected: form.modo === "valor" }),
+      ],
+    );
+    const base = el("input", {
+      classe: "input", type: "number", step: "0.01", min: "0",
+      placeholder: "Venda do turno", value: form.base, oninput: guardar("base"),
+    });
+    const percentual = el("input", {
+      classe: "input", type: "number", step: "0.5", min: "0", max: "100",
+      value: form.percentual, oninput: guardar("percentual"),
+    });
+    const valor = el("input", {
+      classe: "input", type: "number", step: "0.01", min: "0",
+      placeholder: "0,00", value: form.valor, oninput: guardar("valor"),
+    });
+    const repasse = el("input", {
+      classe: "input", type: "number", step: "1", min: "0", max: "100",
+      value: form.repasse, oninput: guardar("repasse"),
+    });
     const criterio = el(
       "select",
-      { classe: "select" },
-      dados.criterios.map((c) => el("option", { value: c.id, texto: c.nome })),
+      { classe: "select", onchange: guardar("criterio") },
+      dados.criterios.map((c) => el("option", { value: c.id, texto: c.nome, selected: form.criterio === c.id })),
     );
-    const observacao = el("input", { classe: "input", type: "text", placeholder: "Observação (opcional)" });
+    const observacao = el("input", {
+      classe: "input", type: "text", placeholder: "Observação (opcional)",
+      value: form.observacao, oninput: guardar("observacao"),
+    });
+
+    const campoBase = el("div", { classe: "campo" }, [el("label", { texto: "Venda do turno" }), base]);
+    const campoPercentual = el("div", { classe: "campo" }, [el("label", { texto: "% de serviço" }), percentual]);
+    const campoValor = el("div", { classe: "campo" }, [el("label", { texto: "Valor arrecadado" }), valor]);
+
+    function trocarModo() {
+      const porPercentual = form.modo === "percentual";
+      campoBase.hidden = !porPercentual;
+      campoPercentual.hidden = !porPercentual;
+      campoValor.hidden = porPercentual;
+    }
+    trocarModo();
 
     return el("section", { classe: "cartao" }, [
       el("h2", { texto: "Gorjeta do turno" }),
       el("p", {
         classe: "muted",
         texto:
-          "Lance o valor arrecadado e veja a divisão antes de gravar. Entra quem estava escalado e quem bateu ponto — inclusive quem chegou de última hora.",
+          "O serviço é um percentual sobre a venda, e nem tudo que entra é repassado. Lance a conta inteira e veja a divisão antes de gravar — entra quem estava escalado e quem bateu ponto.",
       }),
       el("div", { classe: "grade" }, [
         el("div", { classe: "campo" }, [el("label", { texto: "Dia" }), dia]),
         el("div", { classe: "campo" }, [el("label", { texto: "Turno" }), turno]),
-        el("div", { classe: "campo" }, [el("label", { texto: "Valor arrecadado" }), valor]),
+        el("div", { classe: "campo" }, [el("label", { texto: "Como entrou" }), modo]),
+        campoBase,
+        campoPercentual,
+        campoValor,
+        el("div", { classe: "campo" }, [el("label", { texto: "% repassado à equipe" }), repasse]),
         el("div", { classe: "campo" }, [el("label", { texto: "Como dividir" }), criterio]),
         el("div", { classe: "campo" }, [el("label", { texto: "Observação" }), observacao]),
       ]),
@@ -93,22 +171,39 @@ export function criarFechamento(corpo, ctx) {
           type: "button",
           texto: "Ver a divisão",
           onclick: async (e) => {
-            if (!(Number(valor.value) > 0)) {
+            const porPercentual = form.modo === "percentual";
+            if (porPercentual && !(Number(form.base) > 0)) {
+              avisar("Informe a venda do turno.", "erro");
+              return;
+            }
+            if (!porPercentual && !(Number(form.valor) > 0)) {
               avisar("Informe o valor arrecadado.", "erro");
               return;
             }
             e.target.disabled = true;
             try {
-              const busca = new URLSearchParams({ dia: dia.value });
-              if (turno.value) busca.set("turno", turno.value);
+              const busca = new URLSearchParams({ dia: form.dia });
+              if (form.turnoId) busca.set("turno", form.turnoId);
               const r = await get(`/v1/venues/${ctx.venue}/rh/gorjetas?${busca}`);
+              const conta = contaDaGorjeta({
+                base: porPercentual ? Number(form.base) : null,
+                percentualServico: porPercentual ? Number(form.percentual) : null,
+                valorFechado: porPercentual ? null : Number(form.valor),
+                percentualRepasse: Number(form.repasse),
+              });
+              // Mantém a venda já digitada de quem continua no turno.
+              const vendaAnterior = new Map((previa?.participantes ?? []).map((p) => [p.atendente_id, p.venda]));
               previa = {
-                participantes: r.participantes,
-                criterio: criterio.value,
-                valor: Number(valor.value),
-                dia: dia.value,
-                turnoId: turno.value || null,
-                observacao: observacao.value,
+                participantes: r.participantes.map((p) => ({ ...p, venda: vendaAnterior.get(p.atendente_id) ?? 0 })),
+                criterio: form.criterio,
+                dia: form.dia,
+                turnoId: form.turnoId || null,
+                observacao: form.observacao,
+                baseVenda: porPercentual ? Number(form.base) : null,
+                percentualServico: porPercentual ? Number(form.percentual) : null,
+                percentualRepasse: Number(form.repasse),
+                valorFechado: porPercentual ? null : Number(form.valor),
+                ...conta,
               };
               desenhar();
               corpo.querySelector(".previa-gorjeta")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -133,12 +228,14 @@ export function criarFechamento(corpo, ctx) {
   /** A divisão na tela ANTES de gravar — é o que evita discussão depois. */
   function cartaoDaPrevia() {
     const soma = (lista) => lista.reduce((t, c) => t + c.valor, 0);
-    const cotas = dividirLocalmente(previa);
+    // Divide o REPASSADO: o que fica com a casa não entra no bolo de ninguém.
+    const cotas = dividirLocalmente({ ...previa, valor: previa.repassado });
+    const porVenda = previa.criterio === "venda";
 
     return el("section", { classe: "cartao previa-gorjeta" }, [
       el("div", { classe: "cabecalho-secao" }, [
         el("div", {}, [
-          el("h3", { texto: `Divisão de ${dinheiro(previa.valor)}` }),
+          el("h3", { texto: `Divisão de ${dinheiro(previa.repassado)}` }),
           el("p", {
             classe: "muted",
             texto: `${NOME_DO_CRITERIO[previa.criterio]} · ${cotas.length} pessoa(s) no turno.`,
@@ -155,41 +252,36 @@ export function criarFechamento(corpo, ctx) {
         }),
       ]),
 
+      // A conta inteira à vista: é o que responde "cadê o resto?" sem
+      // ninguém precisar perguntar.
+      el("div", { classe: "grade" }, [
+        indicador({
+          rotulo: "Serviço arrecadado",
+          valor: dinheiro(previa.arrecadado),
+          nota: previa.percentualServico ? `${previa.percentualServico}% sobre ${dinheiro(previa.baseVenda)}` : "valor lançado",
+        }),
+        indicador({
+          rotulo: "Repassado à equipe",
+          valor: dinheiro(previa.repassado),
+          nota: `${previa.percentualRepasse}% do arrecadado`,
+        }),
+        indicador({
+          rotulo: "Fica com a casa",
+          valor: dinheiro(previa.retido),
+          nota: previa.retido > 0 ? "taxa de cartão, quebra, o que a casa combinar" : "nada retido",
+        }),
+      ]),
+
+      porVenda
+        ? el("p", {
+            classe: "muted",
+            texto: "Digite a venda de cada um: a divisão acompanha o que você digitar, na hora.",
+          })
+        : null,
+
       cotas.length === 0
         ? vazio("Ninguém neste turno", "Monte a escala do dia ou espere as batidas do ponto.")
-        : el("div", { classe: "rolagem-x" }, [
-            el("table", { classe: "planilha" }, [
-              el("thead", {}, [
-                el("tr", {}, [
-                  el("th", { texto: "Pessoa" }),
-                  el("th", { texto: "Função" }),
-                  el("th", { classe: "col-num", texto: "Peso" }),
-                  el("th", { classe: "col-num", texto: "Horas" }),
-                  el("th", { classe: "col-num", texto: "Recebe" }),
-                ]),
-              ]),
-              el(
-                "tbody",
-                {},
-                cotas.map((c) =>
-                  el("tr", {}, [
-                    el("td", {}, [el("strong", { texto: c.nome })]),
-                    el("td", { texto: c.funcao ?? "—" }),
-                    el("td", { classe: "col-num", texto: String(c.peso) }),
-                    el("td", { classe: "col-num", texto: emHoras(c.minutos) }),
-                    el("td", { classe: "col-num", texto: dinheiro(c.valor) }),
-                  ]),
-                ),
-              ),
-              el("tfoot", {}, [
-                el("tr", {}, [
-                  el("td", { colspan: 4, texto: "Total repartido" }),
-                  el("td", { classe: "col-num", texto: dinheiro(soma(cotas)) }),
-                ]),
-              ]),
-            ]),
-          ]),
-
+        : tabelaDaPrevia(cotas, porVenda, soma),
       el("div", { classe: "reserva-acoes" }, [
         el("button", {
           classe: "btn btn-primario",
@@ -202,9 +294,15 @@ export function criarFechamento(corpo, ctx) {
               await post(`/v1/venues/${ctx.venue}/rh/gorjetas`, {
                 dia: previa.dia,
                 turno_id: previa.turnoId,
-                valor: previa.valor,
+                valor: previa.valorFechado,
+                base_venda: previa.baseVenda,
+                percentual_servico: previa.percentualServico,
+                percentual_repasse: previa.percentualRepasse,
                 criterio: previa.criterio,
                 observacao: previa.observacao,
+                // A venda individual só existe aqui na tela: o servidor não
+                // tem de onde adivinhar quanto cada um vendeu.
+                participantes: previa.criterio === "venda" ? previa.participantes : undefined,
               });
               avisar("Gorjeta registrada e dividida.", "ok");
               previa = null;
@@ -215,6 +313,74 @@ export function criarFechamento(corpo, ctx) {
             }
           },
         }),
+      ]),
+    ]);
+  }
+
+  /**
+   * A tabela da prévia.
+   *
+   * Quando a divisão é por venda individual, cada linha tem um campo. Digitar
+   * atualiza só a coluna "Recebe" e o total — redesenhar a tela inteira a
+   * cada tecla tirava o cursor do lugar e piscava a página.
+   */
+  function tabelaDaPrevia(cotas, porVenda, soma) {
+    const celulas = new Map();
+    const totalCelula = el("td", { classe: "col-num", texto: dinheiro(soma(cotas)) });
+
+    function recalcular() {
+      const novas = dividirLocalmente({ ...previa, valor: previa.repassado });
+      for (const c of novas) {
+        const celula = celulas.get(c.atendente_id);
+        if (celula) celula.textContent = dinheiro(c.valor);
+      }
+      totalCelula.textContent = dinheiro(soma(novas));
+    }
+
+    return el("div", { classe: "rolagem-x" }, [
+      el("table", { classe: "planilha" }, [
+        el("thead", {}, [
+          el("tr", {}, [
+            el("th", { texto: "Pessoa" }),
+            el("th", { texto: "Função" }),
+            el("th", { classe: "col-num", texto: porVenda ? "Venda dele" : "Peso" }),
+            el("th", { classe: "col-num", texto: "Horas" }),
+            el("th", { classe: "col-num", texto: "Recebe" }),
+          ]),
+        ]),
+        el(
+          "tbody",
+          {},
+          cotas.map((c) => {
+            const recebe = el("td", { classe: "col-num", texto: dinheiro(c.valor) });
+            celulas.set(c.atendente_id, recebe);
+
+            return el("tr", {}, [
+              el("td", {}, [el("strong", { texto: c.nome })]),
+              el("td", { texto: c.funcao ?? "—" }),
+              el("td", { classe: "col-num" }, [
+                porVenda
+                  ? el("input", {
+                      classe: "input",
+                      type: "number",
+                      step: "0.01",
+                      min: "0",
+                      value: String(c.venda ?? 0),
+                      style: "max-width:130px;text-align:right",
+                      oninput: (e) => {
+                        const pessoa = previa.participantes.find((p) => p.atendente_id === c.atendente_id);
+                        if (pessoa) pessoa.venda = Number(e.target.value) || 0;
+                        recalcular();
+                      },
+                    })
+                  : document.createTextNode(String(c.peso)),
+              ]),
+              el("td", { classe: "col-num", texto: emHoras(c.minutos) }),
+              recebe,
+            ]);
+          }),
+        ),
+        el("tfoot", {}, [el("tr", {}, [el("td", { colspan: 4, texto: "Total repartido" }), totalCelula])]),
       ]),
     ]);
   }
@@ -301,13 +467,17 @@ export function criarFechamento(corpo, ctx) {
     }
 
     const total = dados.gorjetas.reduce((t, g) => t + g.valor, 0);
+    const totalRepassado = dados.gorjetas.reduce((t, g) => t + (g.valor_repassado ?? g.valor), 0);
     const nomeDoTurno = (id) => dados.turnos.find((t) => t.id === id)?.nome ?? "A noite toda";
 
     return el("section", { classe: "cartao" }, [
       el("div", { classe: "cabecalho-secao" }, [
         el("div", {}, [
           el("h3", { texto: "Gorjetas lançadas" }),
-          el("p", { classe: "muted", texto: `${diaBr(dados.de)} a ${diaBr(dados.ate)} · total ${dinheiro(total)}` }),
+          el("p", {
+            classe: "muted",
+            texto: `${diaBr(dados.de)} a ${diaBr(dados.ate)} · arrecadado ${dinheiro(total)} · repassado ${dinheiro(totalRepassado)}`,
+          }),
         ]),
       ]),
       el(
@@ -316,7 +486,15 @@ export function criarFechamento(corpo, ctx) {
         dados.gorjetas.map((g) =>
           el("div", { classe: "linha-tabela" }, [
             el("div", { classe: "linha-principal", style: "flex:1;min-width:240px" }, [
-              el("strong", { texto: `${diaBr(g.dia)} · ${nomeDoTurno(g.turno_id)} · ${dinheiro(g.valor)}` }),
+              el("strong", {
+                texto: `${diaBr(g.dia)} · ${nomeDoTurno(g.turno_id)} · ${dinheiro(g.valor_repassado ?? g.valor)}`,
+              }),
+              g.percentual_servico
+                ? el("span", {
+                    classe: "muted",
+                    texto: `${g.percentual_servico}% sobre ${dinheiro(g.base_venda)} = ${dinheiro(g.valor)}; repasse de ${g.percentual_repasse}%`,
+                  })
+                : null,
               el("span", {
                 classe: "muted",
                 texto: g.cotas.map((c) => `${c.nome} ${dinheiro(c.valor)}`).join(" · ") || "sem cotas",
@@ -465,7 +643,14 @@ export function criarFechamento(corpo, ctx) {
  */
 function dividirLocalmente({ participantes, criterio, valor }) {
   const centavos = Math.round(valor * 100);
-  const fatia = (p) => (criterio === "peso" ? Math.max(0, p.peso) : criterio === "horas" ? Math.max(0, p.minutos) : 1);
+  const fatia = (p) =>
+    criterio === "peso"
+      ? Math.max(0, p.peso)
+      : criterio === "horas"
+        ? Math.max(0, p.minutos)
+        : criterio === "venda"
+          ? Math.max(0, Number(p.venda) || 0)
+          : 1;
   const soma = participantes.reduce((t, p) => t + fatia(p), 0);
   if (soma <= 0) return participantes.map((p) => ({ ...p, valor: 0 }));
 
@@ -484,6 +669,27 @@ function dividirLocalmente({ participantes, criterio, valor }) {
   for (let i = 0; sobra > 0 && fila.length > 0; i += 1, sobra -= 1) fila[i % fila.length].centavos += 1;
 
   return cotas.map((c) => ({ ...c.p, valor: c.centavos / 100 }));
+}
+
+/**
+ * A mesma conta do servidor: venda × serviço = arrecadado; × repasse = bolso.
+ *
+ * Existe aqui só para a prévia responder na hora, sem ida e volta. O servidor
+ * refaz tudo ao gravar, e é a conta dele que vai para o banco.
+ */
+function contaDaGorjeta({ base, percentualServico, valorFechado, percentualRepasse }) {
+  const centavos = (n) => Math.round((Number(n) || 0) * 100);
+  const arrecadadoCentavos =
+    valorFechado !== null && valorFechado !== undefined && valorFechado !== ""
+      ? centavos(valorFechado)
+      : Math.round(centavos(base) * ((Number(percentualServico) || 0) / 100));
+  const repasse = percentualRepasse === null || percentualRepasse === undefined || percentualRepasse === "" ? 100 : Number(percentualRepasse);
+  const repassadoCentavos = Math.round(arrecadadoCentavos * (repasse / 100));
+  return {
+    arrecadado: arrecadadoCentavos / 100,
+    repassado: repassadoCentavos / 100,
+    retido: (arrecadadoCentavos - repassadoCentavos) / 100,
+  };
 }
 
 function diaBr(iso) {

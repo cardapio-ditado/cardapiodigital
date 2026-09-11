@@ -155,3 +155,59 @@ test("data que não é data não vira período", () => {
   assert.throws(() => periodosAquisitivos("15/03/2024", "2026-01-10"), ErroDoRh);
   assert.throws(() => diasEntre("2026-10-01", ""), ErroDoRh);
 });
+
+test("período com as férias concedidas vira GOZADO e sai do alerta", () => {
+  // Era o defeito relatado: lançar as férias e o período continuar
+  // aparecendo como vencido, cobrando uma coisa que já foi feita.
+  const concedidas = [
+    {
+      periodo_inicio: "2023-01-10",
+      inicio: "2025-02-01",
+      fim: "2025-03-02",
+      dias: 30,
+      abono_dias: 0,
+      situacao: "aprovado",
+    },
+  ];
+  const p = periodosAquisitivos("2023-01-10", "2025-06-01", concedidas);
+
+  assert.equal(p[0]!.situacao, "gozado");
+  assert.equal(p[0]!.dias_gozados, 30);
+  assert.equal(p[0]!.dias_restantes, 0);
+  assert.equal(p[0]!.gozado_em, "2025-03-02");
+  // Sem as férias, o mesmo período estaria vencido.
+  assert.equal(periodosAquisitivos("2023-01-10", "2025-06-01")[0]!.situacao, "vencido");
+});
+
+test("pedido ainda não aprovado NÃO quita o período", () => {
+  const pendente = [
+    { periodo_inicio: "2023-01-10", inicio: "2025-02-01", fim: "2025-03-02", dias: 30, situacao: "pedido" },
+  ];
+  const p = periodosAquisitivos("2023-01-10", "2025-06-01", pendente);
+  assert.equal(p[0]!.situacao, "vencido", "só a aprovação tira o período do risco");
+  assert.equal(p[0]!.dias_gozados, 0);
+});
+
+test("férias tiradas em parcelas só quitam quando fecham os 30 dias", () => {
+  const base = { periodo_inicio: "2023-01-10", situacao: "aprovado" };
+  const metade = [{ ...base, inicio: "2025-02-01", fim: "2025-02-15", dias: 15, abono_dias: 0 }];
+
+  const parcial = periodosAquisitivos("2023-01-10", "2025-06-01", metade);
+  assert.equal(parcial[0]!.situacao, "vencido", "metade tirada não quita");
+  assert.equal(parcial[0]!.dias_restantes, 15);
+
+  const inteiro = periodosAquisitivos("2023-01-10", "2025-06-01", [
+    ...metade,
+    { ...base, inicio: "2025-04-01", fim: "2025-04-10", dias: 10, abono_dias: 5 },
+  ]);
+  assert.equal(inteiro[0]!.situacao, "gozado", "15 + 10 + 5 de abono fecham os 30");
+  assert.equal(inteiro[0]!.dias_gozados, 30);
+});
+
+test("o pedido seguinte cai no próximo período, não no que já foi gozado", () => {
+  const gozadoOPrimeiro = [
+    { periodo_inicio: "2023-01-10", inicio: "2025-02-01", fim: "2025-03-02", dias: 30, situacao: "aprovado" },
+  ];
+  const periodos = periodosAquisitivos("2023-01-10", "2025-06-01", gozadoOPrimeiro);
+  assert.equal(periodoDoPedido(periodos), "2024-01-10", "vai para o segundo período");
+});

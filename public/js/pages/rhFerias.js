@@ -31,6 +31,7 @@ const NOME_DO_PERIODO = {
   a_conceder: "pode conceder",
   a_vencer: "vence em breve",
   vencido: "vencido",
+  gozado: "gozado",
 };
 
 export function criarFerias(corpo, ctx) {
@@ -192,7 +193,10 @@ export function criarFerias(corpo, ctx) {
   }
 
   function linha(pessoa) {
-    const fechado = pessoa.periodos.find((p) => p.situacao !== "em_curso") ?? null;
+    const fechado =
+      pessoa.periodos.find((p) => p.situacao !== "em_curso" && p.situacao !== "gozado") ?? null;
+    const tudoGozado =
+      !fechado && pessoa.periodos.some((p) => p.situacao === "gozado");
     const aberta = abertaId === pessoa.atendente_id;
 
     return el(
@@ -216,7 +220,9 @@ export function criarFerias(corpo, ctx) {
             ? "—"
             : fechado
               ? `${diaBr(fechado.inicio)} a ${diaBr(fechado.fim)}`
-              : "ainda acumulando",
+              : tudoGozado
+                ? "tudo gozado"
+                : "ainda acumulando",
         }),
         el("td", { texto: fechado ? diaBr(fechado.limite) : "—" }),
         el("td", { classe: "col-num", texto: pessoa.saldo === null ? "—" : `${pessoa.saldo} d` }),
@@ -229,7 +235,10 @@ export function criarFerias(corpo, ctx) {
                   "etiqueta-alerta",
                 )
               : fechado
-                ? etiqueta(NOME_DO_PERIODO[fechado.situacao] ?? fechado.situacao, "")
+                ? etiqueta(
+                    NOME_DO_PERIODO[fechado.situacao] ?? fechado.situacao,
+                    fechado.situacao === "gozado" ? "etiqueta-ok" : "",
+                  )
                 : etiqueta("acumulando", ""),
         ]),
       ],
@@ -283,14 +292,22 @@ export function criarFerias(corpo, ctx) {
                     el("span", {
                       classe: "muted",
                       texto:
-                        p.situacao === "em_curso"
-                          ? "ainda acumulando"
-                          : `conceder até ${diaBr(p.limite)}${p.dias_para_vencer < 0 ? " (já passou)" : ""}`,
+                        p.situacao === "gozado"
+                          ? `gozado — ${p.dias_gozados} dia(s), último em ${diaBr(p.gozado_em)}`
+                          : p.situacao === "em_curso"
+                            ? "ainda acumulando"
+                            : `conceder até ${diaBr(p.limite)}${p.dias_para_vencer < 0 ? " (já passou)" : ""}${
+                                p.dias_gozados ? ` · ${p.dias_gozados} de 30 já tirados` : ""
+                              }`,
                     }),
                   ]),
                   etiqueta(
                     NOME_DO_PERIODO[p.situacao] ?? p.situacao,
-                    p.situacao === "vencido" || p.situacao === "a_vencer" ? "etiqueta-alerta" : "",
+                    p.situacao === "gozado"
+                      ? "etiqueta-ok"
+                      : p.situacao === "vencido" || p.situacao === "a_vencer"
+                        ? "etiqueta-alerta"
+                        : "",
                   ),
                 ]),
               ),

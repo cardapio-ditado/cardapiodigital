@@ -81,7 +81,7 @@ export function diasEntre(inicio: string, fim: string): number {
   return Math.round((b - a) / 86_400_000) + 1;
 }
 
-export type SituacaoDoPeriodo = "em_curso" | "a_conceder" | "a_vencer" | "vencido";
+export type SituacaoDoPeriodo = "em_curso" | "a_conceder" | "a_vencer" | "vencido" | "gozado";
 
 export interface PeriodoAquisitivo {
   numero: number;
@@ -92,6 +92,22 @@ export interface PeriodoAquisitivo {
   situacao: SituacaoDoPeriodo;
   /** Dias até o limite. Negativo = já passou. */
   dias_para_vencer: number;
+  /** Dias já concedidos deste período, somando férias e abono vendido. */
+  dias_gozados: number;
+  /** Quanto ainda falta conceder. Zero = período quitado. */
+  dias_restantes: number;
+  /** Quando as férias deste período foram efetivamente tiradas. */
+  gozado_em: string | null;
+}
+
+/** Uma linha de férias, só o que o cálculo do período precisa saber. */
+export interface FeriasDoPeriodo {
+  periodo_inicio: string | null;
+  inicio: string;
+  fim: string;
+  dias: number;
+  abono_dias?: number;
+  situacao: string;
 }
 
 /**
@@ -100,9 +116,19 @@ export interface PeriodoAquisitivo {
  * Um período por ano de contrato. O primeiro fecha doze meses depois da
  * admissão; a casa tem os doze meses seguintes para conceder as férias dele.
  */
-export function periodosAquisitivos(admissao: string, hoje: string): PeriodoAquisitivo[] {
+export function periodosAquisitivos(
+  admissao: string,
+  hoje: string,
+  ferias: FeriasDoPeriodo[] = [],
+  diasDeDireito = 30,
+): PeriodoAquisitivo[] {
   const periodos: PeriodoAquisitivo[] = [];
   const agora = comoData(hoje).getTime();
+
+  // Só o que foi CONCEDIDO quita o período. Pedido pendente e recusado não
+  // tiram ninguém do risco — era esse o defeito: lançar as férias e o período
+  // continuar aparecendo como vencido.
+  const concedidas = ferias.filter((f) => f.situacao === "aprovado");
 
   for (let numero = 1; numero <= 40; numero += 1) {
     const inicio = somarAnos(admissao, numero - 1);
@@ -112,13 +138,32 @@ export function periodosAquisitivos(admissao: string, hoje: string): PeriodoAqui
     const limite = somarDias(somarAnos(admissao, numero + 1), -1);
     const paraVencer = Math.round((comoData(limite).getTime() - agora) / 86_400_000);
 
+    const minhas = concedidas.filter((f) => f.periodo_inicio === inicio);
+    const gozados = minhas.reduce((soma, f) => soma + f.dias + (f.abono_dias ?? 0), 0);
+    const restantes = Math.max(0, diasDeDireito - gozados);
+    // A data que interessa é a da última parcela: é quando o período fechou.
+    const gozadoEm = minhas.length ? minhas.map((f) => f.fim).sort().at(-1)! : null;
+
     let situacao: SituacaoDoPeriodo;
-    if (comoData(fim).getTime() >= agora) situacao = "em_curso";
+    if (restantes === 0 && gozados > 0) {
+      // Quitado manda em tudo: período gozado não vence nem alerta mais.
+      situacao = "gozado";
+    } else if (comoData(fim).getTime() >= agora) situacao = "em_curso";
     else if (paraVencer < 0) situacao = "vencido";
     else if (paraVencer <= DIAS_DE_ALERTA) situacao = "a_vencer";
     else situacao = "a_conceder";
 
-    periodos.push({ numero, inicio, fim, limite, situacao, dias_para_vencer: paraVencer });
+    periodos.push({
+      numero,
+      inicio,
+      fim,
+      limite,
+      situacao,
+      dias_para_vencer: paraVencer,
+      dias_gozados: gozados,
+      dias_restantes: restantes,
+      gozado_em: situacao === "gozado" ? gozadoEm : null,
+    });
   }
   return periodos;
 }
@@ -282,17 +327,18 @@ export async function situacaoDaEquipe(params: {
   const lista = ((pessoas ?? []) as Array<{ id: string; nome: string; apelido: string | null }>).map((p) => {
     const admissao = admissoes.get(p.id) ?? null;
     const minhas = porPessoa.get(p.id) ?? [];
-    const periodos = admissao ? periodosAquisitivos(admissao, params.hoje) : [];
+    const periodos = admissao ? periodosAquisitivos(admissao, params.hoje, minhas) : [];
 
-    // O período mais velho que ainda pode ser concedido é o que corre risco.
+    // Período gozado não corre risco nenhum: ele sai do alerta junto com a
+    // aprovação das férias.
     const emRisco = periodos.find((per) => per.situacao === "vencido" || per.situacao === "a_vencer") ?? null;
 
-    // Saldo do período mais antigo fechado e ainda não totalmente usado.
-    const fechado = periodos.filter((per) => per.situacao !== "em_curso");
-    const alvo = fechado[0] ?? null;
-    const usados = alvo
+    // Saldo do período mais antigo que ainda tem dias a conceder. Pedido
+    // pendente também segura o saldo, senão o gestor marcaria duas vezes.
+    const alvo = periodos.find((per) => per.situacao !== "em_curso" && per.situacao !== "gozado") ?? null;
+    const pendentes = alvo
       ? minhas
-          .filter((f) => f.periodo_inicio === alvo.inicio && (f.situacao === "aprovado" || f.situacao === "pedido"))
+          .filter((f) => f.periodo_inicio === alvo.inicio && f.situacao === "pedido")
           .reduce((soma, f) => soma + f.dias + (f.abono_dias ?? 0), 0)
       : 0;
 
@@ -302,7 +348,7 @@ export async function situacaoDaEquipe(params: {
       admissao,
       periodos,
       ferias: minhas,
-      saldo: alvo ? 30 - usados : null,
+      saldo: alvo ? Math.max(0, alvo.dias_restantes - pendentes) : null,
       alerta: emRisco
         ? {
             periodo: emRisco.numero,
@@ -339,10 +385,19 @@ export async function calendario(params: {
 // Escrita
 // ============================================================
 
-/** A qual período aquisitivo estas férias pertencem. */
+/**
+ * A qual período aquisitivo estas férias pertencem.
+ *
+ * O mais antigo que AINDA TEM DIAS A CONCEDER. Olhar só "o mais antigo
+ * fechado" fazia o segundo pedido cair de novo no período já gozado, estourar
+ * o saldo e deixar o período seguinte parecendo intocado.
+ */
 export function periodoDoPedido(periodos: PeriodoAquisitivo[]): string | null {
-  const fechado = periodos.filter((p) => p.situacao !== "em_curso");
-  return fechado[0]?.inicio ?? periodos[0]?.inicio ?? null;
+  const emAberto = periodos.filter((p) => p.situacao !== "em_curso" && p.situacao !== "gozado");
+  if (emAberto[0]) return emAberto[0].inicio;
+  // Ninguém com período fechado em aberto: cai no que está correndo, que é o
+  // caso de quem adianta férias do período em curso.
+  return periodos.find((p) => p.situacao === "em_curso")?.inicio ?? periodos[0]?.inicio ?? null;
 }
 
 export async function pedirFerias(params: {
@@ -368,9 +423,6 @@ export async function pedirFerias(params: {
     throw new ErroDoRh(400, "Preencha a data de admissão na ficha antes de lançar férias — é dela que sai o período aquisitivo.");
   }
 
-  const periodos = periodosAquisitivos(admissao, params.hoje);
-  const periodoInicio = periodoDoPedido(periodos);
-
   const { data: jaTem, error: erroJa } = await cliente()
     .from("rh_ferias")
     .select("inicio, fim, dias, abono_dias, situacao, periodo_inicio")
@@ -378,6 +430,11 @@ export async function pedirFerias(params: {
     .eq("atendente_id", params.atendenteId)
     .in("situacao", ["pedido", "aprovado"]);
   if (erroJa) falhar(500, "Falha ao ler as férias já lançadas", erroJa.message);
+
+  // Os períodos precisam saber o que já foi concedido: sem isso o pedido novo
+  // cairia de novo no período que a pessoa já gozou.
+  const periodos = periodosAquisitivos(admissao, params.hoje, (jaTem ?? []) as FeriasDoPeriodo[]);
+  const periodoInicio = periodoDoPedido(periodos);
 
   const doMesmoPeriodo = ((jaTem ?? []) as Array<{
     inicio: string;

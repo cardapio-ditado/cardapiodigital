@@ -2447,10 +2447,25 @@ async function roteasApi(
               dia: texto(corpo, "dia"),
               turnoId: (corpo.turno_id as string | null) ?? null,
               valor: corpo.valor,
+              baseVenda: corpo.base_venda,
+              percentualServico: corpo.percentual_servico,
+              percentualRepasse: corpo.percentual_repasse,
               criterio: texto(corpo, "criterio"),
               observacao: corpo.observacao,
               timezone: fuso,
               quem: chave.name,
+              // Venda individual chega digitada por pessoa; sem isso o rateio
+              // por venda não teria de onde tirar quanto cada um vendeu.
+              participantes: Array.isArray(corpo.participantes)
+                ? (corpo.participantes as Array<Record<string, unknown>>).map((p) => ({
+                    atendente_id: String(p.atendente_id),
+                    nome: String(p.nome ?? ""),
+                    funcao: (p.funcao as string | null) ?? null,
+                    peso: Number(p.peso) || 1,
+                    minutos: Number(p.minutos) || 0,
+                    venda: Number(p.venda) || 0,
+                  }))
+                : undefined,
             }),
           );
           return ok(res, gorjeta, 201);
