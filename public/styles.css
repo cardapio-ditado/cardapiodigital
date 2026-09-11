@@ -2805,3 +2805,254 @@ button.linha-tabela:hover { background: var(--marca-suave); }
 
 /* Contador de comentários dentro da aba. */
 .aba .nav-contador { margin-left: 6px; }
+
+/* ============ RH · Férias: as linhas do tempo ============
+   Barras posicionadas em porcentagem dentro de um trilho. Quem calcula a
+   posição é o JavaScript; aqui ficam só a moldura e as cores neutras — as
+   cores de situação vêm por style, porque são semânticas e iguais nos dois
+   temas. */
+
+.ferias-barra-time {
+  display: flex;
+  height: 34px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  overflow: hidden;
+  margin-top: 10px;
+}
+.ferias-barra-time button {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  min-width: 30px;
+  transition: opacity 0.15s;
+}
+
+.ferias-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: var(--texto-2);
+}
+.ferias-legenda > * {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ferias-legenda button {
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+.ferias-cor {
+  width: 13px;
+  height: 9px;
+  border-radius: 3px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.ferias-cor-vazia { border: 1px solid var(--borda-forte); }
+.ferias-cor-tracejada { border: 1px dashed var(--borda-forte); }
+
+/* ---- Gantt: o calendário do time e os prazos da casa ---- */
+
+.ferias-gantt { min-width: 680px; }
+.ferias-gantt-meses {
+  display: flex;
+  border-bottom: 1px solid var(--borda);
+}
+.ferias-gantt-mes {
+  flex: 1;
+  text-align: center;
+  font-size: 0.72rem;
+  padding: 4px 0;
+  color: var(--texto-3);
+}
+.ferias-gantt-mes.mes-atual {
+  color: var(--marca-forte);
+  font-weight: 700;
+}
+.ferias-gantt-linha {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  border-bottom: 1px solid var(--borda);
+}
+.ferias-gantt-linha:last-child { border-bottom: 0; }
+.ferias-gantt-nome {
+  flex-shrink: 0;
+  text-align: left;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--texto);
+  cursor: pointer;
+  padding: 0 10px 0 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ferias-gantt-nome:hover { color: var(--marca-forte); }
+.ferias-trilho {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  min-width: 0;
+}
+.ferias-grade {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+}
+.ferias-grade span {
+  flex: 1;
+  border-left: 1px solid var(--borda);
+}
+.ferias-hoje {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--marca);
+  pointer-events: none;
+  z-index: 4;
+}
+.ferias-bloco {
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.ferias-bloco-curso {
+  border: 1px dashed var(--borda-forte);
+  background: var(--superficie-2);
+  color: var(--texto-3);
+  font-weight: 500;
+}
+/* Férias já marcadas passam por cima da barra de prazo, como faixa fina. */
+.ferias-faixa {
+  position: absolute;
+  top: 3px;
+  height: 5px;
+  border-radius: 99px;
+  z-index: 3;
+}
+
+/* ---- A linha do tempo de uma pessoa ---- */
+
+.ferias-tempo-linha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ferias-tempo-rotulo {
+  width: 104px;
+  flex-shrink: 0;
+  text-align: right;
+  line-height: 1.25;
+}
+.ferias-tempo-rotulo strong {
+  display: block;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+.ferias-tempo-rotulo small { font-size: 0.72rem; }
+.ferias-tempo-trilho {
+  position: relative;
+  flex: 1;
+  height: 30px;
+  min-width: 0;
+  border-radius: 8px;
+  background: var(--superficie-2);
+  overflow: hidden;
+}
+.ferias-tempo-trabalho {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--borda-forte);
+  opacity: 0.55;
+}
+.ferias-tempo-prazo {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  border: 1px solid var(--borda-forte);
+  border-radius: 0 8px 8px 0;
+}
+.ferias-tempo-vencido {
+  border-color: #c1121f;
+  background: rgba(193, 18, 31, 0.1);
+}
+.ferias-tempo-bloco {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  border-radius: 4px;
+  opacity: 0.92;
+}
+.ferias-tempo-ponta {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.65rem;
+  color: var(--texto-3);
+  pointer-events: none;
+}
+.ferias-tempo-ponta-esq { left: 6px; }
+.ferias-tempo-ponta-dir { right: 6px; }
+
+/* ---- Um lançamento de férias, em linha ---- */
+
+.ferias-chip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  border: 1px solid var(--borda);
+  border-left-width: 3px;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.84rem;
+  background: var(--superficie);
+}
+.ferias-chip strong { font-variant-numeric: tabular-nums; }
+.ferias-chip-ordem {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--superficie-2);
+  color: var(--texto-2);
+}
+.ferias-frase-ok { color: var(--ok); font-size: 0.86rem; }
+.ferias-frase-alerta { color: var(--perigo); font-size: 0.86rem; }
+
+@media (max-width: 640px) {
+  .ferias-tempo-rotulo { width: 76px; }
+}
+
+/* Cinco cartões pequenos numa linha só: os degraus de urgência das férias
+   perdem o sentido quando o quinto cai sozinho na linha de baixo. */
+.grade-compacta { grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); }
+.grade-compacta .indicador-valor { font-size: 23px; }
+.ferias-gantt-nome .linha-principal > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

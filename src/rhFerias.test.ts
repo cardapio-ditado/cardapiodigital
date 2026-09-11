@@ -7,6 +7,7 @@ import {
   diasPorFaltas,
   periodoDoPedido,
   periodosAquisitivos,
+  situacaoDeEntrada,
   somarAnos,
   somarDias,
 } from "./rhFerias.js";
@@ -202,6 +203,26 @@ test("férias tiradas em parcelas só quitam quando fecham os 30 dias", () => {
   ]);
   assert.equal(inteiro[0]!.situacao, "gozado", "15 + 10 + 5 de abono fecham os 30");
   assert.equal(inteiro[0]!.dias_gozados, 30);
+});
+
+test("férias que já terminaram entram como tiradas, não como pedido", () => {
+  // O defeito relatado: lançar as férias antigas de alguém e o período
+  // continuar cobrando, porque ninguém clicou em "aprovar" num pedido que
+  // era registro do passado.
+  assert.equal(situacaoDeEntrada("2026-08-30", "2026-09-11"), "aprovado");
+  // Férias em curso e futuras continuam precisando de decisão.
+  assert.equal(situacaoDeEntrada("2026-09-11", "2026-09-11"), "pedido", "termina hoje: ainda está acontecendo");
+  assert.equal(situacaoDeEntrada("2026-12-20", "2026-09-11"), "pedido");
+});
+
+test("o lançamento retroativo quita o período na mesma hora", () => {
+  // A ponta solta do defeito: entrar como "aprovado" só resolve se o período
+  // enxergar essas férias como concedidas.
+  const entrada = situacaoDeEntrada("2025-03-02", "2025-06-01");
+  const p = periodosAquisitivos("2023-01-10", "2025-06-01", [
+    { periodo_inicio: "2023-01-10", inicio: "2025-02-01", fim: "2025-03-02", dias: 30, situacao: entrada },
+  ]);
+  assert.equal(p[0]!.situacao, "gozado");
 });
 
 test("o pedido seguinte cai no próximo período, não no que já foi gozado", () => {

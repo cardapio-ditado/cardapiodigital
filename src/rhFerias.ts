@@ -282,6 +282,7 @@ export interface FeriasGravadas {
 export interface PessoaNasFerias {
   atendente_id: string;
   nome: string;
+  funcao: string | null;
   admissao: string | null;
   periodos: PeriodoAquisitivo[];
   ferias: FeriasGravadas[];
@@ -298,7 +299,7 @@ export async function situacaoDaEquipe(params: {
   const [{ data: pessoas, error }, { data: fichas }, { data: ferias }] = await Promise.all([
     cliente()
       .from("pesquisa_atendentes")
-      .select("id, nome, apelido")
+      .select("id, nome, apelido, funcao")
       .eq("venue_id", params.venueId)
       .eq("ativo", true)
       .order("nome", { ascending: true }),
@@ -324,7 +325,12 @@ export async function situacaoDaEquipe(params: {
     porPessoa.set(f.atendente_id, lista);
   }
 
-  const lista = ((pessoas ?? []) as Array<{ id: string; nome: string; apelido: string | null }>).map((p) => {
+  const lista = ((pessoas ?? []) as Array<{
+    id: string;
+    nome: string;
+    apelido: string | null;
+    funcao: string | null;
+  }>).map((p) => {
     const admissao = admissoes.get(p.id) ?? null;
     const minhas = porPessoa.get(p.id) ?? [];
     const periodos = admissao ? periodosAquisitivos(admissao, params.hoje, minhas) : [];
@@ -345,6 +351,7 @@ export async function situacaoDaEquipe(params: {
     return {
       atendente_id: p.id,
       nome: p.apelido || p.nome,
+      funcao: p.funcao ?? null,
       admissao,
       periodos,
       ferias: minhas,
@@ -398,6 +405,18 @@ export function periodoDoPedido(periodos: PeriodoAquisitivo[]): string | null {
   // Ninguém com período fechado em aberto: cai no que está correndo, que é o
   // caso de quem adianta férias do período em curso.
   return periodos.find((p) => p.situacao === "em_curso")?.inicio ?? periodos[0]?.inicio ?? null;
+}
+
+/**
+ * Como um lançamento entra: registro do que já aconteceu, ou pedido do futuro.
+ *
+ * Férias cujo último dia já passou não são um pedido a decidir — são história.
+ * Deixá-las esperando aprovação era o defeito relatado: o gestor lançava as
+ * férias antigas, ninguém clicava em "aprovar", e o período continuava
+ * aparecendo como vencido, cobrando algo que a pessoa já tinha tirado.
+ */
+export function situacaoDeEntrada(fim: string, hoje: string): "aprovado" | "pedido" {
+  return comoData(fim).getTime() < comoData(hoje).getTime() ? "aprovado" : "pedido";
 }
 
 export async function pedirFerias(params: {
@@ -461,6 +480,7 @@ export async function pedirFerias(params: {
   );
   if (encavalou) throw new ErroDoRh(409, "Esta pessoa já tem férias lançadas que encostam nestas datas.");
 
+  const situacao = situacaoDeEntrada(params.fim, params.hoje);
   const { data, error } = await cliente()
     .from("rh_ferias")
     .insert({
@@ -471,15 +491,24 @@ export async function pedirFerias(params: {
       dias: diasEntre(params.inicio, params.fim),
       abono_dias: abono,
       periodo_inicio: periodoInicio,
-      situacao: "pedido",
+      situacao,
       observacao: String(params.observacao ?? "").trim() || null,
       pedido_por: params.quem,
+      ...(situacao === "aprovado"
+        ? { decidido_por: params.quem, decidido_em: new Date().toISOString() }
+        : {}),
     } as never)
     .select("id, atendente_id, inicio, fim, dias, abono_dias, periodo_inicio, situacao, observacao, pedido_por, decidido_por")
     .single();
   if (error) falhar(500, "Falha ao lançar as férias", error.message);
 
-  return { ferias: data as FeriasGravadas, avisos: conferencia.avisos };
+  // Quando o lançamento é histórico, o aviso "começa numa data que já passou"
+  // vira ruído: a frase abaixo já diz isso, e diz o que o sistema fez.
+  const avisos = conferencia.avisos.filter((a) => situacao === "pedido" || !a.includes("já passou"));
+  if (situacao === "aprovado") {
+    avisos.push("As datas já passaram: o lançamento entrou como tirado e o período foi quitado.");
+  }
+  return { ferias: data as FeriasGravadas, avisos };
 }
 
 /**
