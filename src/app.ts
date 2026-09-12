@@ -121,6 +121,7 @@ import {
   verRegra,
 } from "./rhAcerto.js";
 import { comoCsv, comoTexto, resumoDoMes } from "./rhResumo.js";
+import { oQueEstaAcontecendo } from "./aCasa.js";
 import {
   SITUACOES_DE_FERIAS,
   apagarFerias,
@@ -1439,6 +1440,26 @@ async function roteasApi(
       const chave = await exigirChave(req, "reservations:read");
       const venue = await findVenueBySlugInOrg(chave.org_id, slug);
       return ok(res, await listarModulos(venue.id));
+    }
+
+    // GET /v1/venues/:slug/a-casa?desde= — a planta do bar ao vivo.
+    //
+    // Fora do MODULO_DO_RECURSO de propósito: a planta é de toda casa, e é
+    // cada SETOR que se acende pelo contrato. Exigir um módulo aqui deixaria
+    // sem panorama justamente quem tem poucos módulos e mais precisa ver que
+    // existe mais coisa.
+    if (metodo === "GET" && recurso === "a-casa" && p.length === 3) {
+      const chave = await exigirChave(req, "reservations:read");
+      const venue = await findVenueBySlugInOrg(chave.org_id, slug);
+      const modulos = await listarModulos(venue.id);
+      const desde = url.searchParams.get("desde") ?? undefined;
+      const casa = await oQueEstaAcontecendo({
+        venueId: venue.id,
+        contratados: modulos.filter((m) => m.ativo).map((m) => m.modulo),
+        desde,
+        limite: Number(url.searchParams.get("limite")) || undefined,
+      });
+      return ok(res, { ...casa, timezone: venue.timezone ?? "America/Cuiaba" });
     }
 
 

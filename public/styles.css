@@ -3056,3 +3056,204 @@ button.linha-tabela:hover { background: var(--marca-suave); }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ============ A casa ao vivo: a planta do bar ============
+   Os setores ficam em posição absoluta, em porcentagem, para a planta ser a
+   mesma no monitor do escritório e no celular do dono. Quem calcula a
+   posição é o JavaScript; aqui fica a moldura. */
+
+.planta {
+  position: relative;
+  /* `min-width: 0` não é enfeite: como item de grade da `.pilha`, o padrão
+     `auto` impede a planta de encolher abaixo do conteúdo dela, e no celular
+     isso empurra a página inteira para fora da tela. */
+  min-width: 0;
+  position: relative;
+  aspect-ratio: 16 / 11;
+  min-height: 340px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background:
+    linear-gradient(var(--borda) 1px, transparent 1px) 0 0 / 100% 12.5%,
+    linear-gradient(90deg, var(--borda) 1px, transparent 1px) 0 0 / 12.5% 100%,
+    var(--superficie);
+  background-blend-mode: normal;
+  overflow: hidden;
+  box-shadow: var(--sombra);
+}
+/* A grade do piso é referência, não desenho: bem apagada. */
+.planta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--superficie);
+  opacity: 0.86;
+  pointer-events: none;
+}
+.planta > * { position: absolute; z-index: 1; }
+
+.planta-rotulo {
+  transform: translate(-50%, -50%);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texto-3);
+  white-space: nowrap;
+}
+
+.setor {
+  transform: translate(-50%, -50%);
+  width: 160px;
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+}
+.setor-topo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+.setor-topo svg { flex-shrink: 0; color: var(--texto-2); }
+.setor-topo strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.setor-conta {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 99px;
+  background: var(--marca-suave);
+  color: var(--marca-forte);
+  font-variant-numeric: tabular-nums;
+}
+.setor-linha {
+  font-size: 0.78rem;
+  line-height: 1.3;
+  color: var(--texto-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.setor-quando { font-size: 0.7rem; color: var(--texto-3); }
+
+/* Setor com movimento recente: a marca acende na borda. */
+.setor-vivo { border-color: var(--marca); box-shadow: 0 0 0 3px var(--marca-suave), var(--sombra); }
+.setor-vivo .setor-topo svg { color: var(--marca); }
+/* Setor com algo esperando alguém. */
+.setor-atencao { border-color: var(--ambar); box-shadow: 0 0 0 3px var(--alerta-suave), var(--sombra); }
+.setor-atencao .setor-topo svg { color: var(--alerta); }
+/* Módulo que a casa não contratou: existe na planta, mas apagado. */
+.setor-apagado {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+  opacity: 0.5;
+}
+.setor-piscou { transform: translate(-50%, -50%) scale(1.06); }
+
+/* ---- O bonequinho que atravessa o salão ---- */
+
+.boneco {
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 99px;
+  background: var(--marca);
+  color: var(--cta-texto);
+  font-size: 0.78rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(34, 23, 20, 0.25);
+  opacity: 0;
+}
+.boneco-atencao { background: var(--ambar); color: #221714; }
+.boneco-andando {
+  opacity: 1;
+  /* O caminho é reto porque a planta é vista de cima: o que importa é de
+     onde para onde, não o desvio entre as mesas. */
+  transition: left 2.1s cubic-bezier(0.4, 0, 0.2, 1), top 2.1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+}
+.boneco-saindo { opacity: 0; transition: opacity 0.6s; }
+
+/* Abre para BAIXO: o bonequinho para logo abaixo do cartão do setor, e um
+   balão para cima cobriria justamente o texto que a pessoa foi ler. */
+.balao {
+  position: absolute;
+  top: 130%;
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  width: max-content;
+  max-width: 180px;
+  display: grid;
+  gap: 1px;
+  padding: 6px 9px;
+  border-radius: 9px;
+  background: var(--texto);
+  color: var(--fundo);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+}
+.balao small { opacity: 0.7; }
+.balao::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: var(--texto);
+}
+.boneco-chegou .balao { opacity: 1; transform: translateX(-50%) scale(1); }
+
+/* O pulso do "ao vivo" no cabeçalho. */
+.casa-pulso {
+  width: 9px;
+  height: 9px;
+  border-radius: 99px;
+  background: var(--ok);
+  box-shadow: 0 0 0 0 rgba(26, 122, 74, 0.5);
+  animation: casa-pulsa 2s infinite;
+}
+.casa-pulso-parado { background: var(--texto-3); animation: none; box-shadow: none; }
+@keyframes casa-pulsa {
+  70% { box-shadow: 0 0 0 7px rgba(26, 122, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(26, 122, 74, 0); }
+}
+
+/* No celular a planta vira uma coluna: sete cartões de 160px lado a lado não
+   cabem em 400px, e espremer transformaria a leitura de relance — que é o
+   ponto da tela — em caça a texto de 9px. */
+@media (max-width: 700px) {
+  .planta {
+    aspect-ratio: auto;
+    min-height: 0;
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+  .planta::before { display: none; }
+  .planta > * { position: static; }
+  .planta-rotulo { display: none; }
+  .setor { width: auto; min-width: 0; transform: none; }
+  .setor-piscou { transform: scale(1.02); }
+  .boneco { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boneco, .balao, .setor, .casa-pulso { transition: none; animation: none; }
+}

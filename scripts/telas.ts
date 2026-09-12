@@ -240,9 +240,34 @@ interface Achados {
   titulos: string[];
   colunas: string[];
   rolaDeLado: boolean;
+  /** Quem está estourando a largura, quando a página rola de lado. */
+  culpados: string[];
   erros: string[];
   foto: string;
 }
+
+/**
+ * Quem empurrou a página para fora da tela.
+ *
+ * Roda no navegador. Descobrir isto à mão custa abrir o inspetor e ir
+ * clicando elemento por elemento; a pergunta é sempre a mesma, então ela
+ * mora aqui.
+ */
+const PROCURAR_CULPADOS = `(() => {
+  const limite = window.innerWidth + 1;
+  const achados = [];
+  for (const n of document.querySelectorAll("body *")) {
+    const r = n.getBoundingClientRect();
+    if (r.right <= limite && r.left >= -1) continue;
+    if (r.width === 0 || r.height === 0) continue;
+    // Só o elemento mais de fora de cada galho interessa: o filho estoura
+    // junto com o pai, e listar os dois é ruído.
+    if (achados.some((a) => a.node.contains(n))) continue;
+    const classe = typeof n.className === "string" && n.className ? "." + n.className.trim().split(/\\s+/).join(".") : "";
+    achados.push({ node: n, texto: n.tagName.toLowerCase() + classe + " (" + Math.round(r.width) + "px, borda em " + Math.round(r.right) + ")" });
+  }
+  return achados.slice(0, 4).map((a) => a.texto);
+})()`;
 
 async function abrirNoNavegador(nome: string, endereco: string, larguras: number[]): Promise<Achados[]> {
   // O playwright é opcional de propósito: quem só quer clicar na tela usa
@@ -278,13 +303,15 @@ async function abrirNoNavegador(nome: string, endereco: string, larguras: number
       const foto = join(FOTOS, `${nome}-${largura}.png`);
       await pagina.screenshot({ path: foto, fullPage: true });
 
+      const rolaDeLado = Boolean(await pagina.evaluate("document.body.scrollWidth > window.innerWidth + 1"));
       achados.push({
         largura,
         titulos: await pagina.$$eval("h1, h2, h3", (ns) => ns.map((n) => n.textContent!.trim()).slice(0, 6)),
         colunas: await pagina.$$eval("thead th", (ns) => ns.map((n) => n.textContent!.trim())),
         // Expressão em texto, e não função: este código roda no navegador, e
         // o TypeScript daqui não conhece `document` nem `window`.
-        rolaDeLado: Boolean(await pagina.evaluate("document.body.scrollWidth > window.innerWidth + 1")),
+        rolaDeLado,
+        culpados: rolaDeLado ? ((await pagina.evaluate(PROCURAR_CULPADOS)) as string[]) : [],
         erros,
         foto,
       });
@@ -322,6 +349,7 @@ function relatar(achados: Achados[]): boolean {
     if (a.colunas.length) console.log(`    colunas: ${a.colunas.join(" | ")}`);
     if (a.rolaDeLado) {
       console.log("    ⚠ a página rola de lado nesta largura");
+      for (const c of a.culpados) console.log(`      estoura: ${c}`);
       houveErro = true;
     }
     if (a.erros.length) {
