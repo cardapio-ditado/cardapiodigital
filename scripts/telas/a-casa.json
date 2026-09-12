@@ -1,12 +1,12 @@
 {
-  "rotulo": "A casa ao vivo — a planta do bar",
+  "rotulo": "A casa agora — o escritório do bar",
   "modulo": "/js/pages/aCasa.js",
   "funcao": "aCasa",
   "venue": "casa-de-teste",
   "rotas": {
     "GET /a-casa": {
-      "agora": "2026-09-12T20:40:00.000Z",
-      "desde": "2026-09-11T20:40:00.000Z",
+      "agora": "2026-09-12T23:40:00.000Z",
+      "desde": "2026-09-11T23:40:00.000Z",
       "timezone": "America/Cuiaba",
       "setores": [
         {
@@ -14,55 +14,61 @@
           "nome": "Doca",
           "legenda": "Mercadoria entrando e contagem",
           "modulo": "cmv",
-          "x": 16,
-          "y": 18,
+          "x": 2,
+          "y": 3,
+          "w": 28,
+          "h": 28,
           "contratado": true,
-          "quantos": 2,
+          "quantos": 1,
           "ultimo": {
             "id": "compra:1",
-            "quando": "2026-09-12T18:20:00.000Z",
+            "quando": "2026-09-12T21:10:00.000Z",
             "setor": "doca",
             "tipo": "recebimento",
             "titulo": "Mercadoria recebida",
             "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
-            "quem": "Distribuidora Cuiabá",
+            "quem": "Seu Nilton",
             "atencao": false
           },
-          "minutos_parado": 140
+          "minutos_parado": 150
         },
         {
           "id": "cozinha",
           "nome": "Cozinha",
           "legenda": "Produção das fichas técnicas",
           "modulo": "cmv",
-          "x": 50,
-          "y": 14,
+          "x": 32,
+          "y": 3,
+          "w": 34,
+          "h": 28,
           "contratado": true,
           "quantos": 1,
           "ultimo": {
             "id": "producao:1",
-            "quando": "2026-09-12T17:30:00.000Z",
+            "quando": "2026-09-12T23:26:00.000Z",
             "setor": "cozinha",
             "tipo": "producao",
             "titulo": "Produziu 4 lote(s)",
             "detalhe": "Molho da casa",
-            "quem": null,
+            "quem": "Cida",
             "atencao": false
           },
-          "minutos_parado": 190
+          "minutos_parado": 14
         },
         {
           "id": "escritorio",
           "nome": "Escritório",
-          "legenda": "Ponto, escala e gorjeta",
+          "legenda": "Ponto, escala, gorjeta e avisos",
           "modulo": "rh",
-          "x": 84,
-          "y": 18,
+          "x": 68,
+          "y": 3,
+          "w": 30,
+          "h": 28,
           "contratado": true,
-          "quantos": 2,
+          "quantos": 1,
           "ultimo": {
             "id": "ponto:1",
-            "quando": "2026-09-12T20:18:00.000Z",
+            "quando": "2026-09-12T21:18:00.000Z",
             "setor": "escritorio",
             "tipo": "ponto",
             "titulo": "Bateu entrada",
@@ -70,45 +76,49 @@
             "quem": "Juliana",
             "atencao": false
           },
-          "minutos_parado": 22
+          "minutos_parado": 142
         },
         {
           "id": "salao",
           "nome": "Salão",
           "legenda": "Mesas, garçons e cardápio",
           "modulo": "cardapio-digital",
-          "x": 50,
-          "y": 48,
+          "x": 2,
+          "y": 34,
+          "w": 96,
+          "h": 30,
           "contratado": true,
           "quantos": 2,
           "ultimo": {
             "id": "mesa:1",
-            "quando": "2026-09-12T20:31:00.000Z",
+            "quando": "2026-09-12T23:34:00.000Z",
             "setor": "salao",
             "tipo": "chamou",
             "titulo": "Mesa 12: Chamou o garçom",
             "detalhe": null,
-            "quem": "Mesa 12",
+            "quem": "Juliana",
             "atencao": true
           },
-          "minutos_parado": 9
+          "minutos_parado": 6
         },
         {
           "id": "porta",
           "nome": "Porta",
           "legenda": "Reservas e o agente no WhatsApp",
           "modulo": "agentes-ia",
-          "x": 16,
-          "y": 80,
+          "x": 2,
+          "y": 67,
+          "w": 28,
+          "h": 30,
           "contratado": true,
           "quantos": 2,
           "ultimo": {
             "id": "reserva:1",
-            "quando": "2026-09-12T20:37:00.000Z",
+            "quando": "2026-09-12T23:37:00.000Z",
             "setor": "porta",
             "tipo": "reserva",
             "titulo": "Reserva para 6 pessoa(s)",
-            "detalhe": "Renata Prado · para 12/09/2026 21:30",
+            "detalhe": "para 12/09/2026 21:30",
             "quem": "Renata Prado",
             "atencao": true
           },
@@ -119,18 +129,20 @@
           "nome": "Rotinas",
           "legenda": "Checklists do turno",
           "modulo": "checklist",
-          "x": 50,
-          "y": 84,
+          "x": 32,
+          "y": 67,
+          "w": 34,
+          "h": 30,
           "contratado": true,
           "quantos": 1,
           "ultimo": {
             "id": "checklist:1",
-            "quando": "2026-09-12T20:02:00.000Z",
+            "quando": "2026-09-12T23:02:00.000Z",
             "setor": "operacao",
             "tipo": "checklist",
             "titulo": "Checklist concluído",
             "detalhe": "2 ponto(s) de atenção",
-            "quem": "Cida",
+            "quem": "Marcos",
             "atencao": true
           },
           "minutos_parado": 38
@@ -140,13 +152,15 @@
           "nome": "Opinião",
           "legenda": "Pesquisa e avaliações",
           "modulo": "clientes",
-          "x": 84,
-          "y": 80,
+          "x": 68,
+          "y": 67,
+          "w": 30,
+          "h": 30,
           "contratado": true,
           "quantos": 2,
           "ultimo": {
             "id": "resposta:1",
-            "quando": "2026-09-12T19:45:00.000Z",
+            "quando": "2026-09-12T22:45:00.000Z",
             "setor": "opiniao",
             "tipo": "pesquisa",
             "titulo": "Respondeu a pesquisa: nota 9",
@@ -160,7 +174,7 @@
       "fatos": [
         {
           "id": "reserva:1",
-          "quando": "2026-09-12T20:37:00.000Z",
+          "quando": "2026-09-12T23:37:00.000Z",
           "setor": "porta",
           "tipo": "reserva",
           "titulo": "Reserva para 6 pessoa(s)",
@@ -170,7 +184,7 @@
         },
         {
           "id": "msg:1",
-          "quando": "2026-09-12T20:36:00.000Z",
+          "quando": "2026-09-12T23:36:00.000Z",
           "setor": "porta",
           "tipo": "agente-respondeu",
           "titulo": "O agente respondeu",
@@ -180,17 +194,17 @@
         },
         {
           "id": "mesa:1",
-          "quando": "2026-09-12T20:31:00.000Z",
+          "quando": "2026-09-12T23:34:00.000Z",
           "setor": "salao",
           "tipo": "chamou",
           "titulo": "Mesa 12: Chamou o garçom",
           "detalhe": null,
-          "quem": "Mesa 12",
+          "quem": "Juliana",
           "atencao": true
         },
         {
           "id": "ponto:1",
-          "quando": "2026-09-12T20:18:00.000Z",
+          "quando": "2026-09-12T21:18:00.000Z",
           "setor": "escritorio",
           "tipo": "ponto",
           "titulo": "Bateu entrada",
@@ -199,18 +213,8 @@
           "atencao": false
         },
         {
-          "id": "checklist:1",
-          "quando": "2026-09-12T20:02:00.000Z",
-          "setor": "operacao",
-          "tipo": "checklist",
-          "titulo": "Checklist concluído",
-          "detalhe": "2 ponto(s) de atenção",
-          "quem": "Cida",
-          "atencao": true
-        },
-        {
           "id": "mesa:2",
-          "quando": "2026-09-12T19:59:00.000Z",
+          "quando": "2026-09-12T23:31:00.000Z",
           "setor": "salao",
           "tipo": "curtiu",
           "titulo": "Mesa 7: Curtiu um item",
@@ -219,8 +223,28 @@
           "atencao": false
         },
         {
+          "id": "producao:1",
+          "quando": "2026-09-12T23:26:00.000Z",
+          "setor": "cozinha",
+          "tipo": "producao",
+          "titulo": "Produziu 4 lote(s)",
+          "detalhe": "Molho da casa",
+          "quem": "Cida",
+          "atencao": false
+        },
+        {
+          "id": "checklist:1",
+          "quando": "2026-09-12T23:02:00.000Z",
+          "setor": "operacao",
+          "tipo": "checklist",
+          "titulo": "Checklist concluído",
+          "detalhe": "2 ponto(s) de atenção",
+          "quem": "Marcos",
+          "atencao": true
+        },
+        {
           "id": "resposta:1",
-          "quando": "2026-09-12T19:45:00.000Z",
+          "quando": "2026-09-12T22:45:00.000Z",
           "setor": "opiniao",
           "tipo": "pesquisa",
           "titulo": "Respondeu a pesquisa: nota 9",
@@ -230,65 +254,125 @@
         },
         {
           "id": "compra:1",
-          "quando": "2026-09-12T18:20:00.000Z",
+          "quando": "2026-09-12T21:10:00.000Z",
           "setor": "doca",
           "tipo": "recebimento",
           "titulo": "Mercadoria recebida",
           "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
-          "quem": "Distribuidora Cuiabá",
-          "atencao": false
-        },
-        {
-          "id": "producao:1",
-          "quando": "2026-09-12T17:30:00.000Z",
-          "setor": "cozinha",
-          "tipo": "producao",
-          "titulo": "Produziu 4 lote(s)",
-          "detalhe": "Molho da casa",
-          "quem": null,
-          "atencao": false
-        },
-        {
-          "id": "ponto:2",
-          "quando": "2026-09-12T15:40:00.000Z",
-          "setor": "escritorio",
-          "tipo": "ponto",
-          "titulo": "Bateu saída",
-          "detalhe": null,
-          "quem": "Tiago",
+          "quem": "Seu Nilton",
           "atencao": false
         },
         {
           "id": "google:1",
-          "quando": "2026-09-12T13:40:00.000Z",
+          "quando": "2026-09-12T16:40:00.000Z",
           "setor": "opiniao",
           "tipo": "google",
           "titulo": "Avaliação no Google: 2 estrela(s)",
           "detalhe": "Demorou demais para sair a comida",
           "quem": "Anderson",
           "atencao": true
+        }
+      ],
+      "trabalhadores": [
+        {
+          "id": "pessoa:1",
+          "nome": "Juliana Barbosa",
+          "tipo": "pessoa",
+          "papel": "Garçonete",
+          "setor": "salao",
+          "fazendo": "Mesa 12: Chamou o garçom",
+          "desde": "2026-09-12T23:34:00.000Z",
+          "minutos_parado": 6,
+          "em_pausa": false
         },
         {
-          "id": "contagem:1",
-          "quando": "2026-09-11T19:40:00.000Z",
-          "setor": "doca",
-          "tipo": "contagem",
-          "titulo": "Contagem de estoque fechada",
-          "detalhe": null,
-          "quem": null,
-          "atencao": false
+          "id": "pessoa:2",
+          "nome": "Cida Nogueira",
+          "tipo": "pessoa",
+          "papel": "Cozinha",
+          "setor": "cozinha",
+          "fazendo": "Produziu 4 lote(s)",
+          "desde": "2026-09-12T23:26:00.000Z",
+          "minutos_parado": 14,
+          "em_pausa": false
+        },
+        {
+          "id": "pessoa:3",
+          "nome": "Tiago Menezes",
+          "tipo": "pessoa",
+          "papel": "Barman",
+          "setor": "salao",
+          "fazendo": null,
+          "desde": "2026-09-12T22:48:00.000Z",
+          "minutos_parado": 52,
+          "em_pausa": false
+        },
+        {
+          "id": "pessoa:4",
+          "nome": "Rose da Silva",
+          "tipo": "pessoa",
+          "papel": "Copa",
+          "setor": "salao",
+          "fazendo": null,
+          "desde": "2026-09-12T22:07:00.000Z",
+          "minutos_parado": 93,
+          "em_pausa": false
+        },
+        {
+          "id": "pessoa:5",
+          "nome": "Marcos Aurélio",
+          "tipo": "pessoa",
+          "papel": "Segurança",
+          "setor": "porta",
+          "fazendo": null,
+          "desde": "2026-09-12T23:02:00.000Z",
+          "minutos_parado": 38,
+          "em_pausa": false
+        },
+        {
+          "id": "pessoa:6",
+          "nome": "Val Prado",
+          "tipo": "pessoa",
+          "papel": "Subgerente",
+          "setor": "escritorio",
+          "fazendo": null,
+          "desde": "2026-09-12T23:20:00.000Z",
+          "minutos_parado": 20,
+          "em_pausa": true
+        },
+        {
+          "id": "agente:atendente",
+          "nome": "Atendente",
+          "tipo": "agente",
+          "papel": "Responde o WhatsApp",
+          "setor": "porta",
+          "fazendo": "Respondendo Renata",
+          "desde": "2026-09-12T23:36:00.000Z",
+          "minutos_parado": 4,
+          "em_pausa": false
+        },
+        {
+          "id": "agente:carteiro",
+          "nome": "Carteiro",
+          "tipo": "agente",
+          "papel": "Manda os avisos no WhatsApp",
+          "setor": "escritorio",
+          "fazendo": null,
+          "desde": "2026-09-12T20:40:00.000Z",
+          "minutos_parado": 180,
+          "em_pausa": false
         }
       ],
       "setoresMudos": []
     }
   },
   "variacoes": {
-    "noite-cheia": {
-      "rotulo": "sexta à noite, tudo acontecendo",
+    "sexta-a-noite": {
+      "rotulo": "sexta à noite, a casa cheia",
       "rotas": {
         "GET /a-casa": {
-          "agora": "2026-09-12T20:40:00.000Z",
-          "desde": "2026-09-11T20:40:00.000Z",
+          "agora": "2026-09-12T23:40:00.000Z",
+          "desde": "2026-09-11T23:40:00.000Z",
           "timezone": "America/Cuiaba",
           "setores": [
             {
@@ -296,55 +380,61 @@
               "nome": "Doca",
               "legenda": "Mercadoria entrando e contagem",
               "modulo": "cmv",
-              "x": 16,
-              "y": 18,
+              "x": 2,
+              "y": 3,
+              "w": 28,
+              "h": 28,
               "contratado": true,
-              "quantos": 2,
+              "quantos": 1,
               "ultimo": {
                 "id": "compra:1",
-                "quando": "2026-09-12T18:20:00.000Z",
+                "quando": "2026-09-12T21:10:00.000Z",
                 "setor": "doca",
                 "tipo": "recebimento",
                 "titulo": "Mercadoria recebida",
                 "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
-                "quem": "Distribuidora Cuiabá",
+                "quem": "Seu Nilton",
                 "atencao": false
               },
-              "minutos_parado": 140
+              "minutos_parado": 150
             },
             {
               "id": "cozinha",
               "nome": "Cozinha",
               "legenda": "Produção das fichas técnicas",
               "modulo": "cmv",
-              "x": 50,
-              "y": 14,
+              "x": 32,
+              "y": 3,
+              "w": 34,
+              "h": 28,
               "contratado": true,
               "quantos": 1,
               "ultimo": {
                 "id": "producao:1",
-                "quando": "2026-09-12T17:30:00.000Z",
+                "quando": "2026-09-12T23:26:00.000Z",
                 "setor": "cozinha",
                 "tipo": "producao",
                 "titulo": "Produziu 4 lote(s)",
                 "detalhe": "Molho da casa",
-                "quem": null,
+                "quem": "Cida",
                 "atencao": false
               },
-              "minutos_parado": 190
+              "minutos_parado": 14
             },
             {
               "id": "escritorio",
               "nome": "Escritório",
-              "legenda": "Ponto, escala e gorjeta",
+              "legenda": "Ponto, escala, gorjeta e avisos",
               "modulo": "rh",
-              "x": 84,
-              "y": 18,
+              "x": 68,
+              "y": 3,
+              "w": 30,
+              "h": 28,
               "contratado": true,
-              "quantos": 2,
+              "quantos": 1,
               "ultimo": {
                 "id": "ponto:1",
-                "quando": "2026-09-12T20:18:00.000Z",
+                "quando": "2026-09-12T21:18:00.000Z",
                 "setor": "escritorio",
                 "tipo": "ponto",
                 "titulo": "Bateu entrada",
@@ -352,45 +442,49 @@
                 "quem": "Juliana",
                 "atencao": false
               },
-              "minutos_parado": 22
+              "minutos_parado": 142
             },
             {
               "id": "salao",
               "nome": "Salão",
               "legenda": "Mesas, garçons e cardápio",
               "modulo": "cardapio-digital",
-              "x": 50,
-              "y": 48,
+              "x": 2,
+              "y": 34,
+              "w": 96,
+              "h": 30,
               "contratado": true,
               "quantos": 2,
               "ultimo": {
                 "id": "mesa:1",
-                "quando": "2026-09-12T20:31:00.000Z",
+                "quando": "2026-09-12T23:34:00.000Z",
                 "setor": "salao",
                 "tipo": "chamou",
                 "titulo": "Mesa 12: Chamou o garçom",
                 "detalhe": null,
-                "quem": "Mesa 12",
+                "quem": "Juliana",
                 "atencao": true
               },
-              "minutos_parado": 9
+              "minutos_parado": 6
             },
             {
               "id": "porta",
               "nome": "Porta",
               "legenda": "Reservas e o agente no WhatsApp",
               "modulo": "agentes-ia",
-              "x": 16,
-              "y": 80,
+              "x": 2,
+              "y": 67,
+              "w": 28,
+              "h": 30,
               "contratado": true,
               "quantos": 2,
               "ultimo": {
                 "id": "reserva:1",
-                "quando": "2026-09-12T20:37:00.000Z",
+                "quando": "2026-09-12T23:37:00.000Z",
                 "setor": "porta",
                 "tipo": "reserva",
                 "titulo": "Reserva para 6 pessoa(s)",
-                "detalhe": "Renata Prado · para 12/09/2026 21:30",
+                "detalhe": "para 12/09/2026 21:30",
                 "quem": "Renata Prado",
                 "atencao": true
               },
@@ -401,18 +495,20 @@
               "nome": "Rotinas",
               "legenda": "Checklists do turno",
               "modulo": "checklist",
-              "x": 50,
-              "y": 84,
+              "x": 32,
+              "y": 67,
+              "w": 34,
+              "h": 30,
               "contratado": true,
               "quantos": 1,
               "ultimo": {
                 "id": "checklist:1",
-                "quando": "2026-09-12T20:02:00.000Z",
+                "quando": "2026-09-12T23:02:00.000Z",
                 "setor": "operacao",
                 "tipo": "checklist",
                 "titulo": "Checklist concluído",
                 "detalhe": "2 ponto(s) de atenção",
-                "quem": "Cida",
+                "quem": "Marcos",
                 "atencao": true
               },
               "minutos_parado": 38
@@ -422,13 +518,15 @@
               "nome": "Opinião",
               "legenda": "Pesquisa e avaliações",
               "modulo": "clientes",
-              "x": 84,
-              "y": 80,
+              "x": 68,
+              "y": 67,
+              "w": 30,
+              "h": 30,
               "contratado": true,
               "quantos": 2,
               "ultimo": {
                 "id": "resposta:1",
-                "quando": "2026-09-12T19:45:00.000Z",
+                "quando": "2026-09-12T22:45:00.000Z",
                 "setor": "opiniao",
                 "tipo": "pesquisa",
                 "titulo": "Respondeu a pesquisa: nota 9",
@@ -442,7 +540,7 @@
           "fatos": [
             {
               "id": "reserva:1",
-              "quando": "2026-09-12T20:37:00.000Z",
+              "quando": "2026-09-12T23:37:00.000Z",
               "setor": "porta",
               "tipo": "reserva",
               "titulo": "Reserva para 6 pessoa(s)",
@@ -452,7 +550,7 @@
             },
             {
               "id": "msg:1",
-              "quando": "2026-09-12T20:36:00.000Z",
+              "quando": "2026-09-12T23:36:00.000Z",
               "setor": "porta",
               "tipo": "agente-respondeu",
               "titulo": "O agente respondeu",
@@ -462,17 +560,17 @@
             },
             {
               "id": "mesa:1",
-              "quando": "2026-09-12T20:31:00.000Z",
+              "quando": "2026-09-12T23:34:00.000Z",
               "setor": "salao",
               "tipo": "chamou",
               "titulo": "Mesa 12: Chamou o garçom",
               "detalhe": null,
-              "quem": "Mesa 12",
+              "quem": "Juliana",
               "atencao": true
             },
             {
               "id": "ponto:1",
-              "quando": "2026-09-12T20:18:00.000Z",
+              "quando": "2026-09-12T21:18:00.000Z",
               "setor": "escritorio",
               "tipo": "ponto",
               "titulo": "Bateu entrada",
@@ -481,18 +579,8 @@
               "atencao": false
             },
             {
-              "id": "checklist:1",
-              "quando": "2026-09-12T20:02:00.000Z",
-              "setor": "operacao",
-              "tipo": "checklist",
-              "titulo": "Checklist concluído",
-              "detalhe": "2 ponto(s) de atenção",
-              "quem": "Cida",
-              "atencao": true
-            },
-            {
               "id": "mesa:2",
-              "quando": "2026-09-12T19:59:00.000Z",
+              "quando": "2026-09-12T23:31:00.000Z",
               "setor": "salao",
               "tipo": "curtiu",
               "titulo": "Mesa 7: Curtiu um item",
@@ -501,8 +589,28 @@
               "atencao": false
             },
             {
+              "id": "producao:1",
+              "quando": "2026-09-12T23:26:00.000Z",
+              "setor": "cozinha",
+              "tipo": "producao",
+              "titulo": "Produziu 4 lote(s)",
+              "detalhe": "Molho da casa",
+              "quem": "Cida",
+              "atencao": false
+            },
+            {
+              "id": "checklist:1",
+              "quando": "2026-09-12T23:02:00.000Z",
+              "setor": "operacao",
+              "tipo": "checklist",
+              "titulo": "Checklist concluído",
+              "detalhe": "2 ponto(s) de atenção",
+              "quem": "Marcos",
+              "atencao": true
+            },
+            {
               "id": "resposta:1",
-              "quando": "2026-09-12T19:45:00.000Z",
+              "quando": "2026-09-12T22:45:00.000Z",
               "setor": "opiniao",
               "tipo": "pesquisa",
               "titulo": "Respondeu a pesquisa: nota 9",
@@ -512,65 +620,125 @@
             },
             {
               "id": "compra:1",
-              "quando": "2026-09-12T18:20:00.000Z",
+              "quando": "2026-09-12T21:10:00.000Z",
               "setor": "doca",
               "tipo": "recebimento",
               "titulo": "Mercadoria recebida",
               "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
-              "quem": "Distribuidora Cuiabá",
-              "atencao": false
-            },
-            {
-              "id": "producao:1",
-              "quando": "2026-09-12T17:30:00.000Z",
-              "setor": "cozinha",
-              "tipo": "producao",
-              "titulo": "Produziu 4 lote(s)",
-              "detalhe": "Molho da casa",
-              "quem": null,
-              "atencao": false
-            },
-            {
-              "id": "ponto:2",
-              "quando": "2026-09-12T15:40:00.000Z",
-              "setor": "escritorio",
-              "tipo": "ponto",
-              "titulo": "Bateu saída",
-              "detalhe": null,
-              "quem": "Tiago",
+              "quem": "Seu Nilton",
               "atencao": false
             },
             {
               "id": "google:1",
-              "quando": "2026-09-12T13:40:00.000Z",
+              "quando": "2026-09-12T16:40:00.000Z",
               "setor": "opiniao",
               "tipo": "google",
               "titulo": "Avaliação no Google: 2 estrela(s)",
               "detalhe": "Demorou demais para sair a comida",
               "quem": "Anderson",
               "atencao": true
+            }
+          ],
+          "trabalhadores": [
+            {
+              "id": "pessoa:1",
+              "nome": "Juliana Barbosa",
+              "tipo": "pessoa",
+              "papel": "Garçonete",
+              "setor": "salao",
+              "fazendo": "Mesa 12: Chamou o garçom",
+              "desde": "2026-09-12T23:34:00.000Z",
+              "minutos_parado": 6,
+              "em_pausa": false
             },
             {
-              "id": "contagem:1",
-              "quando": "2026-09-11T19:40:00.000Z",
-              "setor": "doca",
-              "tipo": "contagem",
-              "titulo": "Contagem de estoque fechada",
-              "detalhe": null,
-              "quem": null,
-              "atencao": false
+              "id": "pessoa:2",
+              "nome": "Cida Nogueira",
+              "tipo": "pessoa",
+              "papel": "Cozinha",
+              "setor": "cozinha",
+              "fazendo": "Produziu 4 lote(s)",
+              "desde": "2026-09-12T23:26:00.000Z",
+              "minutos_parado": 14,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:3",
+              "nome": "Tiago Menezes",
+              "tipo": "pessoa",
+              "papel": "Barman",
+              "setor": "salao",
+              "fazendo": null,
+              "desde": "2026-09-12T22:48:00.000Z",
+              "minutos_parado": 52,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:4",
+              "nome": "Rose da Silva",
+              "tipo": "pessoa",
+              "papel": "Copa",
+              "setor": "salao",
+              "fazendo": null,
+              "desde": "2026-09-12T22:07:00.000Z",
+              "minutos_parado": 93,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:5",
+              "nome": "Marcos Aurélio",
+              "tipo": "pessoa",
+              "papel": "Segurança",
+              "setor": "porta",
+              "fazendo": null,
+              "desde": "2026-09-12T23:02:00.000Z",
+              "minutos_parado": 38,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:6",
+              "nome": "Val Prado",
+              "tipo": "pessoa",
+              "papel": "Subgerente",
+              "setor": "escritorio",
+              "fazendo": null,
+              "desde": "2026-09-12T23:20:00.000Z",
+              "minutos_parado": 20,
+              "em_pausa": true
+            },
+            {
+              "id": "agente:atendente",
+              "nome": "Atendente",
+              "tipo": "agente",
+              "papel": "Responde o WhatsApp",
+              "setor": "porta",
+              "fazendo": "Respondendo Renata",
+              "desde": "2026-09-12T23:36:00.000Z",
+              "minutos_parado": 4,
+              "em_pausa": false
+            },
+            {
+              "id": "agente:carteiro",
+              "nome": "Carteiro",
+              "tipo": "agente",
+              "papel": "Manda os avisos no WhatsApp",
+              "setor": "escritorio",
+              "fazendo": null,
+              "desde": "2026-09-12T20:40:00.000Z",
+              "minutos_parado": 180,
+              "em_pausa": false
             }
           ],
           "setoresMudos": []
         }
       }
     },
-    "so-o-agente": {
-      "rotulo": "casa que só tem o módulo de agente",
+    "tudo-ocioso": {
+      "rotulo": "terça de tarde: todo mundo parado",
       "rotas": {
         "GET /a-casa": {
-          "agora": "2026-09-12T20:40:00.000Z",
-          "desde": "2026-09-11T20:40:00.000Z",
+          "agora": "2026-09-12T23:40:00.000Z",
+          "desde": "2026-09-11T23:40:00.000Z",
           "timezone": "America/Cuiaba",
           "setores": [
             {
@@ -578,21 +746,34 @@
               "nome": "Doca",
               "legenda": "Mercadoria entrando e contagem",
               "modulo": "cmv",
-              "x": 16,
-              "y": 18,
-              "contratado": false,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
+              "x": 2,
+              "y": 3,
+              "w": 28,
+              "h": 28,
+              "contratado": true,
+              "quantos": 1,
+              "ultimo": {
+                "id": "compra:1",
+                "quando": "2026-09-12T21:10:00.000Z",
+                "setor": "doca",
+                "tipo": "recebimento",
+                "titulo": "Mercadoria recebida",
+                "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
+                "quem": "Seu Nilton",
+                "atencao": false
+              },
+              "minutos_parado": 150
             },
             {
               "id": "cozinha",
               "nome": "Cozinha",
               "legenda": "Produção das fichas técnicas",
               "modulo": "cmv",
-              "x": 50,
-              "y": 14,
-              "contratado": false,
+              "x": 32,
+              "y": 3,
+              "w": 34,
+              "h": 28,
+              "contratado": true,
               "quantos": 0,
               "ultimo": null,
               "minutos_parado": null
@@ -600,11 +781,13 @@
             {
               "id": "escritorio",
               "nome": "Escritório",
-              "legenda": "Ponto, escala e gorjeta",
+              "legenda": "Ponto, escala, gorjeta e avisos",
               "modulo": "rh",
-              "x": 84,
-              "y": 18,
-              "contratado": false,
+              "x": 68,
+              "y": 3,
+              "w": 30,
+              "h": 28,
+              "contratado": true,
               "quantos": 0,
               "ultimo": null,
               "minutos_parado": null
@@ -614,9 +797,11 @@
               "nome": "Salão",
               "legenda": "Mesas, garçons e cardápio",
               "modulo": "cardapio-digital",
-              "x": 50,
-              "y": 48,
-              "contratado": false,
+              "x": 2,
+              "y": 34,
+              "w": 96,
+              "h": 30,
+              "contratado": true,
               "quantos": 0,
               "ultimo": null,
               "minutos_parado": null
@@ -626,17 +811,251 @@
               "nome": "Porta",
               "legenda": "Reservas e o agente no WhatsApp",
               "modulo": "agentes-ia",
-              "x": 16,
-              "y": 80,
+              "x": 2,
+              "y": 67,
+              "w": 28,
+              "h": 30,
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "operacao",
+              "nome": "Rotinas",
+              "legenda": "Checklists do turno",
+              "modulo": "checklist",
+              "x": 32,
+              "y": 67,
+              "w": 34,
+              "h": 30,
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "opiniao",
+              "nome": "Opinião",
+              "legenda": "Pesquisa e avaliações",
+              "modulo": "clientes",
+              "x": 68,
+              "y": 67,
+              "w": 30,
+              "h": 30,
+              "contratado": true,
+              "quantos": 1,
+              "ultimo": {
+                "id": "google:1",
+                "quando": "2026-09-12T16:40:00.000Z",
+                "setor": "opiniao",
+                "tipo": "google",
+                "titulo": "Avaliação no Google: 2 estrela(s)",
+                "detalhe": "Demorou demais para sair a comida",
+                "quem": "Anderson",
+                "atencao": true
+              },
+              "minutos_parado": 420
+            }
+          ],
+          "fatos": [
+            {
+              "id": "compra:1",
+              "quando": "2026-09-12T21:10:00.000Z",
+              "setor": "doca",
+              "tipo": "recebimento",
+              "titulo": "Mercadoria recebida",
+              "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
+              "quem": "Seu Nilton",
+              "atencao": false
+            },
+            {
+              "id": "google:1",
+              "quando": "2026-09-12T16:40:00.000Z",
+              "setor": "opiniao",
+              "tipo": "google",
+              "titulo": "Avaliação no Google: 2 estrela(s)",
+              "detalhe": "Demorou demais para sair a comida",
+              "quem": "Anderson",
+              "atencao": true
+            }
+          ],
+          "trabalhadores": [
+            {
+              "id": "pessoa:1",
+              "nome": "Juliana Barbosa",
+              "tipo": "pessoa",
+              "papel": "Garçonete",
+              "setor": "salao",
+              "fazendo": null,
+              "desde": "2026-09-12T23:34:00.000Z",
+              "minutos_parado": 90,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:2",
+              "nome": "Cida Nogueira",
+              "tipo": "pessoa",
+              "papel": "Cozinha",
+              "setor": "cozinha",
+              "fazendo": null,
+              "desde": "2026-09-12T23:26:00.000Z",
+              "minutos_parado": 90,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:3",
+              "nome": "Tiago Menezes",
+              "tipo": "pessoa",
+              "papel": "Barman",
+              "setor": "salao",
+              "fazendo": null,
+              "desde": "2026-09-12T22:48:00.000Z",
+              "minutos_parado": 90,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:4",
+              "nome": "Rose da Silva",
+              "tipo": "pessoa",
+              "papel": "Copa",
+              "setor": "salao",
+              "fazendo": null,
+              "desde": "2026-09-12T22:07:00.000Z",
+              "minutos_parado": 90,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:5",
+              "nome": "Marcos Aurélio",
+              "tipo": "pessoa",
+              "papel": "Segurança",
+              "setor": "porta",
+              "fazendo": null,
+              "desde": "2026-09-12T23:02:00.000Z",
+              "minutos_parado": 90,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:6",
+              "nome": "Val Prado",
+              "tipo": "pessoa",
+              "papel": "Subgerente",
+              "setor": "escritorio",
+              "fazendo": null,
+              "desde": "2026-09-12T23:20:00.000Z",
+              "minutos_parado": 90,
+              "em_pausa": false
+            },
+            {
+              "id": "agente:atendente",
+              "nome": "Atendente",
+              "tipo": "agente",
+              "papel": "Responde o WhatsApp",
+              "setor": "porta",
+              "fazendo": null,
+              "desde": "2026-09-12T23:36:00.000Z",
+              "minutos_parado": 90,
+              "em_pausa": false
+            },
+            {
+              "id": "agente:carteiro",
+              "nome": "Carteiro",
+              "tipo": "agente",
+              "papel": "Manda os avisos no WhatsApp",
+              "setor": "escritorio",
+              "fazendo": null,
+              "desde": "2026-09-12T20:40:00.000Z",
+              "minutos_parado": 90,
+              "em_pausa": false
+            }
+          ],
+          "setoresMudos": []
+        }
+      }
+    },
+    "so-os-agentes": {
+      "rotulo": "madrugada: só os agentes de software na casa",
+      "rotas": {
+        "GET /a-casa": {
+          "agora": "2026-09-12T23:40:00.000Z",
+          "desde": "2026-09-11T23:40:00.000Z",
+          "timezone": "America/Cuiaba",
+          "setores": [
+            {
+              "id": "doca",
+              "nome": "Doca",
+              "legenda": "Mercadoria entrando e contagem",
+              "modulo": "cmv",
+              "x": 2,
+              "y": 3,
+              "w": 28,
+              "h": 28,
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "cozinha",
+              "nome": "Cozinha",
+              "legenda": "Produção das fichas técnicas",
+              "modulo": "cmv",
+              "x": 32,
+              "y": 3,
+              "w": 34,
+              "h": 28,
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "escritorio",
+              "nome": "Escritório",
+              "legenda": "Ponto, escala, gorjeta e avisos",
+              "modulo": "rh",
+              "x": 68,
+              "y": 3,
+              "w": 30,
+              "h": 28,
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "salao",
+              "nome": "Salão",
+              "legenda": "Mesas, garçons e cardápio",
+              "modulo": "cardapio-digital",
+              "x": 2,
+              "y": 34,
+              "w": 96,
+              "h": 30,
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "porta",
+              "nome": "Porta",
+              "legenda": "Reservas e o agente no WhatsApp",
+              "modulo": "agentes-ia",
+              "x": 2,
+              "y": 67,
+              "w": 28,
+              "h": 30,
               "contratado": true,
               "quantos": 2,
               "ultimo": {
                 "id": "reserva:1",
-                "quando": "2026-09-12T20:37:00.000Z",
+                "quando": "2026-09-12T23:37:00.000Z",
                 "setor": "porta",
                 "tipo": "reserva",
                 "titulo": "Reserva para 6 pessoa(s)",
-                "detalhe": "Renata Prado · para 12/09/2026 21:30",
+                "detalhe": "para 12/09/2026 21:30",
                 "quem": "Renata Prado",
                 "atencao": true
               },
@@ -647,9 +1066,11 @@
               "nome": "Rotinas",
               "legenda": "Checklists do turno",
               "modulo": "checklist",
-              "x": 50,
-              "y": 84,
-              "contratado": false,
+              "x": 32,
+              "y": 67,
+              "w": 34,
+              "h": 30,
+              "contratado": true,
               "quantos": 0,
               "ultimo": null,
               "minutos_parado": null
@@ -659,9 +1080,11 @@
               "nome": "Opinião",
               "legenda": "Pesquisa e avaliações",
               "modulo": "clientes",
-              "x": 84,
-              "y": 80,
-              "contratado": false,
+              "x": 68,
+              "y": 67,
+              "w": 30,
+              "h": 30,
+              "contratado": true,
               "quantos": 0,
               "ultimo": null,
               "minutos_parado": null
@@ -670,7 +1093,7 @@
           "fatos": [
             {
               "id": "reserva:1",
-              "quando": "2026-09-12T20:37:00.000Z",
+              "quando": "2026-09-12T23:37:00.000Z",
               "setor": "porta",
               "tipo": "reserva",
               "titulo": "Reserva para 6 pessoa(s)",
@@ -680,7 +1103,7 @@
             },
             {
               "id": "msg:1",
-              "quando": "2026-09-12T20:36:00.000Z",
+              "quando": "2026-09-12T23:36:00.000Z",
               "setor": "porta",
               "tipo": "agente-respondeu",
               "titulo": "O agente respondeu",
@@ -689,16 +1112,40 @@
               "atencao": false
             }
           ],
+          "trabalhadores": [
+            {
+              "id": "agente:atendente",
+              "nome": "Atendente",
+              "tipo": "agente",
+              "papel": "Responde o WhatsApp",
+              "setor": "porta",
+              "fazendo": "Respondendo Renata",
+              "desde": "2026-09-12T23:36:00.000Z",
+              "minutos_parado": 4,
+              "em_pausa": false
+            },
+            {
+              "id": "agente:carteiro",
+              "nome": "Carteiro",
+              "tipo": "agente",
+              "papel": "Manda os avisos no WhatsApp",
+              "setor": "escritorio",
+              "fazendo": null,
+              "desde": "2026-09-12T20:40:00.000Z",
+              "minutos_parado": 180,
+              "em_pausa": false
+            }
+          ],
           "setoresMudos": []
         }
       }
     },
-    "casa-quieta": {
-      "rotulo": "segunda de manhã, nada aconteceu",
+    "casa-vazia": {
+      "rotulo": "ninguém na casa e nada aconteceu",
       "rotas": {
         "GET /a-casa": {
-          "agora": "2026-09-12T20:40:00.000Z",
-          "desde": "2026-09-11T20:40:00.000Z",
+          "agora": "2026-09-12T23:40:00.000Z",
+          "desde": "2026-09-11T23:40:00.000Z",
           "timezone": "America/Cuiaba",
           "setores": [
             {
@@ -706,8 +1153,10 @@
               "nome": "Doca",
               "legenda": "Mercadoria entrando e contagem",
               "modulo": "cmv",
-              "x": 16,
-              "y": 18,
+              "x": 2,
+              "y": 3,
+              "w": 28,
+              "h": 28,
               "contratado": true,
               "quantos": 0,
               "ultimo": null,
@@ -718,8 +1167,10 @@
               "nome": "Cozinha",
               "legenda": "Produção das fichas técnicas",
               "modulo": "cmv",
-              "x": 50,
-              "y": 14,
+              "x": 32,
+              "y": 3,
+              "w": 34,
+              "h": 28,
               "contratado": true,
               "quantos": 0,
               "ultimo": null,
@@ -728,10 +1179,12 @@
             {
               "id": "escritorio",
               "nome": "Escritório",
-              "legenda": "Ponto, escala e gorjeta",
+              "legenda": "Ponto, escala, gorjeta e avisos",
               "modulo": "rh",
-              "x": 84,
-              "y": 18,
+              "x": 68,
+              "y": 3,
+              "w": 30,
+              "h": 28,
               "contratado": true,
               "quantos": 0,
               "ultimo": null,
@@ -742,8 +1195,10 @@
               "nome": "Salão",
               "legenda": "Mesas, garçons e cardápio",
               "modulo": "cardapio-digital",
-              "x": 50,
-              "y": 48,
+              "x": 2,
+              "y": 34,
+              "w": 96,
+              "h": 30,
               "contratado": true,
               "quantos": 0,
               "ultimo": null,
@@ -754,8 +1209,10 @@
               "nome": "Porta",
               "legenda": "Reservas e o agente no WhatsApp",
               "modulo": "agentes-ia",
-              "x": 16,
-              "y": 80,
+              "x": 2,
+              "y": 67,
+              "w": 28,
+              "h": 30,
               "contratado": true,
               "quantos": 0,
               "ultimo": null,
@@ -766,8 +1223,10 @@
               "nome": "Rotinas",
               "legenda": "Checklists do turno",
               "modulo": "checklist",
-              "x": 50,
-              "y": 84,
+              "x": 32,
+              "y": 67,
+              "w": 34,
+              "h": 30,
               "contratado": true,
               "quantos": 0,
               "ultimo": null,
@@ -778,8 +1237,10 @@
               "nome": "Opinião",
               "legenda": "Pesquisa e avaliações",
               "modulo": "clientes",
-              "x": 84,
-              "y": 80,
+              "x": 68,
+              "y": 67,
+              "w": 30,
+              "h": 30,
               "contratado": true,
               "quantos": 0,
               "ultimo": null,
@@ -787,16 +1248,17 @@
             }
           ],
           "fatos": [],
+          "trabalhadores": [],
           "setoresMudos": []
         }
       }
     },
-    "tudo-pedindo-atencao": {
-      "rotulo": "o dia em que tudo precisa de alguém",
+    "so-o-agente-contratado": {
+      "rotulo": "casa que só tem o módulo de agente",
       "rotas": {
         "GET /a-casa": {
-          "agora": "2026-09-12T20:40:00.000Z",
-          "desde": "2026-09-11T20:40:00.000Z",
+          "agora": "2026-09-12T23:40:00.000Z",
+          "desde": "2026-09-11T23:40:00.000Z",
           "timezone": "America/Cuiaba",
           "setores": [
             {
@@ -804,101 +1266,75 @@
               "nome": "Doca",
               "legenda": "Mercadoria entrando e contagem",
               "modulo": "cmv",
-              "x": 16,
-              "y": 18,
-              "contratado": true,
-              "quantos": 2,
-              "ultimo": {
-                "id": "compra:1",
-                "quando": "2026-09-12T18:20:00.000Z",
-                "setor": "doca",
-                "tipo": "recebimento",
-                "titulo": "Mercadoria recebida",
-                "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
-                "quem": "Distribuidora Cuiabá",
-                "atencao": true
-              },
-              "minutos_parado": 140
+              "x": 2,
+              "y": 3,
+              "w": 28,
+              "h": 28,
+              "contratado": false,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
             },
             {
               "id": "cozinha",
               "nome": "Cozinha",
               "legenda": "Produção das fichas técnicas",
               "modulo": "cmv",
-              "x": 50,
-              "y": 14,
-              "contratado": true,
-              "quantos": 1,
-              "ultimo": {
-                "id": "producao:1",
-                "quando": "2026-09-12T17:30:00.000Z",
-                "setor": "cozinha",
-                "tipo": "producao",
-                "titulo": "Produziu 4 lote(s)",
-                "detalhe": "Molho da casa",
-                "quem": null,
-                "atencao": true
-              },
-              "minutos_parado": 190
+              "x": 32,
+              "y": 3,
+              "w": 34,
+              "h": 28,
+              "contratado": false,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
             },
             {
               "id": "escritorio",
               "nome": "Escritório",
-              "legenda": "Ponto, escala e gorjeta",
+              "legenda": "Ponto, escala, gorjeta e avisos",
               "modulo": "rh",
-              "x": 84,
-              "y": 18,
-              "contratado": true,
-              "quantos": 2,
-              "ultimo": {
-                "id": "ponto:1",
-                "quando": "2026-09-12T20:18:00.000Z",
-                "setor": "escritorio",
-                "tipo": "ponto",
-                "titulo": "Bateu entrada",
-                "detalhe": null,
-                "quem": "Juliana",
-                "atencao": true
-              },
-              "minutos_parado": 22
+              "x": 68,
+              "y": 3,
+              "w": 30,
+              "h": 28,
+              "contratado": false,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
             },
             {
               "id": "salao",
               "nome": "Salão",
               "legenda": "Mesas, garçons e cardápio",
               "modulo": "cardapio-digital",
-              "x": 50,
-              "y": 48,
-              "contratado": true,
-              "quantos": 2,
-              "ultimo": {
-                "id": "mesa:1",
-                "quando": "2026-09-12T20:31:00.000Z",
-                "setor": "salao",
-                "tipo": "chamou",
-                "titulo": "Mesa 12: Chamou o garçom",
-                "detalhe": null,
-                "quem": "Mesa 12",
-                "atencao": true
-              },
-              "minutos_parado": 9
+              "x": 2,
+              "y": 34,
+              "w": 96,
+              "h": 30,
+              "contratado": false,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
             },
             {
               "id": "porta",
               "nome": "Porta",
               "legenda": "Reservas e o agente no WhatsApp",
               "modulo": "agentes-ia",
-              "x": 16,
-              "y": 80,
+              "x": 2,
+              "y": 67,
+              "w": 28,
+              "h": 30,
               "contratado": true,
               "quantos": 2,
               "ultimo": {
                 "id": "reserva:1",
-                "quando": "2026-09-12T20:37:00.000Z",
+                "quando": "2026-09-12T23:37:00.000Z",
                 "setor": "porta",
                 "tipo": "reserva",
                 "titulo": "Reserva para 6 pessoa(s)",
-                "detalhe": "Renata Prado · para 12/09/2026 21:30",
+                "detalhe": "para 12/09/2026 21:30",
                 "quem": "Renata Prado",
                 "atencao": true
               },
@@ -909,48 +1345,34 @@
               "nome": "Rotinas",
               "legenda": "Checklists do turno",
               "modulo": "checklist",
-              "x": 50,
-              "y": 84,
-              "contratado": true,
-              "quantos": 1,
-              "ultimo": {
-                "id": "checklist:1",
-                "quando": "2026-09-12T20:02:00.000Z",
-                "setor": "operacao",
-                "tipo": "checklist",
-                "titulo": "Checklist concluído",
-                "detalhe": "2 ponto(s) de atenção",
-                "quem": "Cida",
-                "atencao": true
-              },
-              "minutos_parado": 38
+              "x": 32,
+              "y": 67,
+              "w": 34,
+              "h": 30,
+              "contratado": false,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
             },
             {
               "id": "opiniao",
               "nome": "Opinião",
               "legenda": "Pesquisa e avaliações",
               "modulo": "clientes",
-              "x": 84,
-              "y": 80,
-              "contratado": true,
-              "quantos": 2,
-              "ultimo": {
-                "id": "resposta:1",
-                "quando": "2026-09-12T19:45:00.000Z",
-                "setor": "opiniao",
-                "tipo": "pesquisa",
-                "titulo": "Respondeu a pesquisa: nota 9",
-                "detalhe": "Atendimento rápido e comida boa demais",
-                "quem": "Paulo",
-                "atencao": true
-              },
-              "minutos_parado": 55
+              "x": 68,
+              "y": 67,
+              "w": 30,
+              "h": 30,
+              "contratado": false,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
             }
           ],
           "fatos": [
             {
               "id": "reserva:1",
-              "quando": "2026-09-12T20:37:00.000Z",
+              "quando": "2026-09-12T23:37:00.000Z",
               "setor": "porta",
               "tipo": "reserva",
               "titulo": "Reserva para 6 pessoa(s)",
@@ -960,113 +1382,26 @@
             },
             {
               "id": "msg:1",
-              "quando": "2026-09-12T20:36:00.000Z",
+              "quando": "2026-09-12T23:36:00.000Z",
               "setor": "porta",
               "tipo": "agente-respondeu",
               "titulo": "O agente respondeu",
               "detalhe": "Temos mesa para 6 às 21h30, posso confirmar?",
               "quem": "Renata Prado",
-              "atencao": true
-            },
+              "atencao": false
+            }
+          ],
+          "trabalhadores": [
             {
-              "id": "mesa:1",
-              "quando": "2026-09-12T20:31:00.000Z",
-              "setor": "salao",
-              "tipo": "chamou",
-              "titulo": "Mesa 12: Chamou o garçom",
-              "detalhe": null,
-              "quem": "Mesa 12",
-              "atencao": true
-            },
-            {
-              "id": "ponto:1",
-              "quando": "2026-09-12T20:18:00.000Z",
-              "setor": "escritorio",
-              "tipo": "ponto",
-              "titulo": "Bateu entrada",
-              "detalhe": null,
-              "quem": "Juliana",
-              "atencao": true
-            },
-            {
-              "id": "checklist:1",
-              "quando": "2026-09-12T20:02:00.000Z",
-              "setor": "operacao",
-              "tipo": "checklist",
-              "titulo": "Checklist concluído",
-              "detalhe": "2 ponto(s) de atenção",
-              "quem": "Cida",
-              "atencao": true
-            },
-            {
-              "id": "mesa:2",
-              "quando": "2026-09-12T19:59:00.000Z",
-              "setor": "salao",
-              "tipo": "curtiu",
-              "titulo": "Mesa 7: Curtiu um item",
-              "detalhe": "Costela no bafo",
-              "quem": "Mesa 7",
-              "atencao": true
-            },
-            {
-              "id": "resposta:1",
-              "quando": "2026-09-12T19:45:00.000Z",
-              "setor": "opiniao",
-              "tipo": "pesquisa",
-              "titulo": "Respondeu a pesquisa: nota 9",
-              "detalhe": "Atendimento rápido e comida boa demais",
-              "quem": "Paulo",
-              "atencao": true
-            },
-            {
-              "id": "compra:1",
-              "quando": "2026-09-12T18:20:00.000Z",
-              "setor": "doca",
-              "tipo": "recebimento",
-              "titulo": "Mercadoria recebida",
-              "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
-              "quem": "Distribuidora Cuiabá",
-              "atencao": true
-            },
-            {
-              "id": "producao:1",
-              "quando": "2026-09-12T17:30:00.000Z",
-              "setor": "cozinha",
-              "tipo": "producao",
-              "titulo": "Produziu 4 lote(s)",
-              "detalhe": "Molho da casa",
-              "quem": null,
-              "atencao": true
-            },
-            {
-              "id": "ponto:2",
-              "quando": "2026-09-12T15:40:00.000Z",
-              "setor": "escritorio",
-              "tipo": "ponto",
-              "titulo": "Bateu saída",
-              "detalhe": null,
-              "quem": "Tiago",
-              "atencao": true
-            },
-            {
-              "id": "google:1",
-              "quando": "2026-09-12T13:40:00.000Z",
-              "setor": "opiniao",
-              "tipo": "google",
-              "titulo": "Avaliação no Google: 2 estrela(s)",
-              "detalhe": "Demorou demais para sair a comida",
-              "quem": "Anderson",
-              "atencao": true
-            },
-            {
-              "id": "contagem:1",
-              "quando": "2026-09-11T19:40:00.000Z",
-              "setor": "doca",
-              "tipo": "contagem",
-              "titulo": "Contagem de estoque fechada",
-              "detalhe": null,
-              "quem": null,
-              "atencao": true
+              "id": "agente:atendente",
+              "nome": "Atendente",
+              "tipo": "agente",
+              "papel": "Responde o WhatsApp",
+              "setor": "porta",
+              "fazendo": "Respondendo Renata",
+              "desde": "2026-09-12T23:36:00.000Z",
+              "minutos_parado": 4,
+              "em_pausa": false
             }
           ],
           "setoresMudos": []

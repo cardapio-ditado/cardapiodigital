@@ -2,31 +2,33 @@ import { get } from "../api.js";
 import { el, icone, limpar, vazio } from "../ui.js";
 
 /**
- * A CASA AO VIVO — a planta do bar, com o que está acontecendo em cada setor.
+ * A CASA AGORA — a planta do bar como um escritório visto de cima.
  *
- * O painel conta a verdade repartida em dez telas. Quem abre de manhã quer
- * uma coisa só: "o que andou acontecendo na minha casa?". Aqui a casa vira
- * planta vista de cima, e cada fato aparece NO LUGAR onde ele acontece — a
- * mercadoria na doca, a reserva na porta, o ponto no escritório.
+ * Sete salas com parede, e dentro delas os bonecos de quem está na casa: as
+ * pessoas com o ponto aberto e os agentes de software. Cada boneco anda pela
+ * sala dele e carrega na cabeça o que está fazendo — ou "ocioso", e há quanto
+ * tempo.
  *
- * O bonequinho que atravessa a planta não é enfeite: ele diz DE ONDE PARA
- * ONDE a coisa foi, e é isso que faz o dono perceber num relance que a doca
- * está parada há três dias sem ler número nenhum.
+ * "Ocioso" aqui é informação de verdade, não enfeite. Agente ocioso é o
+ * normal: ninguém escreveu. Cozinheiro ocioso às três da tarde também. O que
+ * esta tela entrega é o CONTRASTE — três garçons ociosos às nove da noite de
+ * sexta salta aos olhos de qualquer um, e não há relatório que faça isso tão
+ * rápido.
  *
- * Três cuidados que a tela toma:
- *   · na primeira carga ninguém anda. Vinte e quatro horas de fatos viraria
- *     um formigueiro, e o que interessa é o estado, não a chegada.
- *   · com a aba escondida a tela para de perguntar. Não faz sentido o
- *     celular no bolso buscar movimento a cada quinze segundos.
- *   · quem pediu menos animação no sistema não vê bonequinho andando; o
- *     setor pisca e pronto.
+ * Cuidados que a tela toma:
+ *   · com a aba escondida ela para de perguntar;
+ *   · quem pediu menos animação no aparelho vê os bonecos parados nos
+ *     lugares, sem caminhada;
+ *   · no celular as salas viram cartões empilhados com os bonecos em fila —
+ *     sete salas lado a lado em 400px não se leem.
  */
 
 const QUANTO_ESPERA_MS = 15_000;
-/** Depois disto, o setor deixa de ser "vivo" e vira "quieto". */
+/** Depois disto, a sala deixa de ser "viva" e vira "quieta". */
 const MINUTOS_ATE_ESFRIAR = 45;
-/** Quantos bonequinhos podem estar na planta ao mesmo tempo. */
-const BONECOS_AO_MESMO_TEMPO = 4;
+/** De quanto em quanto tempo um boneco escolhe um novo lugar na sala. */
+const PASSO_TRABALHANDO = [2600, 4200];
+const PASSO_OCIOSO = [7000, 12_000];
 
 const ICONE_DO_SETOR = {
   doca: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10",
@@ -38,19 +40,18 @@ const ICONE_DO_SETOR = {
   opiniao: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z",
 };
 
-/** De onde o bonequinho sai: a porta da rua, no canto de baixo. */
-const ENTRADA = { x: 4, y: 95 };
-
 const menosAnimacao = () =>
   typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+const sorteio = (de, ate) => de + Math.random() * (ate - de);
+
 export async function aCasa(raiz, ctx) {
   let dados = null;
-  let vistos = new Set();
+  const vistos = new Set();
   let pausado = false;
   let relogio = null;
-  const fila = [];
-  let andando = 0;
+  /** Um passeio por boneco: `setTimeout` que se reagenda sozinho. */
+  const passeios = new Set();
 
   const planta = el("div", { classe: "planta" });
   const lista = el("div", {});
@@ -62,6 +63,7 @@ export async function aCasa(raiz, ctx) {
   // batendo em segundo plano e a casa inteira é buscada para ninguém.
   ctx.aoSair(() => {
     clearInterval(relogio);
+    pararPasseios();
     document.removeEventListener("visibilitychange", aoTrocarDeAba);
   });
   document.addEventListener("visibilitychange", aoTrocarDeAba);
@@ -77,6 +79,11 @@ export async function aCasa(raiz, ctx) {
     if (!document.hidden && !pausado) void buscar({ primeira: false });
   }
 
+  function pararPasseios() {
+    for (const t of passeios) clearTimeout(t);
+    passeios.clear();
+  }
+
   /* ================= Dados ================= */
 
   async function buscar({ primeira }) {
@@ -89,31 +96,27 @@ export async function aCasa(raiz, ctx) {
       return;
     }
 
-    if (primeira) {
-      dados = novo;
-      // A primeira carga é estado, não chegada: ninguém anda.
-      for (const f of novo.fatos) vistos.add(f.id);
-      desenhar();
-      return;
-    }
+    const novidades = primeira ? [] : novo.fatos.filter((f) => !vistos.has(f.id));
+    for (const f of novo.fatos) vistos.add(f.id);
 
-    const novidades = novo.fatos.filter((f) => !vistos.has(f.id));
-    for (const f of novidades) vistos.add(f.id);
-    // A janela incremental só traz o que é novo; o resto continua valendo.
-    dados = {
-      ...novo,
-      fatos: [...novidades, ...dados.fatos].slice(0, 60),
-      setores: juntarSetores(dados.setores, novo.setores),
-    };
+    dados = primeira
+      ? novo
+      : {
+        ...novo,
+        // A janela incremental só traz o que é novo; o resto continua valendo.
+        fatos: [...novidades, ...dados.fatos].slice(0, 60),
+        setores: juntarSetores(dados.setores, novo.setores),
+      };
+
     desenhar();
-    for (const f of novidades.slice().reverse()) enfileirar(f);
+    for (const f of novidades) avisarNaSala(f.setor);
   }
 
   /**
-   * O setor novo manda no que ele sabe, mas não apaga o que já havia.
+   * A sala nova manda no que ela sabe, mas não apaga o que já havia.
    *
    * A busca incremental só olha os últimos quinze segundos: se ela mandasse
-   * sozinha, todo setor viraria "nada ainda" a cada volta do relógio.
+   * sozinha, toda sala viraria "sem movimento" a cada volta do relógio.
    */
   function juntarSetores(antigos, novos) {
     return novos.map((n) => {
@@ -133,15 +136,21 @@ export async function aCasa(raiz, ctx) {
 
   function desenharCabecalho() {
     const atencao = dados.fatos.filter((f) => f.atencao).length;
+    const gente = dados.trabalhadores ?? [];
+    const ociosos = gente.filter((t) => !t.fazendo && !t.em_pausa).length;
+
     limpar(cabecalho).append(
       el("div", { classe: "cabecalho-secao" }, [
         el("div", {}, [
           el("h2", { texto: "A casa agora" }),
           el("p", {
             classe: "muted",
-            texto: dados.fatos.length
-              ? `${dados.fatos.length} coisa(s) nas últimas 24 horas${atencao ? ` · ${atencao} pedindo atenção` : ""}`
-              : "Nada aconteceu nas últimas 24 horas.",
+            texto: [
+              gente.length ? `${gente.length} na casa` : "ninguém na casa",
+              ociosos ? `${ociosos} ocioso(s)` : null,
+              dados.fatos.length ? `${dados.fatos.length} coisa(s) em 24 h` : null,
+              atencao ? `${atencao} pedindo atenção` : null,
+            ].filter(Boolean).join(" · "),
           }),
         ]),
         el("div", { classe: "reserva-acoes" }, [
@@ -163,42 +172,122 @@ export async function aCasa(raiz, ctx) {
   }
 
   function desenharPlanta() {
+    pararPasseios();
     limpar(planta);
-    planta.append(el("span", { classe: "planta-rotulo", texto: "entrada" , style: `left:${ENTRADA.x}%;top:${ENTRADA.y}%`}));
-    for (const setor of dados.setores) planta.append(cartaoDoSetor(setor));
+
+    for (const setor of dados.setores) {
+      const moradores = (dados.trabalhadores ?? []).filter((t) => t.setor === setor.id);
+      planta.append(sala(setor, moradores));
+    }
+    if (!menosAnimacao()) {
+      for (const node of planta.querySelectorAll(".boneco")) passear(node);
+    }
   }
 
-  function cartaoDoSetor(setor) {
+  function sala(setor, moradores) {
     const vivo = setor.minutos_parado !== null && setor.minutos_parado <= MINUTOS_ATE_ESFRIAR;
     const precisa = setor.ultimo?.atencao === true;
-    const classe = !setor.contratado
-      ? "setor setor-apagado"
-      : precisa
-        ? "setor setor-atencao"
-        : vivo
-          ? "setor setor-vivo"
-          : "setor";
+    const estado = !setor.contratado ? "sala-apagada" : precisa ? "sala-atencao" : vivo ? "sala-viva" : "";
 
     return el("div", {
-      classe,
+      classe: `sala ${estado}`.trim(),
       "data-setor": setor.id,
-      style: `left:${setor.x}%;top:${setor.y}%`,
+      style: `left:${setor.x}%;top:${setor.y}%;width:${setor.w}%;height:${setor.h}%`,
       title: setor.contratado ? setor.legenda : `${setor.legenda} — a casa não contratou este módulo`,
     }, [
-      el("div", { classe: "setor-topo" }, [
-        icone(ICONE_DO_SETOR[setor.id] ?? ICONE_DO_SETOR.salao, 18),
+      el("div", { classe: "sala-placa" }, [
+        icone(ICONE_DO_SETOR[setor.id] ?? ICONE_DO_SETOR.salao, 15),
         el("strong", { texto: setor.nome }),
         setor.contratado && setor.quantos > 0
-          ? el("span", { classe: "setor-conta", texto: String(setor.quantos) })
+          ? el("span", { classe: "sala-conta", texto: String(setor.quantos) })
           : null,
       ]),
-      !setor.contratado
-        ? el("span", { classe: "setor-linha muted", texto: "não contratado" })
-        : el("span", { classe: "setor-linha", texto: setor.ultimo ? setor.ultimo.titulo : "sem movimento" }),
+      el("div", { classe: "sala-piso" },
+        !setor.contratado
+          ? [el("span", { classe: "sala-vazia", texto: "não contratado" })]
+          : moradores.length === 0
+            ? [el("span", { classe: "sala-vazia", texto: "ninguém aqui agora" })]
+            : moradores.map((t, i) => boneco(t, lugarNaSala(i, moradores.length)))),
       setor.contratado
-        ? el("span", { classe: "setor-quando", texto: comoFazTempo(setor.minutos_parado) })
+        ? el("span", { classe: "sala-rodape", texto: setor.ultimo ? setor.ultimo.titulo : "sem movimento" })
         : null,
     ]);
+  }
+
+  /**
+   * Onde o i-ésimo de n colegas fica na sala.
+   *
+   * Repartido, e não sorteado: com posição aleatória dois bonecos nasciam
+   * colados e as etiquetas de cabeça se cobriam — que é justamente o texto
+   * que a tela existe para mostrar. A altura alterna entre duas faixas para
+   * as etiquetas de vizinhos também não baterem.
+   */
+  function lugarNaSala(i, n) {
+    const x = n === 1 ? 50 : 16 + ((i + 0.5) / n) * 68;
+    const y = n === 1 ? 52 : i % 2 === 0 ? 42 : 66;
+    return { x, y };
+  }
+
+  /**
+   * O boneco: cabeça com as iniciais, tronco, e a etiqueta em cima dizendo o
+   * que ele está fazendo.
+   */
+  function boneco(t, lugar) {
+    const ocioso = !t.fazendo && !t.em_pausa;
+    const classe = [
+      "boneco",
+      t.tipo === "agente" ? "boneco-agente" : "boneco-pessoa",
+      t.em_pausa ? "boneco-pausa" : ocioso ? "boneco-ocioso" : "boneco-ativo",
+    ].join(" ");
+
+    const dizer = t.em_pausa
+      ? "em pausa"
+      : t.fazendo
+        ? t.fazendo
+        : `ocioso ${comoFazTempo(t.minutos_parado)}`.trim();
+
+    const node = el("div", {
+      classe,
+      style: `left:${lugar.x.toFixed(1)}%;top:${lugar.y.toFixed(1)}%`,
+      title: [t.nome, t.papel, dizer].filter(Boolean).join(" · "),
+    }, [
+      el("span", { classe: "boneco-etiqueta", texto: dizer }),
+      el("span", { classe: "boneco-corpo" }, [
+        el("span", { classe: "boneco-cabeca", texto: iniciais(t.nome) }),
+        el("span", { classe: "boneco-tronco" }),
+      ]),
+      el("span", { classe: "boneco-nome", texto: primeiroNome(t.nome) }),
+    ]);
+    // O lugar de origem fica guardado: o passeio é um vaivém em torno dele,
+    // e não uma corrida pela sala inteira que embaralharia todo mundo.
+    node.dataset.casa = `${lugar.x},${lugar.y}`;
+    return node;
+  }
+
+  /** Um passo a cada tantos segundos: quem trabalha anda mais que quem não. */
+  function passear(node) {
+    const parado = node.classList.contains("boneco-ocioso") || node.classList.contains("boneco-pausa");
+    const [de, ate] = parado ? PASSO_OCIOSO : PASSO_TRABALHANDO;
+    const [casaX, casaY] = String(node.dataset.casa ?? "50,52").split(",").map(Number);
+    // O passo é curto: ninguém atravessa a sala de uma vez, e ninguém pisa
+    // no lugar do colega.
+    const raio = parado ? 5 : 9;
+
+    const t = setTimeout(() => {
+      passeios.delete(t);
+      node.style.left = `${Math.min(86, Math.max(14, casaX + sorteio(-raio, raio))).toFixed(1)}%`;
+      node.style.top = `${Math.min(74, Math.max(30, casaY + sorteio(-raio / 2, raio / 2))).toFixed(1)}%`;
+      passear(node);
+    }, sorteio(de, ate));
+    passeios.add(t);
+  }
+
+  /** Chegou fato novo numa sala: ela pisca, para o olho perceber de longe. */
+  function avisarNaSala(setor) {
+    const node = planta.querySelector(`[data-setor="${setor}"]`);
+    if (!node) return;
+    node.classList.add("sala-piscou");
+    setTimeout(() => node.classList.remove("sala-piscou"), 1200);
   }
 
   function desenharLista() {
@@ -230,65 +319,12 @@ export async function aCasa(raiz, ctx) {
       ]),
     );
   }
-
-  /* ================= Os bonequinhos ================= */
-
-  function enfileirar(fato) {
-    // Quem pediu menos animação no aparelho não ganha bonequinho: o setor já
-    // mudou de cor e de texto sozinho, que é a informação.
-    if (menosAnimacao()) return;
-    fila.push(fato);
-    puxarDaFila();
-  }
-
-  function puxarDaFila() {
-    while (andando < BONECOS_AO_MESMO_TEMPO && fila.length > 0) andar(fila.shift());
-  }
-
-  function andar(fato) {
-    const setor = dados.setores.find((s) => s.id === fato.setor);
-    if (!setor || !setor.contratado) return;
-
-    andando += 1;
-    const boneco = el("div", {
-      classe: `boneco ${fato.atencao ? "boneco-atencao" : ""}`.trim(),
-      style: `left:${ENTRADA.x}%;top:${ENTRADA.y}%`,
-    }, [
-      el("span", { classe: "boneco-inicial", texto: inicial(fato.quem) }),
-      el("span", { classe: "balao" }, [
-        el("strong", { texto: fato.titulo }),
-        fato.quem ? el("small", { texto: primeiroNome(fato.quem) }) : null,
-      ]),
-    ]);
-    planta.append(boneco);
-
-    // Dois quadros antes de mover: o navegador precisa pintar a posição de
-    // partida, senão ele "aparece" já no destino e não há caminhada.
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      boneco.style.left = `${setor.x}%`;
-      boneco.style.top = `${setor.y + 9}%`;
-      boneco.classList.add("boneco-andando");
-    }));
-
-    setTimeout(() => boneco.classList.add("boneco-chegou"), 2200);
-    setTimeout(() => {
-      const cartao = planta.querySelector(`[data-setor="${fato.setor}"]`);
-      cartao?.classList.add("setor-piscou");
-      setTimeout(() => cartao?.classList.remove("setor-piscou"), 900);
-      boneco.classList.add("boneco-saindo");
-    }, 5200);
-    setTimeout(() => {
-      boneco.remove();
-      andando -= 1;
-      puxarDaFila();
-    }, 6000);
-  }
 }
 
 /* ================= Miudezas ================= */
 
 function comoFazTempo(minutos) {
-  if (minutos === null || minutos === undefined) return "nada ainda";
+  if (minutos === null || minutos === undefined) return "";
   if (minutos < 1) return "agora mesmo";
   if (minutos < 60) return `há ${minutos} min`;
   const horas = Math.floor(minutos / 60);
@@ -301,9 +337,12 @@ function primeiroNome(nome) {
   return String(nome ?? "").trim().split(/\s+/)[0] ?? "";
 }
 
-function inicial(nome) {
-  const primeiro = primeiroNome(nome);
-  return primeiro ? primeiro[0].toUpperCase() : "•";
+/** Duas letras cabem na cabeça do boneco; três já viram borrão. */
+function iniciais(nome) {
+  const partes = String(nome ?? "").trim().split(/\s+/).filter(Boolean);
+  if (partes.length === 0) return "•";
+  if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+  return (partes[0][0] + partes[1][0]).toUpperCase();
 }
 
 /**

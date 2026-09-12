@@ -35,9 +35,11 @@ export interface Setor {
   legenda: string;
   /** O módulo que alimenta o setor. `null` = todo cliente tem. */
   modulo: string | null;
-  /** Onde o setor fica na planta, em porcentagem da largura e da altura. */
+  /** A SALA, em porcentagem da planta: canto de cima à esquerda e tamanho. */
   x: number;
   y: number;
+  w: number;
+  h: number;
   contratado: boolean;
   /** Fatos deste setor na janela lida. */
   quantos: number;
@@ -55,28 +57,99 @@ export interface Fato {
   tipo: string;
   titulo: string;
   detalhe: string | null;
-  /** De quem é o fato — vira o nome do bonequinho que anda na planta. */
+  /** De quem é o fato — é por aqui que ele acha o boneco de quem o fez. */
   quem: string | null;
   /** Precisa de alguém: reserva esperando, nota baixa, checklist com alerta. */
   atencao: boolean;
 }
 
 /**
- * A planta.
+ * Quem está na casa agora — de carne ou de software.
  *
- * As posições são as de um salão visto de cima: a porta embaixo à esquerda
- * (por onde o cliente entra), o salão no meio, a cozinha e a doca no fundo.
- * Quem conhece o próprio bar lê isto sem legenda.
+ * O boneco de cada um anda na sala dele e carrega na cabeça o que está
+ * fazendo. "Ocioso" aqui é informação de verdade, não enfeite: garçom ocioso
+ * às nove da noite de sexta é um problema, e agente ocioso é o normal.
+ */
+export interface Trabalhador {
+  id: string;
+  nome: string;
+  /** `pessoa` bate ponto; `agente` é rotina do sistema. */
+  tipo: "pessoa" | "agente";
+  /** A função de quem é gente; o que faz, no caso do agente. */
+  papel: string | null;
+  setor: string;
+  /** O que está fazendo agora. `null` = ocioso. */
+  fazendo: string | null;
+  /** Desde quando está nisto — ou desde quando está parado. */
+  desde: string | null;
+  minutos_parado: number | null;
+  /** Saiu para a pausa: está na casa, mas não está trabalhando. */
+  em_pausa: boolean;
+}
+
+/**
+ * A planta: sete salas, como um bar visto de cima.
+ *
+ * A porta embaixo à esquerda (por onde o cliente entra), o salão atravessando
+ * o meio, e cozinha, doca e escritório no fundo. Quem conhece o próprio bar
+ * lê isto sem legenda.
  */
 export const SETORES: Array<Omit<Setor, "contratado" | "quantos" | "ultimo" | "minutos_parado">> = [
-  { id: "doca", nome: "Doca", legenda: "Mercadoria entrando e contagem", modulo: "cmv", x: 16, y: 18 },
-  { id: "cozinha", nome: "Cozinha", legenda: "Produção das fichas técnicas", modulo: "cmv", x: 50, y: 14 },
-  { id: "escritorio", nome: "Escritório", legenda: "Ponto, escala e gorjeta", modulo: "rh", x: 84, y: 18 },
-  { id: "salao", nome: "Salão", legenda: "Mesas, garçons e cardápio", modulo: "cardapio-digital", x: 50, y: 48 },
-  { id: "porta", nome: "Porta", legenda: "Reservas e o agente no WhatsApp", modulo: "agentes-ia", x: 16, y: 80 },
-  { id: "operacao", nome: "Rotinas", legenda: "Checklists do turno", modulo: "checklist", x: 50, y: 84 },
-  { id: "opiniao", nome: "Opinião", legenda: "Pesquisa e avaliações", modulo: "clientes", x: 84, y: 80 },
+  { id: "doca", nome: "Doca", legenda: "Mercadoria entrando e contagem", modulo: "cmv", x: 2, y: 3, w: 28, h: 28 },
+  { id: "cozinha", nome: "Cozinha", legenda: "Produção das fichas técnicas", modulo: "cmv", x: 32, y: 3, w: 34, h: 28 },
+  { id: "escritorio", nome: "Escritório", legenda: "Ponto, escala, gorjeta e avisos", modulo: "rh", x: 68, y: 3, w: 30, h: 28 },
+  { id: "salao", nome: "Salão", legenda: "Mesas, garçons e cardápio", modulo: "cardapio-digital", x: 2, y: 34, w: 96, h: 30 },
+  { id: "porta", nome: "Porta", legenda: "Reservas e o agente no WhatsApp", modulo: "agentes-ia", x: 2, y: 67, w: 28, h: 30 },
+  { id: "operacao", nome: "Rotinas", legenda: "Checklists do turno", modulo: "checklist", x: 32, y: 67, w: 34, h: 30 },
+  { id: "opiniao", nome: "Opinião", legenda: "Pesquisa e avaliações", modulo: "clientes", x: 68, y: 67, w: 30, h: 30 },
 ];
+
+/**
+ * Onde cada função trabalha.
+ *
+ * Casado por pedaço do nome e sem acento, porque o cadastro do bar tem
+ * "GARCOM", "garçom" e "Garçonete" na mesma lista — e ninguém vai normalizar
+ * isso à mão.
+ */
+const FUNCAO_NO_SETOR: Array<[string, string]> = [
+  ["cozinh", "cozinha"],
+  ["chapeir", "cozinha"],
+  ["pizzaiol", "cozinha"],
+  ["confeit", "cozinha"],
+  ["estoqu", "doca"],
+  ["almox", "doca"],
+  ["compr", "doca"],
+  ["receb", "doca"],
+  ["gerent", "escritorio"],
+  ["administrat", "escritorio"],
+  ["financ", "escritorio"],
+  ["caixa", "escritorio"],
+  ["rh", "escritorio"],
+  ["seguran", "porta"],
+  ["portari", "porta"],
+  ["recep", "porta"],
+  ["hostes", "porta"],
+  ["host", "porta"],
+  ["limpez", "operacao"],
+  ["manuten", "operacao"],
+];
+
+/** Sem acento e em minúscula, para o cadastro torto não atrapalhar. */
+function simples(txt: string): string {
+  return txt.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
+export function setorDaFuncao(funcao: string | null): string {
+  const alvo = simples(String(funcao ?? ""));
+  if (!alvo) return "salao";
+  for (const [pedaco, setor] of FUNCAO_NO_SETOR) {
+    if (alvo.includes(pedaco)) return setor;
+  }
+  // Garçom, barman, copa e o que mais não se encaixar: o salão é o padrão,
+  // porque é onde fica a maior parte da equipe de um bar.
+  return "salao";
+}
+
 
 // ============================================================
 // Contas puras — sem banco, testáveis
@@ -144,11 +217,63 @@ export function comoFazTempo(minutos: number | null): string {
   return dias === 1 ? "ontem" : `há ${dias} dias`;
 }
 
-/** O primeiro nome, que é o que cabe embaixo do bonequinho. */
+/** O primeiro nome, que é o que cabe embaixo do boneco. */
 export function primeiroNome(nome: string | null): string | null {
   const limpo = String(nome ?? "").trim();
   if (!limpo) return null;
   return limpo.split(/\s+/)[0]!;
+}
+
+/** Depois disto, quem não fez nada aparece como ocioso. */
+export const MINUTOS_PARA_OCIOSO = 25;
+
+/**
+ * O que cada um está fazendo agora.
+ *
+ * A regra é simples e honesta: o último fato DA PESSOA manda, se for
+ * recente. Não havendo, ela está ociosa — e a tela diz há quanto tempo.
+ *
+ * Ocioso não é acusação: agente ocioso é o normal (ninguém escreveu), e
+ * cozinheiro ocioso às três da tarde também. O que a tela entrega é o
+ * contraste — garçom ocioso às nove da noite de sexta salta aos olhos.
+ */
+export function oQueCadaUmFaz(params: {
+  trabalhadores: Trabalhador[];
+  fatos: Fato[];
+  agora: string;
+  minutosParaOcioso?: number;
+}): Trabalhador[] {
+  const limite = params.minutosParaOcioso ?? MINUTOS_PARA_OCIOSO;
+
+  return params.trabalhadores.map((t) => {
+    // Quem já veio com tarefa da própria fonte (o agente sabe o que está
+    // respondendo) não precisa que ninguém adivinhe por ele.
+    if (t.fazendo) return t;
+    if (t.em_pausa) {
+      return { ...t, fazendo: null, minutos_parado: t.desde ? minutosEntre(t.desde, params.agora) : null };
+    }
+
+    const meus = params.fatos.filter((f) => ehDaPessoa(f, t));
+    const ultimo = meus[0] ?? null;
+    const desde = ultimo?.quando ?? t.desde ?? null;
+    const parado = desde ? minutosEntre(desde, params.agora) : null;
+    const trabalhando = ultimo !== null && parado !== null && parado <= limite;
+
+    return {
+      ...t,
+      fazendo: trabalhando ? ultimo!.titulo : null,
+      desde,
+      minutos_parado: parado,
+    };
+  });
+}
+
+/** O fato é desta pessoa? Casa pelo nome, que é o que as fontes carregam. */
+function ehDaPessoa(fato: Fato, t: Trabalhador): boolean {
+  if (!fato.quem) return false;
+  const dele = simples(t.nome);
+  const doFato = simples(fato.quem);
+  return doFato === dele || doFato.startsWith(`${dele} `) || dele.startsWith(`${doFato} `);
 }
 
 // ============================================================
@@ -472,6 +597,141 @@ const FONTES: Array<{ modulo: string; fonte: Fonte }> = [
 ];
 
 // ============================================================
+// Quem está na casa agora
+// ============================================================
+
+/** A última batida manda: entrada e volta põem na casa; pausa e saída tiram. */
+const NA_CASA = new Set(["entrada", "volta"]);
+
+/**
+ * As pessoas com o ponto aberto.
+ *
+ * Lê as batidas das últimas dezoito horas e fica com a última de cada um —
+ * dezoito horas porque o turno de bar atravessa a madrugada, e pedir o "dia
+ * operacional" aqui amarraria esta tela à configuração do CMV.
+ */
+async function pessoasNaCasa(venueId: string): Promise<Trabalhador[]> {
+  const desde = new Date(Date.now() - 18 * 3600_000).toISOString();
+  const { data } = await cliente()
+    .from("rh_pontos")
+    .select("atendente_id, tipo, momento")
+    .eq("venue_id", venueId)
+    .gte("momento", desde)
+    .order("momento", { ascending: true });
+
+  const ultima = new Map<string, { tipo: string; momento: string }>();
+  for (const b of (data ?? []) as Array<{ atendente_id: string; tipo: string; momento: string }>) {
+    ultima.set(b.atendente_id, { tipo: b.tipo, momento: b.momento });
+  }
+  const dentro = [...ultima.entries()].filter(([, b]) => NA_CASA.has(b.tipo) || b.tipo === "pausa");
+  if (dentro.length === 0) return [];
+
+  const { data: pessoas } = await cliente()
+    .from("pesquisa_atendentes")
+    .select("id, nome, apelido, funcao")
+    .eq("venue_id", venueId)
+    .in("id", dentro.map(([id]) => id));
+
+  const cadastro = new Map(
+    ((pessoas ?? []) as Array<{ id: string; nome: string; apelido: string | null; funcao: string | null }>)
+      .map((p) => [p.id, p]),
+  );
+
+  return dentro.map(([id, batida]) => {
+    const pessoa = cadastro.get(id);
+    return {
+      id: `pessoa:${id}`,
+      nome: pessoa?.apelido || pessoa?.nome || "Alguém",
+      tipo: "pessoa" as const,
+      papel: pessoa?.funcao ?? null,
+      setor: setorDaFuncao(pessoa?.funcao ?? null),
+      fazendo: null,
+      desde: batida.momento,
+      minutos_parado: null,
+      em_pausa: batida.tipo === "pausa",
+    };
+  });
+}
+
+/**
+ * Os agentes de software, que também moram na casa.
+ *
+ * São dois, e os dois são verdade conferível: o que atende no WhatsApp e o
+ * que despacha a fila de avisos. Inventar um terceiro "robô do estoque" só
+ * porque a planta tem espaço seria encher a tela de mentira.
+ */
+async function agentesDeSoftware(venueId: string, contratados: string[]): Promise<Trabalhador[]> {
+  const lista: Trabalhador[] = [];
+
+  if (contratados.includes("agentes-ia")) {
+    lista.push(await atendenteDoWhatsapp(venueId));
+  }
+  lista.push(await carteiroDosAvisos(venueId));
+  return lista;
+}
+
+async function atendenteDoWhatsapp(venueId: string): Promise<Trabalhador> {
+  const base: Trabalhador = {
+    id: "agente:atendente",
+    nome: "Atendente",
+    tipo: "agente",
+    papel: "Responde o WhatsApp",
+    setor: "porta",
+    fazendo: null,
+    desde: null,
+    minutos_parado: null,
+    em_pausa: false,
+  };
+
+  const { data: conversas } = await cliente()
+    .from("conversations")
+    .select("id, title, external_id, updated_at")
+    .eq("venue_id", venueId)
+    .order("updated_at", { ascending: false })
+    .limit(1);
+
+  const conversa = ((conversas ?? []) as Array<Record<string, unknown>>)[0];
+  if (!conversa) return base;
+
+  const nome = texto(conversa.title) || texto(conversa.external_id);
+  const minutos = minutosEntre(String(conversa.updated_at), new Date().toISOString());
+  return {
+    ...base,
+    // Cinco minutos: uma conversa de WhatsApp respira nesse ritmo. Passou
+    // disso, o agente já respondeu e está esperando o próximo.
+    fazendo: minutos <= 5 ? `Respondendo ${primeiroNome(nome) ?? "um cliente"}` : null,
+    desde: String(conversa.updated_at),
+    minutos_parado: minutos,
+  };
+}
+
+async function carteiroDosAvisos(venueId: string): Promise<Trabalhador> {
+  const { data } = await cliente()
+    .from("notifications")
+    .select("id, status, created_at")
+    .eq("venue_id", venueId)
+    .in("status", ["pending", "queued", "failed"])
+    .order("created_at", { ascending: true })
+    .limit(50);
+
+  const fila = (data ?? []) as Array<{ status: string; created_at: string }>;
+  const falhas = fila.filter((n) => n.status === "failed").length;
+  const esperando = fila.length - falhas;
+
+  return {
+    id: "agente:carteiro",
+    nome: "Carteiro",
+    tipo: "agente",
+    papel: "Manda os avisos no WhatsApp",
+    setor: "escritorio",
+    fazendo: esperando > 0 ? `${esperando} aviso(s) para enviar` : falhas > 0 ? `${falhas} aviso(s) falharam` : null,
+    desde: fila[0]?.created_at ?? null,
+    minutos_parado: null,
+    em_pausa: false,
+  };
+}
+
+// ============================================================
 // A leitura
 // ============================================================
 
@@ -482,7 +742,14 @@ export async function oQueEstaAcontecendo(params: {
   /** Ler o que aconteceu a partir daqui. Padrão: as últimas 24 horas. */
   desde?: string;
   limite?: number;
-}): Promise<{ agora: string; desde: string; setores: Setor[]; fatos: Fato[]; setoresMudos: string[] }> {
+}): Promise<{
+  agora: string;
+  desde: string;
+  setores: Setor[];
+  fatos: Fato[];
+  trabalhadores: Trabalhador[];
+  setoresMudos: string[];
+}> {
   const agora = new Date().toISOString();
   const desde = params.desde ?? new Date(Date.now() - 24 * 3600_000).toISOString();
   const janela: Janela = { venueId: params.venueId, desde, limite: params.limite ?? 40 };
@@ -506,12 +773,30 @@ export async function oQueEstaAcontecendo(params: {
     console.error(`[a-casa] a fonte de ${modulo} não respondeu: ${(r.reason as Error)?.message}`);
   });
 
-  const arrumados = arrumarFatos(fatos, params.limite ?? 60);
+  // Quem mora na casa é lido à parte, e com a mesma tolerância a falha: sem
+  // ninguém de pé a planta continua contando o que aconteceu.
+  const moradores = await Promise.allSettled([
+    temModulo.has("rh") ? pessoasNaCasa(params.venueId) : Promise.resolve([]),
+    agentesDeSoftware(params.venueId, params.contratados),
+  ]);
+  const trabalhadores: Trabalhador[] = [];
+  for (const m of moradores) {
+    if (m.status === "fulfilled") trabalhadores.push(...m.value);
+    else console.error(`[a-casa] não deu para saber quem está na casa: ${(m.reason as Error)?.message}`);
+  }
+
+  // A janela dos fatos é curta quando a tela pergunta de novo, mas quem está
+  // fazendo o quê precisa olhar mais para trás — senão todo mundo vira
+  // ocioso a cada quinze segundos.
+  const fatosDoDia = arrumarFatos(fatos, 200);
+  const arrumados = fatosDoDia.slice(0, params.limite ?? 60);
+
   return {
     agora,
     desde,
     setores: montarSetores({ fatos: arrumados, contratados: params.contratados, agora }),
     fatos: arrumados,
+    trabalhadores: oQueCadaUmFaz({ trabalhadores, fatos: fatosDoDia, agora }),
     setoresMudos: [...new Set(setoresMudos)],
   };
 }
