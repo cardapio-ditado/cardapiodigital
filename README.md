@@ -49,6 +49,46 @@ npm run aprovar -- --recusar <protocolo> --motivo "casa lotada nesse horário"
 
 ---
 
+## Conferir uma tela sem banco e sem deploy
+
+```bash
+npm run telas                      # lista as telas e as situações prontas
+npm run telas -- rh                # abre no navegador de teste e tira foto
+npm run telas -- rh:ferias         # abre numa situação específica
+npm run telas -- rh --servir       # sobe em localhost para você clicar
+npm run telas -- --todas           # passa por todas as telas e situações
+```
+
+A tela roda com **dados de mentira**, escritos à mão em `scripts/telas/<nome>.json`,
+e um servidor de araque responde o que ela pedir. Não precisa de banco, de chave
+nem de deploy.
+
+O ganho está nas **situações**: cada arquivo declara variações da mesma tela — a
+casa que acabou de contratar o módulo, a semana sem venda nenhuma, o período de
+férias que venceu ontem. Forçar isso com dados reais custaria meia hora; aqui é
+um objeto de cinco linhas:
+
+```json
+"variacoes": {
+  "gorjeta-semana-vazia": {
+    "rotulo": "semana sem nada lançado",
+    "guarda": { "brasa.rh.aba": "fechamento" },
+    "rotas": { "GET /rh/acerto": { "linhas": [], "totais": {} } }
+  }
+}
+```
+
+O comando abre cada situação em 1280px e em 400px, avisa se houve erro de
+JavaScript ou se a página rolou de lado, e guarda as fotos em `.telas/` (fora do
+Git). Quando a tela pede uma rota que o arquivo não tem, ela recebe resposta
+vazia e o comando imprime, no fim, o esqueleto pronto para colar.
+
+Para adicionar uma tela nova, copie `scripts/telas/rh.json`, troque `modulo` e
+`funcao` pelo que a tela exporta, rode uma vez e cole o esqueleto que o comando
+imprimir.
+
+---
+
 ## API
 
 Toda rota sob `/v1` exige `Authorization: Bearer <chave>`. Respostas seguem

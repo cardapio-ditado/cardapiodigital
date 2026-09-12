@@ -26,3 +26,7 @@ npm-debug.log*
 
 # Prints para divulgação — material de marketing, gerado sob demanda
 prints/
+
+# Fotos das telas tiradas por `npm run telas`. São geradas a cada rodada e
+# não descrevem o código — o que vale conferir é o JSON de dados de mentira.
+.telas/

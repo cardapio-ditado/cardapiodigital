@@ -1,0 +1,1724 @@
+{
+  "rotulo": "RH — equipe, escala, ponto, férias e gorjeta",
+  "modulo": "/js/pages/rh.js",
+  "funcao": "rh",
+  "venue": "casa-de-teste",
+  "guarda": {
+    "brasa.rh.aba": "equipe"
+  },
+  "rotas": {
+    "GET /rh": {
+      "pessoas": [
+        {
+          "id": "p1",
+          "nome": "Juliana Barbosa",
+          "funcao": "Garçonete",
+          "apelido": "Ju",
+          "ativo": true,
+          "documentos_alerta": 0,
+          "pendencias": [],
+          "ficha": {
+            "atendente_id": "p1",
+            "nome_completo": "Juliana Barbosa dos Santos",
+            "cpf": "123.456.789-09",
+            "rg": null,
+            "nascimento": null,
+            "telefone": "65999990001",
+            "endereco": null,
+            "vinculo": "clt",
+            "cargo": "Garçonete",
+            "admissao": "2022-08-01",
+            "desligamento": null,
+            "motivo_desligamento": null,
+            "salario": 1850,
+            "forma_pagamento": "pix",
+            "chave_pix": "65999990001",
+            "banco": null,
+            "emergencia_nome": null,
+            "emergencia_telefone": null,
+            "observacoes": null
+          }
+        },
+        {
+          "id": "p2",
+          "nome": "Cida Nogueira",
+          "funcao": "Cozinha",
+          "apelido": null,
+          "ativo": true,
+          "documentos_alerta": 1,
+          "pendencias": [
+            "Exame periódico vence em 12 dias"
+          ],
+          "ficha": {
+            "atendente_id": "p2",
+            "nome_completo": "Maria Aparecida Nogueira",
+            "cpf": "987.654.321-00",
+            "rg": null,
+            "nascimento": null,
+            "telefone": "65999990002",
+            "endereco": null,
+            "vinculo": "clt",
+            "cargo": "Cozinha",
+            "admissao": "2023-01-10",
+            "desligamento": null,
+            "motivo_desligamento": null,
+            "salario": 2400,
+            "forma_pagamento": "pix",
+            "chave_pix": "65999990002",
+            "banco": null,
+            "emergencia_nome": null,
+            "emergencia_telefone": null,
+            "observacoes": null
+          }
+        },
+        {
+          "id": "p3",
+          "nome": "Marcos Aurélio",
+          "funcao": "Segurança",
+          "apelido": null,
+          "ativo": true,
+          "documentos_alerta": 0,
+          "pendencias": [
+            "Sem CPF na ficha",
+            "Sem carteira de trabalho"
+          ],
+          "ficha": {
+            "atendente_id": "p3",
+            "nome_completo": null,
+            "cpf": null,
+            "rg": null,
+            "nascimento": null,
+            "telefone": null,
+            "endereco": null,
+            "vinculo": "mei",
+            "cargo": "Segurança",
+            "admissao": "2026-08-01",
+            "desligamento": null,
+            "motivo_desligamento": null,
+            "salario": 2100,
+            "forma_pagamento": "pix",
+            "chave_pix": null,
+            "banco": null,
+            "emergencia_nome": null,
+            "emergencia_telefone": null,
+            "observacoes": null
+          }
+        },
+        {
+          "id": "p4",
+          "nome": "Rose da Silva",
+          "funcao": "Copa",
+          "apelido": null,
+          "ativo": true,
+          "documentos_alerta": 0,
+          "pendencias": [
+            "Sem data de admissão"
+          ],
+          "ficha": {
+            "atendente_id": "p4",
+            "nome_completo": "Rosemary da Silva",
+            "cpf": null,
+            "rg": null,
+            "nascimento": null,
+            "telefone": null,
+            "endereco": null,
+            "vinculo": "clt",
+            "cargo": "Copa",
+            "admissao": null,
+            "desligamento": null,
+            "motivo_desligamento": null,
+            "salario": 1620,
+            "forma_pagamento": "pix",
+            "chave_pix": null,
+            "banco": null,
+            "emergencia_nome": null,
+            "emergencia_telefone": null,
+            "observacoes": null
+          }
+        },
+        {
+          "id": "p5",
+          "nome": "Tiago Menezes",
+          "funcao": "Barman",
+          "apelido": "Tiago",
+          "ativo": true,
+          "documentos_alerta": 2,
+          "pendencias": [],
+          "ficha": {
+            "atendente_id": "p5",
+            "nome_completo": "Tiago Menezes Lima",
+            "cpf": "111.222.333-44",
+            "rg": null,
+            "nascimento": null,
+            "telefone": "65999990005",
+            "endereco": null,
+            "vinculo": "clt",
+            "cargo": "Barman",
+            "admissao": "2023-06-01",
+            "desligamento": null,
+            "motivo_desligamento": null,
+            "salario": 2200,
+            "forma_pagamento": "pix",
+            "chave_pix": "65999990005",
+            "banco": null,
+            "emergencia_nome": null,
+            "emergencia_telefone": null,
+            "observacoes": null
+          }
+        },
+        {
+          "id": "p9",
+          "nome": "Wanderson Alves",
+          "apelido": null,
+          "funcao": "Garçom",
+          "ativo": false,
+          "documentos_alerta": 0,
+          "pendencias": [],
+          "ficha": {
+            "atendente_id": "p9",
+            "nome_completo": "Wanderson Alves",
+            "cpf": null,
+            "rg": null,
+            "nascimento": null,
+            "telefone": null,
+            "endereco": null,
+            "vinculo": "clt",
+            "cargo": "Garçom",
+            "admissao": "2021-03-15",
+            "desligamento": "2026-05-30",
+            "motivo_desligamento": "Pediu demissão",
+            "salario": 1850,
+            "forma_pagamento": "pix",
+            "chave_pix": null,
+            "banco": null,
+            "emergencia_nome": null,
+            "emergencia_telefone": null,
+            "observacoes": null
+          }
+        }
+      ],
+      "resumo": {
+        "ativos": 5,
+        "desligados": 1,
+        "com_pendencia": 3,
+        "documentos_em_alerta": 3
+      },
+      "vinculos": [
+        {
+          "id": "clt",
+          "nome": "CLT"
+        },
+        {
+          "id": "mei",
+          "nome": "MEI"
+        },
+        {
+          "id": "diarista",
+          "nome": "Diarista"
+        },
+        {
+          "id": "freelancer",
+          "nome": "Freelancer"
+        },
+        {
+          "id": "estagio",
+          "nome": "Estágio"
+        },
+        {
+          "id": "socio",
+          "nome": "Sócio"
+        }
+      ],
+      "tipos_de_documento": [
+        {
+          "id": "rg",
+          "nome": "RG"
+        },
+        {
+          "id": "cpf",
+          "nome": "CPF"
+        },
+        {
+          "id": "ctps",
+          "nome": "Carteira de trabalho"
+        },
+        {
+          "id": "comprovante_endereco",
+          "nome": "Comprovante de endereço"
+        },
+        {
+          "id": "exame_admissional",
+          "nome": "Exame admissional"
+        },
+        {
+          "id": "exame_periodico",
+          "nome": "Exame periódico"
+        },
+        {
+          "id": "exame_demissional",
+          "nome": "Exame demissional"
+        },
+        {
+          "id": "aso",
+          "nome": "ASO"
+        },
+        {
+          "id": "atestado",
+          "nome": "Atestado"
+        },
+        {
+          "id": "contrato",
+          "nome": "Contrato"
+        }
+      ]
+    },
+    "GET /rh/turnos": [
+      {
+        "id": "t1",
+        "nome": "Almoço",
+        "inicio": "11:00",
+        "fim": "15:00",
+        "ordem": 1,
+        "ativo": true
+      },
+      {
+        "id": "t2",
+        "nome": "Noite",
+        "inicio": "18:00",
+        "fim": "00:00",
+        "ordem": 2,
+        "ativo": true
+      }
+    ],
+    "GET /rh/escala": {
+      "semana": "2026-09-07",
+      "dias": [
+        "2026-09-07",
+        "2026-09-08",
+        "2026-09-09",
+        "2026-09-10",
+        "2026-09-11",
+        "2026-09-12",
+        "2026-09-13"
+      ],
+      "turnos": [
+        {
+          "id": "t1",
+          "nome": "Almoço",
+          "inicio": "11:00",
+          "fim": "15:00",
+          "ordem": 1,
+          "ativo": true
+        },
+        {
+          "id": "t2",
+          "nome": "Noite",
+          "inicio": "18:00",
+          "fim": "00:00",
+          "ordem": 2,
+          "ativo": true
+        }
+      ],
+      "pessoas": [
+        {
+          "id": "p1",
+          "nome": "Juliana Barbosa",
+          "apelido": null,
+          "funcao": "Garçonete"
+        },
+        {
+          "id": "p2",
+          "nome": "Cida Nogueira",
+          "apelido": null,
+          "funcao": "Cozinha"
+        },
+        {
+          "id": "p3",
+          "nome": "Marcos Aurélio",
+          "apelido": null,
+          "funcao": "Segurança"
+        },
+        {
+          "id": "p4",
+          "nome": "Rose da Silva",
+          "apelido": null,
+          "funcao": "Copa"
+        },
+        {
+          "id": "p5",
+          "nome": "Tiago Menezes",
+          "apelido": null,
+          "funcao": "Barman"
+        }
+      ],
+      "linhas": [
+        {
+          "id": "e1",
+          "data": "2026-09-07",
+          "atendente_id": "p1",
+          "turno_id": "t2",
+          "situacao": "trabalha",
+          "funcao": "Garçonete",
+          "observacao": null
+        },
+        {
+          "id": "e2",
+          "data": "2026-09-08",
+          "atendente_id": "p1",
+          "turno_id": "t2",
+          "situacao": "trabalha",
+          "funcao": "Garçonete",
+          "observacao": null
+        },
+        {
+          "id": "e3",
+          "data": "2026-09-09",
+          "atendente_id": "p1",
+          "turno_id": "t1",
+          "situacao": "trabalha",
+          "funcao": "Garçonete",
+          "observacao": null
+        },
+        {
+          "id": "e4",
+          "data": "2026-09-10",
+          "atendente_id": "p1",
+          "turno_id": null,
+          "situacao": "folga",
+          "funcao": null,
+          "observacao": null
+        },
+        {
+          "id": "e5",
+          "data": "2026-09-07",
+          "atendente_id": "p2",
+          "turno_id": "t1",
+          "situacao": "trabalha",
+          "funcao": "Cozinha",
+          "observacao": null
+        },
+        {
+          "id": "e6",
+          "data": "2026-09-08",
+          "atendente_id": "p2",
+          "turno_id": "t1",
+          "situacao": "trabalha",
+          "funcao": "Cozinha",
+          "observacao": null
+        },
+        {
+          "id": "e7",
+          "data": "2026-09-09",
+          "atendente_id": "p2",
+          "turno_id": "t1",
+          "situacao": "atestado",
+          "funcao": null,
+          "observacao": null
+        },
+        {
+          "id": "e8",
+          "data": "2026-09-07",
+          "atendente_id": "p5",
+          "turno_id": "t2",
+          "situacao": "trabalha",
+          "funcao": "Barman",
+          "observacao": null
+        },
+        {
+          "id": "e9",
+          "data": "2026-09-08",
+          "atendente_id": "p5",
+          "turno_id": "t2",
+          "situacao": "ferias",
+          "funcao": null,
+          "observacao": null
+        },
+        {
+          "id": "e10",
+          "data": "2026-09-11",
+          "atendente_id": "p3",
+          "turno_id": "t2",
+          "situacao": "trabalha",
+          "funcao": "Segurança",
+          "observacao": null
+        },
+        {
+          "id": "e11",
+          "data": "2026-09-12",
+          "atendente_id": "p3",
+          "turno_id": "t2",
+          "situacao": "trabalha",
+          "funcao": "Segurança",
+          "observacao": null
+        },
+        {
+          "id": "e12",
+          "data": "2026-09-12",
+          "atendente_id": "p4",
+          "turno_id": "t1",
+          "situacao": "trabalha",
+          "funcao": "Copa",
+          "observacao": null
+        }
+      ],
+      "publicada_em": "2026-09-06T14:20:00.000Z",
+      "publicada_por": "kadu@brasafood.app",
+      "avisos_enviados": 5,
+      "mudou_depois_de_publicar": true
+    },
+    "GET /rh/ponto": {
+      "dia": "2026-09-12",
+      "pessoas": [
+        {
+          "atendente_id": "p1",
+          "nome": "Ju",
+          "escalado": "Noite",
+          "situacao_escala": "trabalha",
+          "batidas": [
+            {
+              "id": "b1",
+              "atendente_id": "p1",
+              "dia": "2026-09-12",
+              "tipo": "entrada",
+              "momento": "2026-09-12T21:02:00.000Z",
+              "origem": "totem",
+              "editado_por": null,
+              "motivo": null
+            },
+            {
+              "id": "b2",
+              "atendente_id": "p1",
+              "dia": "2026-09-12",
+              "tipo": "pausa",
+              "momento": "2026-09-12T01:10:00.000Z",
+              "origem": "totem",
+              "editado_por": null,
+              "motivo": null
+            },
+            {
+              "id": "b3",
+              "atendente_id": "p1",
+              "dia": "2026-09-12",
+              "tipo": "volta",
+              "momento": "2026-09-12T01:41:00.000Z",
+              "origem": "totem",
+              "editado_por": null,
+              "motivo": null
+            },
+            {
+              "id": "b4",
+              "atendente_id": "p1",
+              "dia": "2026-09-12",
+              "tipo": "saida",
+              "momento": "2026-09-12T04:12:00.000Z",
+              "origem": "totem",
+              "editado_por": null,
+              "motivo": null
+            }
+          ],
+          "resumo": {
+            "minutos_trabalhados": 411,
+            "minutos_pausa": 31,
+            "minutos_noturnos": 341,
+            "primeira_entrada": "2026-09-12T21:02:00.000Z",
+            "ultima_saida": "2026-09-13T04:12:00.000Z",
+            "aberto": false
+          },
+          "atraso": 2,
+          "faltou": false
+        },
+        {
+          "atendente_id": "p3",
+          "nome": "Marcos Aurélio",
+          "escalado": "Noite",
+          "situacao_escala": "trabalha",
+          "batidas": [
+            {
+              "id": "b5",
+              "atendente_id": "p3",
+              "dia": "2026-09-12",
+              "tipo": "entrada",
+              "momento": "2026-09-12T21:35:00.000Z",
+              "origem": "totem",
+              "editado_por": null,
+              "motivo": null
+            }
+          ],
+          "resumo": {
+            "minutos_trabalhados": 0,
+            "minutos_pausa": 0,
+            "minutos_noturnos": 0,
+            "primeira_entrada": "2026-09-12T21:35:00.000Z",
+            "ultima_saida": null,
+            "aberto": true
+          },
+          "atraso": 35,
+          "faltou": false
+        },
+        {
+          "atendente_id": "p4",
+          "nome": "Rose da Silva",
+          "escalado": "Almoço",
+          "situacao_escala": "trabalha",
+          "batidas": [],
+          "resumo": {
+            "minutos_trabalhados": 0,
+            "minutos_pausa": 0,
+            "minutos_noturnos": 0,
+            "primeira_entrada": null,
+            "ultima_saida": null,
+            "aberto": false
+          },
+          "atraso": null,
+          "faltou": true
+        },
+        {
+          "atendente_id": "p2",
+          "nome": "Cida Nogueira",
+          "escalado": null,
+          "situacao_escala": null,
+          "batidas": [
+            {
+              "id": "b6",
+              "atendente_id": "p2",
+              "dia": "2026-09-12",
+              "tipo": "entrada",
+              "momento": "2026-09-12T14:58:00.000Z",
+              "origem": "totem",
+              "editado_por": null,
+              "motivo": null
+            },
+            {
+              "id": "b7",
+              "atendente_id": "p2",
+              "dia": "2026-09-12",
+              "tipo": "saida",
+              "momento": "2026-09-12T23:04:00.000Z",
+              "origem": "totem",
+              "editado_por": null,
+              "motivo": null
+            }
+          ],
+          "resumo": {
+            "minutos_trabalhados": 486,
+            "minutos_pausa": 0,
+            "minutos_noturnos": 64,
+            "primeira_entrada": "2026-09-12T14:58:00.000Z",
+            "ultima_saida": "2026-09-12T23:04:00.000Z",
+            "aberto": false
+          },
+          "atraso": null,
+          "faltou": false
+        }
+      ]
+    },
+    "GET /rh/totens": [
+      {
+        "id": "tt1",
+        "nome": "Tablet da cozinha",
+        "token": "abc123",
+        "ativo": true,
+        "ultimo_uso_em": "2026-09-12T21:35:00.000Z"
+      }
+    ],
+    "GET /rh/ferias": {
+      "hoje": "2026-09-12",
+      "situacoes": [
+        {
+          "id": "pedido",
+          "nome": "Pedido"
+        },
+        {
+          "id": "aprovado",
+          "nome": "Aprovado"
+        },
+        {
+          "id": "recusado",
+          "nome": "Recusado"
+        },
+        {
+          "id": "cancelado",
+          "nome": "Cancelado"
+        }
+      ],
+      "calendario": [],
+      "pessoas": [
+        {
+          "atendente_id": "p1",
+          "nome": "Ju",
+          "funcao": "Garçonete",
+          "admissao": "2022-08-01",
+          "periodos": [
+            {
+              "numero": 1,
+              "inicio": "2022-08-01",
+              "fim": "2023-07-31",
+              "limite": "2024-07-31",
+              "situacao": "gozado",
+              "dias_para_vencer": -743,
+              "dias_gozados": 30,
+              "dias_restantes": 0,
+              "gozado_em": "2024-03-15"
+            },
+            {
+              "numero": 2,
+              "inicio": "2023-08-01",
+              "fim": "2024-07-31",
+              "limite": "2025-07-31",
+              "situacao": "gozado",
+              "dias_para_vencer": -378,
+              "dias_gozados": 30,
+              "dias_restantes": 0,
+              "gozado_em": "2025-02-14"
+            },
+            {
+              "numero": 3,
+              "inicio": "2024-08-01",
+              "fim": "2025-07-31",
+              "limite": "2026-07-31",
+              "situacao": "vencido",
+              "dias_para_vencer": -43,
+              "dias_gozados": 0,
+              "dias_restantes": 30,
+              "gozado_em": null
+            },
+            {
+              "numero": 4,
+              "inicio": "2025-08-01",
+              "fim": "2026-07-31",
+              "limite": "2027-07-31",
+              "situacao": "a_conceder",
+              "dias_para_vencer": 322,
+              "dias_gozados": 0,
+              "dias_restantes": 30,
+              "gozado_em": null
+            },
+            {
+              "numero": 5,
+              "inicio": "2026-08-01",
+              "fim": "2027-07-31",
+              "limite": "2028-07-31",
+              "situacao": "em_curso",
+              "dias_para_vencer": 687,
+              "dias_gozados": 0,
+              "dias_restantes": 30,
+              "gozado_em": null
+            }
+          ],
+          "ferias": [
+            {
+              "id": "f1",
+              "atendente_id": "p1",
+              "inicio": "2024-02-15",
+              "fim": "2024-03-15",
+              "dias": 30,
+              "abono_dias": 0,
+              "periodo_inicio": "2022-08-01",
+              "situacao": "aprovado",
+              "observacao": null,
+              "pedido_por": "kadu@brasafood.app",
+              "decidido_por": "kadu@brasafood.app"
+            },
+            {
+              "id": "f2",
+              "atendente_id": "p1",
+              "inicio": "2025-01-16",
+              "fim": "2025-02-14",
+              "dias": 30,
+              "abono_dias": 0,
+              "periodo_inicio": "2023-08-01",
+              "situacao": "aprovado",
+              "observacao": null,
+              "pedido_por": "kadu@brasafood.app",
+              "decidido_por": "kadu@brasafood.app"
+            },
+            {
+              "id": "f3",
+              "atendente_id": "p1",
+              "inicio": "2026-10-05",
+              "fim": "2026-10-19",
+              "dias": 15,
+              "abono_dias": 0,
+              "periodo_inicio": "2024-08-01",
+              "situacao": "pedido",
+              "observacao": null,
+              "pedido_por": "kadu@brasafood.app",
+              "decidido_por": null
+            }
+          ],
+          "saldo": 15,
+          "alerta": {
+            "periodo": 3,
+            "limite": "2026-07-31",
+            "dias_para_vencer": -43,
+            "vencido": true
+          }
+        },
+        {
+          "atendente_id": "p2",
+          "nome": "Cida Nogueira",
+          "funcao": "Cozinha",
+          "admissao": "2023-01-10",
+          "periodos": [
+            {
+              "numero": 1,
+              "inicio": "2023-01-10",
+              "fim": "2024-01-09",
+              "limite": "2025-01-09",
+              "situacao": "vencido",
+              "dias_para_vencer": -611,
+              "dias_gozados": 0,
+              "dias_restantes": 30,
+              "gozado_em": null
+            },
+            {
+              "numero": 2,
+              "inicio": "2024-01-10",
+              "fim": "2025-01-09",
+              "limite": "2026-01-09",
+              "situacao": "vencido",
+              "dias_para_vencer": -246,
+              "dias_gozados": 0,
+              "dias_restantes": 30,
+              "gozado_em": null
+            },
+            {
+              "numero": 3,
+              "inicio": "2025-01-10",
+              "fim": "2026-01-09",
+              "limite": "2027-01-09",
+              "situacao": "a_conceder",
+              "dias_para_vencer": 119,
+              "dias_gozados": 0,
+              "dias_restantes": 30,
+              "gozado_em": null
+            },
+            {
+              "numero": 4,
+              "inicio": "2026-01-10",
+              "fim": "2027-01-09",
+              "limite": "2028-01-09",
+              "situacao": "em_curso",
+              "dias_para_vencer": 484,
+              "dias_gozados": 0,
+              "dias_restantes": 30,
+              "gozado_em": null
+            }
+          ],
+          "ferias": [],
+          "saldo": 30,
+          "alerta": {
+            "periodo": 1,
+            "limite": "2025-01-09",
+            "dias_para_vencer": -611,
+            "vencido": true
+          }
+        },
+        {
+          "atendente_id": "p5",
+          "nome": "Tiago",
+          "funcao": "Barman",
+          "admissao": "2023-06-01",
+          "periodos": [
+            {
+              "numero": 1,
+              "inicio": "2023-06-01",
+              "fim": "2024-05-31",
+              "limite": "2025-05-31",
+              "situacao": "gozado",
+              "dias_para_vencer": -469,
+              "dias_gozados": 30,
+              "dias_restantes": 0,
+              "gozado_em": "2025-01-20"
+            },
+            {
+              "numero": 2,
+              "inicio": "2024-06-01",
+              "fim": "2025-05-31",
+              "limite": "2026-05-31",
+              "situacao": "a_vencer",
+              "dias_para_vencer": -104,
+              "dias_gozados": 15,
+              "dias_restantes": 15,
+              "gozado_em": null
+            },
+            {
+              "numero": 3,
+              "inicio": "2025-06-01",
+              "fim": "2026-05-31",
+              "limite": "2027-05-31",
+              "situacao": "a_conceder",
+              "dias_para_vencer": 261,
+              "dias_gozados": 0,
+              "dias_restantes": 30,
+              "gozado_em": null
+            }
+          ],
+          "ferias": [
+            {
+              "id": "f6",
+              "atendente_id": "p5",
+              "inicio": "2024-12-22",
+              "fim": "2025-01-20",
+              "dias": 30,
+              "abono_dias": 0,
+              "periodo_inicio": "2023-06-01",
+              "situacao": "aprovado",
+              "observacao": null,
+              "pedido_por": "kadu@brasafood.app",
+              "decidido_por": "kadu@brasafood.app"
+            },
+            {
+              "id": "f7",
+              "atendente_id": "p5",
+              "inicio": "2026-09-08",
+              "fim": "2026-09-22",
+              "dias": 15,
+              "abono_dias": 0,
+              "periodo_inicio": "2024-06-01",
+              "situacao": "aprovado",
+              "observacao": null,
+              "pedido_por": "kadu@brasafood.app",
+              "decidido_por": "kadu@brasafood.app"
+            }
+          ],
+          "saldo": 15,
+          "alerta": null
+        },
+        {
+          "atendente_id": "p3",
+          "nome": "Marcos Aurélio",
+          "funcao": "Segurança",
+          "admissao": "2026-08-01",
+          "periodos": [
+            {
+              "numero": 1,
+              "inicio": "2026-08-01",
+              "fim": "2027-07-31",
+              "limite": "2028-07-31",
+              "situacao": "em_curso",
+              "dias_para_vencer": 687,
+              "dias_gozados": 0,
+              "dias_restantes": 30,
+              "gozado_em": null
+            }
+          ],
+          "ferias": [],
+          "saldo": null,
+          "alerta": null
+        },
+        {
+          "atendente_id": "p4",
+          "nome": "Rose da Silva",
+          "funcao": "Copa",
+          "admissao": null,
+          "periodos": [],
+          "ferias": [],
+          "saldo": null,
+          "alerta": null
+        }
+      ]
+    },
+    "GET /rh/acerto": {
+      "ano": 2026,
+      "semana": 37,
+      "inicio": "2026-09-07",
+      "fim": "2026-09-13",
+      "regra": {
+        "metodo": "individual",
+        "percentual_servico": 10,
+        "percentual_repasse": 90,
+        "criterio_rateio": "peso",
+        "percentual_da_casa_para_apoio": 20,
+        "configurada": true
+      },
+      "linhas": [
+        {
+          "atendente_id": "p1",
+          "nome": "Ju",
+          "funcao": "Garçonete",
+          "peso": 1,
+          "minutos": 0,
+          "vendas": 20600,
+          "comandas": 140,
+          "comissao": 1483.2,
+          "rateio": 0,
+          "adicionais": 180,
+          "descontos": 0,
+          "a_receber": 1663.2
+        },
+        {
+          "atendente_id": "p2",
+          "nome": "Cida Nogueira",
+          "funcao": "Cozinha",
+          "peso": 3,
+          "minutos": 0,
+          "vendas": 0,
+          "comandas": 0,
+          "comissao": 0,
+          "rateio": 409.05,
+          "adicionais": 0,
+          "descontos": 0,
+          "a_receber": 409.05
+        },
+        {
+          "atendente_id": "p5",
+          "nome": "Tiago",
+          "funcao": "Barman",
+          "peso": 1,
+          "minutos": 0,
+          "vendas": 9700,
+          "comandas": 61,
+          "comissao": 698.4,
+          "rateio": 0,
+          "adicionais": 0,
+          "descontos": 64.5,
+          "a_receber": 633.9
+        },
+        {
+          "atendente_id": "p4",
+          "nome": "Rose da Silva",
+          "funcao": "Copa",
+          "peso": 1,
+          "minutos": 0,
+          "vendas": 0,
+          "comandas": 0,
+          "comissao": 0,
+          "rateio": 136.35,
+          "adicionais": 0,
+          "descontos": 0,
+          "a_receber": 136.35
+        }
+      ],
+      "totais": {
+        "vendas": 30300,
+        "arrecadado": 3030,
+        "repassado": 2727,
+        "retido": 303,
+        "comissoes": 2181.6,
+        "rateio": 545.4,
+        "adicionais": 180,
+        "descontos": 64.5,
+        "a_receber": 2842.5
+      },
+      "vendas": [
+        {
+          "id": "v1",
+          "dia": "2026-09-08",
+          "turno_id": null,
+          "atendente_id": "p1",
+          "valor": 12400,
+          "comandas": 86,
+          "observacao": null
+        },
+        {
+          "id": "v2",
+          "dia": "2026-09-10",
+          "turno_id": "t1",
+          "atendente_id": "p1",
+          "valor": 8200,
+          "comandas": 54,
+          "observacao": null
+        },
+        {
+          "id": "v3",
+          "dia": "2026-09-09",
+          "turno_id": null,
+          "atendente_id": "p5",
+          "valor": 9700,
+          "comandas": 61,
+          "observacao": null
+        }
+      ],
+      "extras": [
+        {
+          "id": "x1",
+          "dia": "2026-09-12",
+          "atendente_id": "p1",
+          "tipo": "adicional",
+          "descricao": "Evento fechado",
+          "valor": 180
+        },
+        {
+          "id": "x2",
+          "dia": "2026-09-11",
+          "atendente_id": "p5",
+          "tipo": "desconto",
+          "descricao": "Consumo no bar",
+          "valor": 64.5
+        }
+      ],
+      "fechamentos": [],
+      "pesos": [
+        {
+          "id": "w1",
+          "funcao": "Cozinha",
+          "peso": 3
+        },
+        {
+          "id": "w2",
+          "funcao": "Copa",
+          "peso": 1
+        }
+      ],
+      "turnos": [
+        {
+          "id": "t1",
+          "nome": "Almoço",
+          "inicio": "11:00",
+          "fim": "15:00",
+          "ordem": 1,
+          "ativo": true
+        },
+        {
+          "id": "t2",
+          "nome": "Noite",
+          "inicio": "18:00",
+          "fim": "00:00",
+          "ordem": 2,
+          "ativo": true
+        }
+      ],
+      "equipe": [
+        {
+          "atendente_id": "p1",
+          "nome": "Juliana Barbosa",
+          "funcao": "Garçonete"
+        },
+        {
+          "atendente_id": "p2",
+          "nome": "Cida Nogueira",
+          "funcao": "Cozinha"
+        },
+        {
+          "atendente_id": "p3",
+          "nome": "Marcos Aurélio",
+          "funcao": "Segurança"
+        },
+        {
+          "atendente_id": "p4",
+          "nome": "Rose da Silva",
+          "funcao": "Copa"
+        },
+        {
+          "atendente_id": "p5",
+          "nome": "Tiago Menezes",
+          "funcao": "Barman"
+        }
+      ],
+      "metodos": [
+        {
+          "id": "individual",
+          "nome": "Comissão individual",
+          "explicacao": "Cada um recebe um percentual sobre o que ele mesmo vendeu."
+        },
+        {
+          "id": "global",
+          "nome": "Bolo da casa",
+          "explicacao": "O serviço da casa inteira é repartido entre a equipe pelo critério escolhido."
+        }
+      ],
+      "criterios": [
+        {
+          "id": "igual",
+          "nome": "Igual para todos"
+        },
+        {
+          "id": "peso",
+          "nome": "Por peso da função (pontuação)"
+        },
+        {
+          "id": "horas",
+          "nome": "Pelas horas trabalhadas"
+        }
+      ]
+    },
+    "GET /rh/resumo": {
+      "mes": "2026-09",
+      "casa": "Casa de Teste",
+      "linhas": [],
+      "totais": {},
+      "texto": "",
+      "csv": ""
+    }
+  },
+  "variacoes": {
+    "equipe": {
+      "rotulo": "a lista da equipe",
+      "guarda": {
+        "brasa.rh.aba": "equipe"
+      }
+    },
+    "escala": {
+      "rotulo": "a grade da semana",
+      "guarda": {
+        "brasa.rh.aba": "escala"
+      }
+    },
+    "ponto": {
+      "rotulo": "as batidas do dia",
+      "guarda": {
+        "brasa.rh.aba": "ponto"
+      }
+    },
+    "ferias": {
+      "rotulo": "quem precisa tirar férias",
+      "guarda": {
+        "brasa.rh.aba": "ferias"
+      }
+    },
+    "gorjeta": {
+      "rotulo": "o acerto da semana",
+      "guarda": {
+        "brasa.rh.aba": "fechamento"
+      }
+    },
+    "gorjeta-sem-regra": {
+      "rotulo": "a casa ainda não escolheu como paga",
+      "guarda": {
+        "brasa.rh.aba": "fechamento"
+      },
+      "rotas": {
+        "GET /rh/acerto": {
+          "ano": 2026,
+          "semana": 37,
+          "inicio": "2026-09-07",
+          "fim": "2026-09-13",
+          "regra": {
+            "metodo": "individual",
+            "percentual_servico": 10,
+            "percentual_repasse": 90,
+            "criterio_rateio": "peso",
+            "percentual_da_casa_para_apoio": 20,
+            "configurada": false
+          },
+          "linhas": [],
+          "totais": {
+            "vendas": 0,
+            "arrecadado": 0,
+            "repassado": 0,
+            "retido": 0,
+            "comissoes": 0,
+            "rateio": 0,
+            "adicionais": 0,
+            "descontos": 0,
+            "a_receber": 0
+          },
+          "vendas": [],
+          "extras": [],
+          "fechamentos": [],
+          "pesos": [
+            {
+              "id": "w1",
+              "funcao": "Cozinha",
+              "peso": 3
+            },
+            {
+              "id": "w2",
+              "funcao": "Copa",
+              "peso": 1
+            }
+          ],
+          "turnos": [
+            {
+              "id": "t1",
+              "nome": "Almoço",
+              "inicio": "11:00",
+              "fim": "15:00",
+              "ordem": 1,
+              "ativo": true
+            },
+            {
+              "id": "t2",
+              "nome": "Noite",
+              "inicio": "18:00",
+              "fim": "00:00",
+              "ordem": 2,
+              "ativo": true
+            }
+          ],
+          "equipe": [
+            {
+              "atendente_id": "p1",
+              "nome": "Juliana Barbosa",
+              "funcao": "Garçonete"
+            },
+            {
+              "atendente_id": "p2",
+              "nome": "Cida Nogueira",
+              "funcao": "Cozinha"
+            },
+            {
+              "atendente_id": "p3",
+              "nome": "Marcos Aurélio",
+              "funcao": "Segurança"
+            },
+            {
+              "atendente_id": "p4",
+              "nome": "Rose da Silva",
+              "funcao": "Copa"
+            },
+            {
+              "atendente_id": "p5",
+              "nome": "Tiago Menezes",
+              "funcao": "Barman"
+            }
+          ],
+          "metodos": [
+            {
+              "id": "individual",
+              "nome": "Comissão individual",
+              "explicacao": "Cada um recebe um percentual sobre o que ele mesmo vendeu."
+            },
+            {
+              "id": "global",
+              "nome": "Bolo da casa",
+              "explicacao": "O serviço da casa inteira é repartido entre a equipe pelo critério escolhido."
+            }
+          ],
+          "criterios": [
+            {
+              "id": "igual",
+              "nome": "Igual para todos"
+            },
+            {
+              "id": "peso",
+              "nome": "Por peso da função (pontuação)"
+            },
+            {
+              "id": "horas",
+              "nome": "Pelas horas trabalhadas"
+            }
+          ]
+        }
+      }
+    },
+    "gorjeta-global": {
+      "rotulo": "bolo da casa repartido por pontuação",
+      "guarda": {
+        "brasa.rh.aba": "fechamento"
+      },
+      "rotas": {
+        "GET /rh/acerto": {
+          "ano": 2026,
+          "semana": 37,
+          "inicio": "2026-09-07",
+          "fim": "2026-09-13",
+          "regra": {
+            "metodo": "global",
+            "percentual_servico": 10,
+            "percentual_repasse": 90,
+            "criterio_rateio": "peso",
+            "percentual_da_casa_para_apoio": 0,
+            "configurada": true
+          },
+          "linhas": [
+            {
+              "atendente_id": "p2",
+              "nome": "Cida Nogueira",
+              "funcao": "Cozinha",
+              "peso": 3,
+              "minutos": 0,
+              "vendas": 0,
+              "comandas": 0,
+              "comissao": 0,
+              "rateio": 1363.5,
+              "adicionais": 0,
+              "descontos": 0,
+              "a_receber": 1363.5
+            },
+            {
+              "atendente_id": "p1",
+              "nome": "Ju",
+              "funcao": "Garçonete",
+              "peso": 1,
+              "minutos": 0,
+              "vendas": 20600,
+              "comandas": 140,
+              "comissao": 0,
+              "rateio": 454.5,
+              "adicionais": 180,
+              "descontos": 0,
+              "a_receber": 634.5
+            },
+            {
+              "atendente_id": "p5",
+              "nome": "Tiago",
+              "funcao": "Barman",
+              "peso": 1,
+              "minutos": 0,
+              "vendas": 9700,
+              "comandas": 61,
+              "comissao": 0,
+              "rateio": 454.5,
+              "adicionais": 0,
+              "descontos": 64.5,
+              "a_receber": 390.0
+            },
+            {
+              "atendente_id": "p4",
+              "nome": "Rose da Silva",
+              "funcao": "Copa",
+              "peso": 1,
+              "minutos": 0,
+              "vendas": 0,
+              "comandas": 0,
+              "comissao": 0,
+              "rateio": 454.5,
+              "adicionais": 0,
+              "descontos": 0,
+              "a_receber": 454.5
+            }
+          ],
+          "totais": {
+            "vendas": 30300,
+            "arrecadado": 3030,
+            "repassado": 2727,
+            "retido": 303,
+            "comissoes": 0,
+            "rateio": 2727,
+            "adicionais": 180,
+            "descontos": 64.5,
+            "a_receber": 2842.5
+          },
+          "vendas": [
+            {
+              "id": "v1",
+              "dia": "2026-09-08",
+              "turno_id": null,
+              "atendente_id": "p1",
+              "valor": 12400,
+              "comandas": 86,
+              "observacao": null
+            },
+            {
+              "id": "v2",
+              "dia": "2026-09-10",
+              "turno_id": "t1",
+              "atendente_id": "p1",
+              "valor": 8200,
+              "comandas": 54,
+              "observacao": null
+            },
+            {
+              "id": "v3",
+              "dia": "2026-09-09",
+              "turno_id": null,
+              "atendente_id": "p5",
+              "valor": 9700,
+              "comandas": 61,
+              "observacao": null
+            }
+          ],
+          "extras": [
+            {
+              "id": "x1",
+              "dia": "2026-09-12",
+              "atendente_id": "p1",
+              "tipo": "adicional",
+              "descricao": "Evento fechado",
+              "valor": 180
+            },
+            {
+              "id": "x2",
+              "dia": "2026-09-11",
+              "atendente_id": "p5",
+              "tipo": "desconto",
+              "descricao": "Consumo no bar",
+              "valor": 64.5
+            }
+          ],
+          "fechamentos": [],
+          "pesos": [
+            {
+              "id": "w1",
+              "funcao": "Cozinha",
+              "peso": 3
+            },
+            {
+              "id": "w2",
+              "funcao": "Copa",
+              "peso": 1
+            }
+          ],
+          "turnos": [
+            {
+              "id": "t1",
+              "nome": "Almoço",
+              "inicio": "11:00",
+              "fim": "15:00",
+              "ordem": 1,
+              "ativo": true
+            },
+            {
+              "id": "t2",
+              "nome": "Noite",
+              "inicio": "18:00",
+              "fim": "00:00",
+              "ordem": 2,
+              "ativo": true
+            }
+          ],
+          "equipe": [
+            {
+              "atendente_id": "p1",
+              "nome": "Juliana Barbosa",
+              "funcao": "Garçonete"
+            },
+            {
+              "atendente_id": "p2",
+              "nome": "Cida Nogueira",
+              "funcao": "Cozinha"
+            },
+            {
+              "atendente_id": "p3",
+              "nome": "Marcos Aurélio",
+              "funcao": "Segurança"
+            },
+            {
+              "atendente_id": "p4",
+              "nome": "Rose da Silva",
+              "funcao": "Copa"
+            },
+            {
+              "atendente_id": "p5",
+              "nome": "Tiago Menezes",
+              "funcao": "Barman"
+            }
+          ],
+          "metodos": [
+            {
+              "id": "individual",
+              "nome": "Comissão individual",
+              "explicacao": "Cada um recebe um percentual sobre o que ele mesmo vendeu."
+            },
+            {
+              "id": "global",
+              "nome": "Bolo da casa",
+              "explicacao": "O serviço da casa inteira é repartido entre a equipe pelo critério escolhido."
+            }
+          ],
+          "criterios": [
+            {
+              "id": "igual",
+              "nome": "Igual para todos"
+            },
+            {
+              "id": "peso",
+              "nome": "Por peso da função (pontuação)"
+            },
+            {
+              "id": "horas",
+              "nome": "Pelas horas trabalhadas"
+            }
+          ]
+        }
+      }
+    },
+    "gorjeta-semana-vazia": {
+      "rotulo": "semana sem nada lançado",
+      "guarda": {
+        "brasa.rh.aba": "fechamento"
+      },
+      "rotas": {
+        "GET /rh/acerto": {
+          "ano": 2026,
+          "semana": 38,
+          "inicio": "2026-09-14",
+          "fim": "2026-09-20",
+          "regra": {
+            "metodo": "individual",
+            "percentual_servico": 10,
+            "percentual_repasse": 90,
+            "criterio_rateio": "peso",
+            "percentual_da_casa_para_apoio": 20,
+            "configurada": true
+          },
+          "linhas": [],
+          "totais": {
+            "vendas": 0,
+            "arrecadado": 0,
+            "repassado": 0,
+            "retido": 0,
+            "comissoes": 0,
+            "rateio": 0,
+            "adicionais": 0,
+            "descontos": 0,
+            "a_receber": 0
+          },
+          "vendas": [],
+          "extras": [],
+          "fechamentos": [],
+          "pesos": [
+            {
+              "id": "w1",
+              "funcao": "Cozinha",
+              "peso": 3
+            },
+            {
+              "id": "w2",
+              "funcao": "Copa",
+              "peso": 1
+            }
+          ],
+          "turnos": [
+            {
+              "id": "t1",
+              "nome": "Almoço",
+              "inicio": "11:00",
+              "fim": "15:00",
+              "ordem": 1,
+              "ativo": true
+            },
+            {
+              "id": "t2",
+              "nome": "Noite",
+              "inicio": "18:00",
+              "fim": "00:00",
+              "ordem": 2,
+              "ativo": true
+            }
+          ],
+          "equipe": [
+            {
+              "atendente_id": "p1",
+              "nome": "Juliana Barbosa",
+              "funcao": "Garçonete"
+            },
+            {
+              "atendente_id": "p2",
+              "nome": "Cida Nogueira",
+              "funcao": "Cozinha"
+            },
+            {
+              "atendente_id": "p3",
+              "nome": "Marcos Aurélio",
+              "funcao": "Segurança"
+            },
+            {
+              "atendente_id": "p4",
+              "nome": "Rose da Silva",
+              "funcao": "Copa"
+            },
+            {
+              "atendente_id": "p5",
+              "nome": "Tiago Menezes",
+              "funcao": "Barman"
+            }
+          ],
+          "metodos": [
+            {
+              "id": "individual",
+              "nome": "Comissão individual",
+              "explicacao": "Cada um recebe um percentual sobre o que ele mesmo vendeu."
+            },
+            {
+              "id": "global",
+              "nome": "Bolo da casa",
+              "explicacao": "O serviço da casa inteira é repartido entre a equipe pelo critério escolhido."
+            }
+          ],
+          "criterios": [
+            {
+              "id": "igual",
+              "nome": "Igual para todos"
+            },
+            {
+              "id": "peso",
+              "nome": "Por peso da função (pontuação)"
+            },
+            {
+              "id": "horas",
+              "nome": "Pelas horas trabalhadas"
+            }
+          ]
+        }
+      }
+    },
+    "equipe-vazia": {
+      "rotulo": "casa que acabou de contratar o módulo",
+      "guarda": {
+        "brasa.rh.aba": "equipe"
+      },
+      "rotas": {
+        "GET /rh": {
+          "pessoas": [],
+          "resumo": {
+            "ativos": 0,
+            "desligados": 0,
+            "com_pendencia": 0,
+            "documentos_em_alerta": 0
+          },
+          "vinculos": [
+            {
+              "id": "clt",
+              "nome": "CLT"
+            },
+            {
+              "id": "mei",
+              "nome": "MEI"
+            },
+            {
+              "id": "diarista",
+              "nome": "Diarista"
+            },
+            {
+              "id": "freelancer",
+              "nome": "Freelancer"
+            },
+            {
+              "id": "estagio",
+              "nome": "Estágio"
+            },
+            {
+              "id": "socio",
+              "nome": "Sócio"
+            }
+          ],
+          "tipos_de_documento": [
+            {
+              "id": "rg",
+              "nome": "RG"
+            },
+            {
+              "id": "cpf",
+              "nome": "CPF"
+            },
+            {
+              "id": "ctps",
+              "nome": "Carteira de trabalho"
+            },
+            {
+              "id": "comprovante_endereco",
+              "nome": "Comprovante de endereço"
+            },
+            {
+              "id": "exame_admissional",
+              "nome": "Exame admissional"
+            },
+            {
+              "id": "exame_periodico",
+              "nome": "Exame periódico"
+            },
+            {
+              "id": "exame_demissional",
+              "nome": "Exame demissional"
+            },
+            {
+              "id": "aso",
+              "nome": "ASO"
+            },
+            {
+              "id": "atestado",
+              "nome": "Atestado"
+            },
+            {
+              "id": "contrato",
+              "nome": "Contrato"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
