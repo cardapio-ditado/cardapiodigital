@@ -5,6 +5,7 @@ import {
   arrumarFatos,
   comoFazTempo,
   minutosEntre,
+  montarMesas,
   montarSetores,
   oQueCadaUmFaz,
   primeiroNome,
@@ -27,20 +28,18 @@ const fato = (id: string, setor: string, quando: string, extra: Partial<Fato> = 
 
 const TODOS = ["agentes-ia", "cmv", "rh", "cardapio-digital", "checklist", "clientes"];
 
-test("as salas cabem na planta e nenhuma invade a outra", () => {
+test("a casa tem o salão na frente e a retaguarda no fundo", () => {
+  const ids = SETORES.map((s) => s.id);
+  assert.equal(new Set(ids).size, ids.length, "setor repetido apareceria duas vezes na tela");
+
+  // A portaria é do salão: é lá que o cliente entra.
+  const noSalao = SETORES.filter((s) => s.area === "salao").map((s) => s.id);
+  assert.deepEqual(noSalao.sort(), ["porta", "salao"]);
+
+  // E todo o resto é retaguarda, nenhum setor fica sem lugar.
   for (const s of SETORES) {
-    assert.ok(s.x >= 0 && s.y >= 0, `${s.id} começa fora da planta`);
-    assert.ok(s.x + s.w <= 100, `${s.id} passa da borda direita`);
-    assert.ok(s.y + s.h <= 100, `${s.id} passa da borda de baixo`);
-    assert.ok(s.w >= 20 && s.h >= 20, `${s.id} é pequena demais para um boneco caber`);
-  }
-  // Duas salas sobrepostas põem um boneco dentro da parede da outra.
-  for (const a of SETORES) {
-    for (const b of SETORES) {
-      if (a.id >= b.id) continue;
-      const separadas = a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y;
-      assert.ok(separadas, `${a.id} e ${b.id} se sobrepõem`);
-    }
+    assert.ok(s.area === "salao" || s.area === "retaguarda", `${s.id} não tem lugar na casa`);
+    assert.ok(s.nome.length > 0 && s.legenda.length > 0, `${s.id} sem nome ou sem legenda`);
   }
 });
 
@@ -246,4 +245,85 @@ test("fato de outra pessoa não vira trabalho de quem tem nome parecido", () => 
 test("ninguém na casa não quebra a conta", () => {
   const r = oQueCadaUmFaz({ trabalhadores: [], fatos: [], agora: "2026-09-12T21:00:00.000Z" });
   assert.deepEqual(r, []);
+});
+
+// ============================================================
+// As mesas do salão
+// ============================================================
+
+test("a mesa acende quando alguém lê o QR, e apaga sozinha depois", () => {
+  const agora = "2026-09-12T21:00:00.000Z";
+  const mesas = montarMesas({
+    cadastro: [1, 2, 3],
+    sessoes: [
+      { mesa: 1, cliente: "Renata", olhando: "Costela no bafo", ultimoEm: "2026-09-12T20:52:00.000Z" },
+      // Abriu o cardápio de manhã e foi embora: a sessão continua "ativa" no
+      // banco, mas ninguém está sentado ali.
+      { mesa: 2, cliente: "Alguém", olhando: null, ultimoEm: "2026-09-12T14:00:00.000Z" },
+    ],
+    chamados: [],
+    garcons: new Map(),
+    agora,
+  });
+
+  const um = mesas.find((m) => m.numero === 1)!;
+  assert.equal(um.estado, "ocupada");
+  assert.equal(um.cliente, "Renata");
+  assert.equal(um.olhando, "Costela no bafo");
+  assert.equal(um.minutos, 8);
+
+  const dois = mesas.find((m) => m.numero === 2)!;
+  assert.equal(dois.estado, "livre", "sete horas depois ninguém está mais na mesa");
+  assert.equal(dois.cliente, null, "e não se mostra o nome de quem já foi embora");
+
+  assert.equal(mesas.find((m) => m.numero === 3)!.estado, "livre");
+});
+
+test("mesa que chamou o garçom pisca, e é o estado que manda", () => {
+  const mesas = montarMesas({
+    cadastro: [5],
+    sessoes: [{ mesa: 5, cliente: "Paulo", olhando: null, ultimoEm: "2026-09-12T20:58:00.000Z" }],
+    chamados: [{ mesa: 5, em: "2026-09-12T20:57:00.000Z" }],
+    garcons: new Map([[5, "Juliana"]]),
+    agora: "2026-09-12T21:00:00.000Z",
+  });
+  assert.equal(mesas[0]!.estado, "chamando", "chamar o garçom manda sobre estar ocupada");
+  assert.equal(mesas[0]!.garcom, "Juliana");
+});
+
+test("chamado velho para de piscar", () => {
+  const mesas = montarMesas({
+    cadastro: [5],
+    sessoes: [],
+    chamados: [{ mesa: 5, em: "2026-09-12T20:00:00.000Z" }],
+    garcons: new Map(),
+    agora: "2026-09-12T21:00:00.000Z",
+  });
+  assert.equal(mesas[0]!.estado, "livre", "uma hora depois o garçom já foi lá");
+});
+
+test("o salão vazio mostra as mesas no lugar, e não um vazio", () => {
+  const mesas = montarMesas({
+    cadastro: [1, 2, 3, 4, 5],
+    sessoes: [],
+    chamados: [],
+    garcons: new Map(),
+    agora: "2026-09-12T21:00:00.000Z",
+  });
+  assert.equal(mesas.length, 5);
+  assert.ok(mesas.every((m) => m.estado === "livre"));
+  assert.deepEqual(mesas.map((m) => m.numero), [1, 2, 3, 4, 5], "em ordem, como no salão");
+});
+
+test("mesa com movimento e sem cadastro aparece assim mesmo", () => {
+  // Acontece: alguém colou o QR de uma mesa nova e não cadastrou.
+  const mesas = montarMesas({
+    cadastro: [1, 2],
+    sessoes: [{ mesa: 99, cliente: "Ana", olhando: null, ultimoEm: "2026-09-12T20:59:00.000Z" }],
+    chamados: [],
+    garcons: new Map(),
+    agora: "2026-09-12T21:00:00.000Z",
+  });
+  assert.deepEqual(mesas.map((m) => m.numero), [1, 2, 99]);
+  assert.equal(mesas.find((m) => m.numero === 99)!.estado, "ocupada");
 });

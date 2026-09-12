@@ -2,12 +2,19 @@ import { get } from "../api.js";
 import { el, icone, limpar, vazio } from "../ui.js";
 
 /**
- * A CASA AGORA — a planta do bar como um escritório visto de cima.
+ * A CASA AGORA — o salão do bar visto de cima, como um tabuleiro.
  *
- * Sete salas com parede, e dentro delas os bonecos de quem está na casa: as
- * pessoas com o ponto aberto e os agentes de software. Cada boneco anda pela
- * sala dele e carrega na cabeça o que está fazendo — ou "ocioso", e há quanto
- * tempo.
+ * O SALÃO é o lugar grande: as mesas da casa desenhadas em grade, a porta no
+ * canto por onde o cliente entra, e os garçons andando entre elas. A mesa
+ * ACENDE no instante em que alguém lê o QR code dela, e PISCA quando aquela
+ * mesa chama o garçom — que é a coisa mais urgente que um salão tem.
+ *
+ * A RETAGUARDA é a faixa de cima: cozinha, doca, escritório, rotinas e
+ * opinião. Importam, mas não é lá que o dinheiro aparece.
+ *
+ * Os bonecos são de quem está na casa: as pessoas com o ponto aberto e os
+ * agentes de software. Cada um anda pelo lugar dele e carrega na cabeça o que
+ * está fazendo — ou "ocioso", e há quanto tempo.
  *
  * "Ocioso" aqui é informação de verdade, não enfeite. Agente ocioso é o
  * normal: ninguém escreveu. Cozinheiro ocioso às três da tarde também. O que
@@ -26,9 +33,11 @@ import { el, icone, limpar, vazio } from "../ui.js";
 const QUANTO_ESPERA_MS = 15_000;
 /** Depois disto, a sala deixa de ser "viva" e vira "quieta". */
 const MINUTOS_ATE_ESFRIAR = 45;
-/** De quanto em quanto tempo um boneco escolhe um novo lugar na sala. */
+/** De quanto em quanto tempo um boneco escolhe um novo lugar. */
 const PASSO_TRABALHANDO = [2600, 4200];
 const PASSO_OCIOSO = [7000, 12_000];
+/** Quantas mesas por fileira no salão, do monitor ao celular. */
+const MESAS_POR_FILEIRA = 10;
 
 const ICONE_DO_SETOR = {
   doca: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10",
@@ -54,6 +63,7 @@ export async function aCasa(raiz, ctx) {
   const passeios = new Set();
 
   const planta = el("div", { classe: "planta" });
+  planta.classList.add("planta-jogo");
   const lista = el("div", {});
   const cabecalho = el("div", { classe: "cartao" });
 
@@ -138,6 +148,7 @@ export async function aCasa(raiz, ctx) {
     const atencao = dados.fatos.filter((f) => f.atencao).length;
     const gente = dados.trabalhadores ?? [];
     const ociosos = gente.filter((t) => !t.fazendo && !t.em_pausa).length;
+    const ocupadas = (dados.mesas ?? []).filter((m) => m.estado !== "livre").length;
 
     limpar(cabecalho).append(
       el("div", { classe: "cabecalho-secao" }, [
@@ -148,7 +159,7 @@ export async function aCasa(raiz, ctx) {
             texto: [
               gente.length ? `${gente.length} na casa` : "ninguém na casa",
               ociosos ? `${ociosos} ocioso(s)` : null,
-              dados.fatos.length ? `${dados.fatos.length} coisa(s) em 24 h` : null,
+              ocupadas ? `${ocupadas} mesa(s) com cliente` : null,
               atencao ? `${atencao} pedindo atenção` : null,
             ].filter(Boolean).join(" · "),
           }),
@@ -175,13 +186,108 @@ export async function aCasa(raiz, ctx) {
     pararPasseios();
     limpar(planta);
 
-    for (const setor of dados.setores) {
-      const moradores = (dados.trabalhadores ?? []).filter((t) => t.setor === setor.id);
-      planta.append(sala(setor, moradores));
-    }
+    const daArea = (area) => dados.setores.filter((s) => s.area === area);
+    const moradoresDe = (id) => (dados.trabalhadores ?? []).filter((t) => t.setor === id);
+
+    planta.append(
+      el("div", { classe: "retaguarda" }, [
+        el("span", { classe: "retaguarda-titulo", texto: "Retaguarda" }),
+        el("div", { classe: "retaguarda-salas" },
+          daArea("retaguarda").map((setor) => sala(setor, moradoresDe(setor.id), "compacta"))),
+      ]),
+      desenharSalao(daArea("salao"), moradoresDe),
+    );
+
     if (!menosAnimacao()) {
-      for (const node of planta.querySelectorAll(".boneco")) passear(node);
+      for (const node of planta.querySelectorAll(".boneco:not(.boneco-na-fila)")) passear(node);
     }
+  }
+
+  /**
+   * O salão: as mesas em grade e, por cima delas, os garçons andando.
+   *
+   * As mesas ficam no fluxo normal (uma grade), e os bonecos flutuam por
+   * cima em posição absoluta. Assim o salão cresce sozinho conforme o número
+   * de mesas da casa — setenta mesas e três mesas desenham igual.
+   */
+  function desenharSalao(setores, moradoresDe) {
+    const salao = setores.find((s) => s.id === "salao");
+    const portaria = setores.find((s) => s.id === "porta");
+    const mesas = dados.mesas ?? [];
+    const ocupadas = mesas.filter((m) => m.estado !== "livre").length;
+    const chamando = mesas.filter((m) => m.estado === "chamando").length;
+
+    const gente = [...moradoresDe("salao"), ...moradoresDe("porta")];
+
+    return el("div", {
+      classe: `salao ${salao && !salao.contratado ? "salao-apagado" : ""}`.trim(),
+      "data-setor": "salao",
+    }, [
+      el("div", { classe: "salao-placa" }, [
+        icone(ICONE_DO_SETOR.salao, 16),
+        el("strong", { texto: "Salão" }),
+        el("span", {
+          classe: "muted",
+          texto: !salao?.contratado
+            ? "cardápio digital não contratado"
+            : mesas.length === 0
+              ? "nenhuma mesa cadastrada"
+              : `${mesas.length} mesas · ${ocupadas} com cliente`,
+        }),
+        chamando ? el("span", { classe: "salao-chamando", texto: `${chamando} chamando o garçom` }) : null,
+      ]),
+
+      el("div", { classe: "salao-piso" }, [
+        mesas.length === 0
+          ? el("span", { classe: "sala-vazia", texto: salao?.contratado ? "Cadastre as mesas no Cardápio para o salão aparecer" : "não contratado" })
+          : el("div", { classe: "mesas", style: `--por-fileira:${Math.min(MESAS_POR_FILEIRA, Math.max(4, Math.ceil(Math.sqrt(mesas.length * 1.6))))}` },
+            mesas.map((m) => mesa(m))),
+
+        // O corredor: a faixa por onde a equipe circula, na frente da porta.
+        // Os bonecos moram AQUI, e não por cima das mesas — em cima do
+        // tabuleiro eles cobriam justamente o número da mesa e o estado dela,
+        // que é o que a tela existe para mostrar.
+        el("div", { classe: "salao-corredor" }, [
+          portaria ? porta(portaria) : null,
+          el("div", { classe: "salao-gente" },
+            gente.map((t, i) => boneco(t, lugarNaSala(i, Math.max(1, gente.length))))),
+        ]),
+      ]),
+    ]);
+  }
+
+  /** Uma mesa: acesa quando leram o QR, piscando quando chamaram o garçom. */
+  function mesa(m) {
+    const detalhe = [
+      m.cliente,
+      m.olhando ? `olhando ${m.olhando}` : null,
+      m.garcom ? `garçom ${m.garcom}` : null,
+      m.minutos !== null ? `há ${m.minutos} min` : null,
+    ].filter(Boolean).join(" · ");
+
+    return el("div", {
+      classe: `mesa mesa-${m.estado}`,
+      title: `Mesa ${m.numero}${detalhe ? ` — ${detalhe}` : " — livre"}`,
+    }, [
+      el("span", { classe: "mesa-numero", texto: String(m.numero) }),
+      m.garcom ? el("span", { classe: "mesa-garcom", texto: iniciais(m.garcom) }) : null,
+    ]);
+  }
+
+  /** A porta da rua, com o que a portaria tem para contar. */
+  function porta(setor) {
+    return el("div", {
+      classe: `porta ${setor.ultimo?.atencao ? "porta-atencao" : ""}`.trim(),
+      "data-setor": "porta",
+      title: setor.contratado ? setor.legenda : `${setor.legenda} — não contratado`,
+    }, [
+      icone(ICONE_DO_SETOR.porta, 16),
+      el("span", { classe: "porta-nome", texto: "Entrada" }),
+      el("span", {
+        classe: "porta-recado",
+        texto: !setor.contratado ? "não contratado" : setor.ultimo ? setor.ultimo.titulo : "sem movimento",
+      }),
+    ]);
   }
 
   function sala(setor, moradores) {
@@ -192,7 +298,6 @@ export async function aCasa(raiz, ctx) {
     return el("div", {
       classe: `sala ${estado}`.trim(),
       "data-setor": setor.id,
-      style: `left:${setor.x}%;top:${setor.y}%;width:${setor.w}%;height:${setor.h}%`,
       title: setor.contratado ? setor.legenda : `${setor.legenda} — a casa não contratou este módulo`,
     }, [
       el("div", { classe: "sala-placa" }, [
@@ -202,12 +307,12 @@ export async function aCasa(raiz, ctx) {
           ? el("span", { classe: "sala-conta", texto: String(setor.quantos) })
           : null,
       ]),
-      el("div", { classe: "sala-piso" },
+      el("div", { classe: "sala-piso sala-piso-fila" },
         !setor.contratado
           ? [el("span", { classe: "sala-vazia", texto: "não contratado" })]
           : moradores.length === 0
-            ? [el("span", { classe: "sala-vazia", texto: "ninguém aqui agora" })]
-            : moradores.map((t, i) => boneco(t, lugarNaSala(i, moradores.length)))),
+            ? [el("span", { classe: "sala-vazia", texto: "ninguém aqui" })]
+            : moradores.map((t) => boneco(t, null))),
       setor.contratado
         ? el("span", { classe: "sala-rodape", texto: setor.ultimo ? setor.ultimo.titulo : "sem movimento" })
         : null,
@@ -223,8 +328,10 @@ export async function aCasa(raiz, ctx) {
    * as etiquetas de vizinhos também não baterem.
    */
   function lugarNaSala(i, n) {
-    const x = n === 1 ? 50 : 16 + ((i + 0.5) / n) * 68;
-    const y = n === 1 ? 52 : i % 2 === 0 ? 42 : 66;
+    const x = n === 1 ? 50 : 8 + ((i + 0.5) / n) * 84;
+    // Duas faixas de altura, alternadas: assim a etiqueta de um não bate na
+    // do vizinho, que foi o primeiro defeito que esta tela teve.
+    const y = n === 1 ? 60 : i % 2 === 0 ? 46 : 74;
     return { x, y };
   }
 
@@ -247,8 +354,10 @@ export async function aCasa(raiz, ctx) {
         : `ocioso ${comoFazTempo(t.minutos_parado)}`.trim();
 
     const node = el("div", {
-      classe,
-      style: `left:${lugar.x.toFixed(1)}%;top:${lugar.y.toFixed(1)}%`,
+      // Sem lugar marcado, o boneco entra na fila da sala — é a retaguarda,
+      // onde o espaço é pouco e a posição não diz nada.
+      classe: lugar ? classe : `${classe} boneco-na-fila`,
+      style: lugar ? `left:${lugar.x.toFixed(1)}%;top:${lugar.y.toFixed(1)}%` : null,
       title: [t.nome, t.papel, dizer].filter(Boolean).join(" · "),
     }, [
       el("span", { classe: "boneco-etiqueta", texto: dizer }),
@@ -259,8 +368,8 @@ export async function aCasa(raiz, ctx) {
       el("span", { classe: "boneco-nome", texto: primeiroNome(t.nome) }),
     ]);
     // O lugar de origem fica guardado: o passeio é um vaivém em torno dele,
-    // e não uma corrida pela sala inteira que embaralharia todo mundo.
-    node.dataset.casa = `${lugar.x},${lugar.y}`;
+    // e não uma corrida pelo salão inteiro que embaralharia todo mundo.
+    if (lugar) node.dataset.casa = `${lugar.x},${lugar.y}`;
     return node;
   }
 

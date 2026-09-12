@@ -1453,13 +1453,15 @@ async function roteasApi(
       const venue = await findVenueBySlugInOrg(chave.org_id, slug);
       const modulos = await listarModulos(venue.id);
       const desde = url.searchParams.get("desde") ?? undefined;
+      const fuso = venue.timezone ?? "America/Cuiaba";
       const casa = await oQueEstaAcontecendo({
         venueId: venue.id,
         contratados: modulos.filter((m) => m.ativo).map((m) => m.modulo),
         desde,
         limite: Number(url.searchParams.get("limite")) || undefined,
+        dia: hojeNaCasa(fuso),
       });
-      return ok(res, { ...casa, timezone: venue.timezone ?? "America/Cuiaba" });
+      return ok(res, { ...casa, timezone: fuso });
     }
 
 

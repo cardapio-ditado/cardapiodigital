@@ -35,11 +35,15 @@ export interface Setor {
   legenda: string;
   /** O módulo que alimenta o setor. `null` = todo cliente tem. */
   modulo: string | null;
-  /** A SALA, em porcentagem da planta: canto de cima à esquerda e tamanho. */
-  x: number;
-  y: number;
-  w: number;
-  h: number;
+  /**
+   * Onde este setor mora na tela.
+   *
+   * `salao` é o tabuleiro: o lugar grande, com as mesas e a portaria dentro.
+   * `retaguarda` é o fundo da casa — cozinha, doca, escritório —, uma faixa
+   * de salas menores. A GEOMETRIA em si é da tela, não daqui: o domínio diz
+   * o que a coisa é, e a tela decide quantos pixels isso ocupa.
+   */
+  area: "salao" | "retaguarda";
   contratado: boolean;
   /** Fatos deste setor na janela lida. */
   quantos: number;
@@ -88,20 +92,20 @@ export interface Trabalhador {
 }
 
 /**
- * A planta: sete salas, como um bar visto de cima.
+ * A casa: o salão na frente, a retaguarda no fundo.
  *
- * A porta embaixo à esquerda (por onde o cliente entra), o salão atravessando
- * o meio, e cozinha, doca e escritório no fundo. Quem conhece o próprio bar
- * lê isto sem legenda.
+ * O salão é onde o bar acontece — as mesas, os garçons, e a portaria, que
+ * fica DENTRO dele porque é ali que o cliente entra. Cozinha, doca e
+ * escritório são retaguarda: importam, mas não é lá que o dinheiro aparece.
  */
 export const SETORES: Array<Omit<Setor, "contratado" | "quantos" | "ultimo" | "minutos_parado">> = [
-  { id: "doca", nome: "Doca", legenda: "Mercadoria entrando e contagem", modulo: "cmv", x: 2, y: 3, w: 28, h: 28 },
-  { id: "cozinha", nome: "Cozinha", legenda: "Produção das fichas técnicas", modulo: "cmv", x: 32, y: 3, w: 34, h: 28 },
-  { id: "escritorio", nome: "Escritório", legenda: "Ponto, escala, gorjeta e avisos", modulo: "rh", x: 68, y: 3, w: 30, h: 28 },
-  { id: "salao", nome: "Salão", legenda: "Mesas, garçons e cardápio", modulo: "cardapio-digital", x: 2, y: 34, w: 96, h: 30 },
-  { id: "porta", nome: "Porta", legenda: "Reservas e o agente no WhatsApp", modulo: "agentes-ia", x: 2, y: 67, w: 28, h: 30 },
-  { id: "operacao", nome: "Rotinas", legenda: "Checklists do turno", modulo: "checklist", x: 32, y: 67, w: 34, h: 30 },
-  { id: "opiniao", nome: "Opinião", legenda: "Pesquisa e avaliações", modulo: "clientes", x: 68, y: 67, w: 30, h: 30 },
+  { id: "salao", nome: "Salão", legenda: "Mesas, garçons e cardápio", modulo: "cardapio-digital", area: "salao" },
+  { id: "porta", nome: "Portaria", legenda: "Reservas e o agente no WhatsApp", modulo: "agentes-ia", area: "salao" },
+  { id: "cozinha", nome: "Cozinha", legenda: "Produção das fichas técnicas", modulo: "cmv", area: "retaguarda" },
+  { id: "doca", nome: "Doca", legenda: "Mercadoria entrando e contagem", modulo: "cmv", area: "retaguarda" },
+  { id: "escritorio", nome: "Escritório", legenda: "Ponto, escala, gorjeta e avisos", modulo: "rh", area: "retaguarda" },
+  { id: "operacao", nome: "Rotinas", legenda: "Checklists do turno", modulo: "checklist", area: "retaguarda" },
+  { id: "opiniao", nome: "Opinião", legenda: "Pesquisa e avaliações", modulo: "clientes", area: "retaguarda" },
 ];
 
 /**
@@ -130,6 +134,7 @@ const FUNCAO_NO_SETOR: Array<[string, string]> = [
   ["recep", "porta"],
   ["hostes", "porta"],
   ["host", "porta"],
+  ["manobr", "porta"],
   ["limpez", "operacao"],
   ["manuten", "operacao"],
 ];
@@ -497,11 +502,14 @@ async function salaoDoCardapio(j: Janela): Promise<Fato[]> {
     .order("criado_em", { ascending: false })
     .limit(j.limite);
 
+  // Os nomes são os que o cardápio grava de verdade. Já estiveram errados
+  // aqui: eu tinha inventado "abriu/curtiu/chamou", e o evento real nunca
+  // casava — a mesa acendia na tela e o texto saía cru.
   const NOME_DO_EVENTO: Record<string, string> = {
-    abriu: "Abriu o cardápio na mesa",
-    curtiu: "Curtiu um item",
-    chamou: "Chamou o garçom",
-    viu: "Olhou um item",
+    visualizacao: "Olhou um item",
+    chamou_garcom: "Chamou o garçom",
+    garcom: "Garçom atendeu",
+    pedido: "Fez um pedido",
   };
 
   return ((data ?? []) as Array<Record<string, unknown>>).map((e) => ({
@@ -512,7 +520,7 @@ async function salaoDoCardapio(j: Janela): Promise<Fato[]> {
     titulo: `Mesa ${e.mesa_numero}: ${NOME_DO_EVENTO[String(e.tipo)] ?? String(e.tipo)}`,
     detalhe: texto(e.item_nome),
     quem: texto(e.cliente_nome),
-    atencao: e.tipo === "chamou",
+    atencao: e.tipo === "chamou_garcom",
   }));
 }
 
@@ -595,6 +603,128 @@ const FONTES: Array<{ modulo: string; fonte: Fonte }> = [
   { modulo: "checklist", fonte: rotinasDoTurno },
   { modulo: "clientes", fonte: opiniaoDoCliente },
 ];
+
+// ============================================================
+// As mesas do salão
+// ============================================================
+
+export interface MesaNoSalao {
+  numero: number;
+  /** `livre`, `ocupada` (leu o QR) ou `chamando` (pediu o garçom). */
+  estado: "livre" | "ocupada" | "chamando";
+  cliente: string | null;
+  /** O item que a mesa estava olhando no cardápio. */
+  olhando: string | null;
+  garcom: string | null;
+  /** Há quantos minutos a mesa está aberta. */
+  minutos: number | null;
+}
+
+/** Depois disto, a mesa apaga sozinha: ninguém fica três horas no cardápio. */
+export const MINUTOS_DE_MESA_ACESA = 150;
+/** Chamado de garçom fica piscando por este tempo. */
+export const MINUTOS_DE_CHAMADO = 20;
+
+/**
+ * O estado de cada mesa do salão.
+ *
+ * A mesa acende quando alguém LÊ O QR CODE dela — é a sessão do cardápio que
+ * abre. Ela pisca quando essa mesa chamou o garçom. Apaga sozinha depois de
+ * um tempo sem evento, porque o cliente vai embora sem avisar o sistema.
+ *
+ * Mesa cadastrada e sem sessão aparece livre, e não some: o salão vazio tem
+ * de parecer o salão vazio, com as mesas no lugar.
+ */
+export function montarMesas(params: {
+  cadastro: number[];
+  sessoes: Array<{ mesa: number; cliente: string | null; olhando: string | null; ultimoEm: string }>;
+  chamados: Array<{ mesa: number; em: string }>;
+  garcons: Map<number, string>;
+  agora: string;
+}): MesaNoSalao[] {
+  const sessaoDa = new Map(params.sessoes.map((s) => [s.mesa, s]));
+  const chamadoDa = new Map<number, number>();
+  for (const c of params.chamados) {
+    const faz = minutosEntre(c.em, params.agora);
+    const atual = chamadoDa.get(c.mesa);
+    if (atual === undefined || faz < atual) chamadoDa.set(c.mesa, faz);
+  }
+
+  // A mesa que nem está no cadastro, mas teve movimento, entra assim mesmo:
+  // é a mesa que alguém criou na correria e não cadastrou.
+  const numeros = [...new Set([...params.cadastro, ...sessaoDa.keys(), ...chamadoDa.keys()])].sort((a, b) => a - b);
+
+  return numeros.map((numero) => {
+    const sessao = sessaoDa.get(numero);
+    const faz = sessao ? minutosEntre(sessao.ultimoEm, params.agora) : null;
+    const acesa = faz !== null && faz <= MINUTOS_DE_MESA_ACESA;
+    const chamando = (chamadoDa.get(numero) ?? Infinity) <= MINUTOS_DE_CHAMADO;
+
+    return {
+      numero,
+      estado: chamando ? "chamando" : acesa ? "ocupada" : "livre",
+      cliente: acesa ? (sessao?.cliente ?? null) : null,
+      olhando: acesa ? (sessao?.olhando ?? null) : null,
+      garcom: params.garcons.get(numero) ?? null,
+      minutos: acesa || chamando ? faz : null,
+    };
+  });
+}
+
+/** O salão de verdade: cadastro de mesas, sessões abertas e chamados. */
+async function mesasDoSalao(venueId: string, dia: string): Promise<MesaNoSalao[]> {
+  const agora = new Date().toISOString();
+  const desde = new Date(Date.now() - 4 * 3600_000).toISOString();
+
+  const [{ data: cadastro }, { data: sessoes }, { data: eventos }, { data: turno }] = await Promise.all([
+    cliente().from("mesas").select("numero").eq("venue_id", venueId).eq("ativa", true).order("numero"),
+    cliente()
+      .from("mesa_sessoes")
+      .select("mesa_numero, cliente_nome, ultimo_item, iniciada_em, ultimo_evento_em")
+      .eq("venue_id", venueId)
+      .eq("ativa", true)
+      .order("ultimo_evento_em", { ascending: false, nullsFirst: false })
+      .limit(300),
+    cliente()
+      .from("mesa_eventos")
+      .select("mesa_numero, criado_em")
+      .eq("venue_id", venueId)
+      .eq("tipo", "chamou_garcom")
+      .gte("criado_em", desde)
+      .order("criado_em", { ascending: false })
+      .limit(100),
+    cliente().from("turno_mesas").select("mesa_numero, garcom_nome").eq("venue_id", venueId).eq("turno_data", dia),
+  ]);
+
+  // Uma sessão por mesa: a mais recente, que é a primeira da ordenação.
+  const porMesa = new Map<number, { mesa: number; cliente: string | null; olhando: string | null; ultimoEm: string }>();
+  for (const s of (sessoes ?? []) as Array<Record<string, unknown>>) {
+    const numero = Number(s.mesa_numero);
+    if (porMesa.has(numero)) continue;
+    porMesa.set(numero, {
+      mesa: numero,
+      cliente: texto(s.cliente_nome),
+      olhando: texto(s.ultimo_item),
+      ultimoEm: String(s.ultimo_evento_em ?? s.iniciada_em),
+    });
+  }
+
+  return montarMesas({
+    cadastro: ((cadastro ?? []) as Array<{ numero: number }>).map((m) => Number(m.numero)),
+    sessoes: [...porMesa.values()],
+    chamados: ((eventos ?? []) as Array<Record<string, unknown>>).map((e) => ({
+      mesa: Number(e.mesa_numero),
+      em: String(e.criado_em),
+    })),
+    garcons: new Map(
+      ((turno ?? []) as Array<{ mesa_numero: number; garcom_nome: string }>).map((t) => [
+        Number(t.mesa_numero),
+        t.garcom_nome,
+      ]),
+    ),
+    agora,
+  });
+}
 
 // ============================================================
 // Quem está na casa agora
@@ -742,12 +872,15 @@ export async function oQueEstaAcontecendo(params: {
   /** Ler o que aconteceu a partir daqui. Padrão: as últimas 24 horas. */
   desde?: string;
   limite?: number;
+  /** O dia da casa, para achar o garçom de cada mesa no turno. */
+  dia: string;
 }): Promise<{
   agora: string;
   desde: string;
   setores: Setor[];
   fatos: Fato[];
   trabalhadores: Trabalhador[];
+  mesas: MesaNoSalao[];
   setoresMudos: string[];
 }> {
   const agora = new Date().toISOString();
@@ -773,17 +906,26 @@ export async function oQueEstaAcontecendo(params: {
     console.error(`[a-casa] a fonte de ${modulo} não respondeu: ${(r.reason as Error)?.message}`);
   });
 
-  // Quem mora na casa é lido à parte, e com a mesma tolerância a falha: sem
-  // ninguém de pé a planta continua contando o que aconteceu.
-  const moradores = await Promise.allSettled([
-    temModulo.has("rh") ? pessoasNaCasa(params.venueId) : Promise.resolve([]),
+  // Quem mora na casa e as mesas do salão são lidos à parte, e com a mesma
+  // tolerância a falha: sem ninguém de pé a planta continua contando o que
+  // aconteceu, e sem as mesas o resto da casa continua de pé.
+  const [dosMoradores, dosAgentes, dasMesas] = await Promise.allSettled([
+    temModulo.has("rh") ? pessoasNaCasa(params.venueId) : Promise.resolve([] as Trabalhador[]),
     agentesDeSoftware(params.venueId, params.contratados),
+    temModulo.has("cardapio-digital")
+      ? mesasDoSalao(params.venueId, params.dia)
+      : Promise.resolve([] as MesaNoSalao[]),
   ]);
+
   const trabalhadores: Trabalhador[] = [];
-  for (const m of moradores) {
+  for (const m of [dosMoradores, dosAgentes]) {
     if (m.status === "fulfilled") trabalhadores.push(...m.value);
     else console.error(`[a-casa] não deu para saber quem está na casa: ${(m.reason as Error)?.message}`);
   }
+  if (dasMesas.status === "rejected") {
+    console.error(`[a-casa] não deu para ler o salão: ${(dasMesas.reason as Error)?.message}`);
+  }
+  const mesas = dasMesas.status === "fulfilled" ? dasMesas.value : [];
 
   // A janela dos fatos é curta quando a tela pergunta de novo, mas quem está
   // fazendo o quê precisa olhar mais para trás — senão todo mundo vira
@@ -797,6 +939,7 @@ export async function oQueEstaAcontecendo(params: {
     setores: montarSetores({ fatos: arrumados, contratados: params.contratados, agora }),
     fatos: arrumados,
     trabalhadores: oQueCadaUmFaz({ trabalhadores, fatos: fatosDoDia, agora }),
+    mesas,
     setoresMudos: [...new Set(setoresMudos)],
   };
 }

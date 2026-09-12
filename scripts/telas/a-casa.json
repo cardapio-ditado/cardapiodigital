@@ -1,5 +1,5 @@
 {
-  "rotulo": "A casa agora — o escritório do bar",
+  "rotulo": "A casa agora — o salão do bar",
   "modulo": "/js/pages/aCasa.js",
   "funcao": "aCasa",
   "venue": "casa-de-teste",
@@ -10,106 +10,31 @@
       "timezone": "America/Cuiaba",
       "setores": [
         {
-          "id": "doca",
-          "nome": "Doca",
-          "legenda": "Mercadoria entrando e contagem",
-          "modulo": "cmv",
-          "x": 2,
-          "y": 3,
-          "w": 28,
-          "h": 28,
-          "contratado": true,
-          "quantos": 1,
-          "ultimo": {
-            "id": "compra:1",
-            "quando": "2026-09-12T21:10:00.000Z",
-            "setor": "doca",
-            "tipo": "recebimento",
-            "titulo": "Mercadoria recebida",
-            "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
-            "quem": "Seu Nilton",
-            "atencao": false
-          },
-          "minutos_parado": 150
-        },
-        {
-          "id": "cozinha",
-          "nome": "Cozinha",
-          "legenda": "Produção das fichas técnicas",
-          "modulo": "cmv",
-          "x": 32,
-          "y": 3,
-          "w": 34,
-          "h": 28,
-          "contratado": true,
-          "quantos": 1,
-          "ultimo": {
-            "id": "producao:1",
-            "quando": "2026-09-12T23:26:00.000Z",
-            "setor": "cozinha",
-            "tipo": "producao",
-            "titulo": "Produziu 4 lote(s)",
-            "detalhe": "Molho da casa",
-            "quem": "Cida",
-            "atencao": false
-          },
-          "minutos_parado": 14
-        },
-        {
-          "id": "escritorio",
-          "nome": "Escritório",
-          "legenda": "Ponto, escala, gorjeta e avisos",
-          "modulo": "rh",
-          "x": 68,
-          "y": 3,
-          "w": 30,
-          "h": 28,
-          "contratado": true,
-          "quantos": 1,
-          "ultimo": {
-            "id": "ponto:1",
-            "quando": "2026-09-12T21:18:00.000Z",
-            "setor": "escritorio",
-            "tipo": "ponto",
-            "titulo": "Bateu entrada",
-            "detalhe": null,
-            "quem": "Juliana",
-            "atencao": false
-          },
-          "minutos_parado": 142
-        },
-        {
           "id": "salao",
           "nome": "Salão",
           "legenda": "Mesas, garçons e cardápio",
           "modulo": "cardapio-digital",
-          "x": 2,
-          "y": 34,
-          "w": 96,
-          "h": 30,
+          "area": "salao",
           "contratado": true,
           "quantos": 2,
           "ultimo": {
             "id": "mesa:1",
-            "quando": "2026-09-12T23:34:00.000Z",
+            "quando": "2026-09-12T23:38:00.000Z",
             "setor": "salao",
-            "tipo": "chamou",
+            "tipo": "chamou_garcom",
             "titulo": "Mesa 12: Chamou o garçom",
             "detalhe": null,
             "quem": "Juliana",
             "atencao": true
           },
-          "minutos_parado": 6
+          "minutos_parado": 2
         },
         {
           "id": "porta",
-          "nome": "Porta",
+          "nome": "Portaria",
           "legenda": "Reservas e o agente no WhatsApp",
           "modulo": "agentes-ia",
-          "x": 2,
-          "y": 67,
-          "w": 28,
-          "h": 30,
+          "area": "salao",
           "contratado": true,
           "quantos": 2,
           "ultimo": {
@@ -125,14 +50,71 @@
           "minutos_parado": 3
         },
         {
+          "id": "cozinha",
+          "nome": "Cozinha",
+          "legenda": "Produção das fichas técnicas",
+          "modulo": "cmv",
+          "area": "retaguarda",
+          "contratado": true,
+          "quantos": 1,
+          "ultimo": {
+            "id": "producao:1",
+            "quando": "2026-09-12T23:26:00.000Z",
+            "setor": "cozinha",
+            "tipo": "producao",
+            "titulo": "Produziu 4 lote(s)",
+            "detalhe": "Molho da casa",
+            "quem": "Cida",
+            "atencao": false
+          },
+          "minutos_parado": 14
+        },
+        {
+          "id": "doca",
+          "nome": "Doca",
+          "legenda": "Mercadoria entrando e contagem",
+          "modulo": "cmv",
+          "area": "retaguarda",
+          "contratado": true,
+          "quantos": 1,
+          "ultimo": {
+            "id": "compra:1",
+            "quando": "2026-09-12T21:10:00.000Z",
+            "setor": "doca",
+            "tipo": "recebimento",
+            "titulo": "Mercadoria recebida",
+            "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
+            "quem": "Seu Nilton",
+            "atencao": false
+          },
+          "minutos_parado": 150
+        },
+        {
+          "id": "escritorio",
+          "nome": "Escritório",
+          "legenda": "Ponto, escala, gorjeta e avisos",
+          "modulo": "rh",
+          "area": "retaguarda",
+          "contratado": true,
+          "quantos": 1,
+          "ultimo": {
+            "id": "ponto:1",
+            "quando": "2026-09-12T21:18:00.000Z",
+            "setor": "escritorio",
+            "tipo": "ponto",
+            "titulo": "Bateu entrada",
+            "detalhe": null,
+            "quem": "Juliana",
+            "atencao": false
+          },
+          "minutos_parado": 142
+        },
+        {
           "id": "operacao",
           "nome": "Rotinas",
           "legenda": "Checklists do turno",
           "modulo": "checklist",
-          "x": 32,
-          "y": 67,
-          "w": 34,
-          "h": 30,
+          "area": "retaguarda",
           "contratado": true,
           "quantos": 1,
           "ultimo": {
@@ -152,19 +134,16 @@
           "nome": "Opinião",
           "legenda": "Pesquisa e avaliações",
           "modulo": "clientes",
-          "x": 68,
-          "y": 67,
-          "w": 30,
-          "h": 30,
+          "area": "retaguarda",
           "contratado": true,
-          "quantos": 2,
+          "quantos": 1,
           "ultimo": {
             "id": "resposta:1",
             "quando": "2026-09-12T22:45:00.000Z",
             "setor": "opiniao",
             "tipo": "pesquisa",
             "titulo": "Respondeu a pesquisa: nota 9",
-            "detalhe": "Atendimento rápido e comida boa demais",
+            "detalhe": "Comida boa demais",
             "quem": "Paulo",
             "atencao": false
           },
@@ -188,36 +167,26 @@
           "setor": "porta",
           "tipo": "agente-respondeu",
           "titulo": "O agente respondeu",
-          "detalhe": "Temos mesa para 6 às 21h30, posso confirmar?",
+          "detalhe": "Temos mesa para 6 às 21h30?",
           "quem": "Renata Prado",
           "atencao": false
         },
         {
           "id": "mesa:1",
-          "quando": "2026-09-12T23:34:00.000Z",
+          "quando": "2026-09-12T23:38:00.000Z",
           "setor": "salao",
-          "tipo": "chamou",
+          "tipo": "chamou_garcom",
           "titulo": "Mesa 12: Chamou o garçom",
           "detalhe": null,
           "quem": "Juliana",
           "atencao": true
         },
         {
-          "id": "ponto:1",
-          "quando": "2026-09-12T21:18:00.000Z",
-          "setor": "escritorio",
-          "tipo": "ponto",
-          "titulo": "Bateu entrada",
-          "detalhe": null,
-          "quem": "Juliana",
-          "atencao": false
-        },
-        {
           "id": "mesa:2",
           "quando": "2026-09-12T23:31:00.000Z",
           "setor": "salao",
-          "tipo": "curtiu",
-          "titulo": "Mesa 7: Curtiu um item",
+          "tipo": "visualizacao",
+          "titulo": "Mesa 7: Olhou um item",
           "detalhe": "Costela no bafo",
           "quem": "Mesa 7",
           "atencao": false
@@ -230,6 +199,16 @@
           "titulo": "Produziu 4 lote(s)",
           "detalhe": "Molho da casa",
           "quem": "Cida",
+          "atencao": false
+        },
+        {
+          "id": "ponto:1",
+          "quando": "2026-09-12T21:18:00.000Z",
+          "setor": "escritorio",
+          "tipo": "ponto",
+          "titulo": "Bateu entrada",
+          "detalhe": null,
+          "quem": "Juliana",
           "atencao": false
         },
         {
@@ -248,7 +227,7 @@
           "setor": "opiniao",
           "tipo": "pesquisa",
           "titulo": "Respondeu a pesquisa: nota 9",
-          "detalhe": "Atendimento rápido e comida boa demais",
+          "detalhe": "Comida boa demais",
           "quem": "Paulo",
           "atencao": false
         },
@@ -261,16 +240,6 @@
           "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
           "quem": "Seu Nilton",
           "atencao": false
-        },
-        {
-          "id": "google:1",
-          "quando": "2026-09-12T16:40:00.000Z",
-          "setor": "opiniao",
-          "tipo": "google",
-          "titulo": "Avaliação no Google: 2 estrela(s)",
-          "detalhe": "Demorou demais para sair a comida",
-          "quem": "Anderson",
-          "atencao": true
         }
       ],
       "trabalhadores": [
@@ -281,19 +250,8 @@
           "papel": "Garçonete",
           "setor": "salao",
           "fazendo": "Mesa 12: Chamou o garçom",
-          "desde": "2026-09-12T23:34:00.000Z",
-          "minutos_parado": 6,
-          "em_pausa": false
-        },
-        {
-          "id": "pessoa:2",
-          "nome": "Cida Nogueira",
-          "tipo": "pessoa",
-          "papel": "Cozinha",
-          "setor": "cozinha",
-          "fazendo": "Produziu 4 lote(s)",
-          "desde": "2026-09-12T23:26:00.000Z",
-          "minutos_parado": 14,
+          "desde": "2026-09-12T23:38:00.000Z",
+          "minutos_parado": 2,
           "em_pausa": false
         },
         {
@@ -330,6 +288,17 @@
           "em_pausa": false
         },
         {
+          "id": "pessoa:2",
+          "nome": "Cida Nogueira",
+          "tipo": "pessoa",
+          "papel": "Cozinha",
+          "setor": "cozinha",
+          "fazendo": "Produziu 4 lote(s)",
+          "desde": "2026-09-12T23:26:00.000Z",
+          "minutos_parado": 14,
+          "em_pausa": false
+        },
+        {
           "id": "pessoa:6",
           "nome": "Val Prado",
           "tipo": "pessoa",
@@ -355,7 +324,7 @@
           "id": "agente:carteiro",
           "nome": "Carteiro",
           "tipo": "agente",
-          "papel": "Manda os avisos no WhatsApp",
+          "papel": "Manda os avisos",
           "setor": "escritorio",
           "fazendo": null,
           "desde": "2026-09-12T20:40:00.000Z",
@@ -363,12 +332,574 @@
           "em_pausa": false
         }
       ],
+      "mesas": [
+        {
+          "numero": 1,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 2,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 3,
+          "estado": "ocupada",
+          "cliente": "Renata",
+          "olhando": "Costela no bafo",
+          "garcom": "Juliana",
+          "minutos": 22
+        },
+        {
+          "numero": 4,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 5,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 6,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 7,
+          "estado": "ocupada",
+          "cliente": "Paulo",
+          "olhando": "Chopp Brahma",
+          "garcom": "Juliana",
+          "minutos": 41
+        },
+        {
+          "numero": 8,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 9,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 10,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 11,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 12,
+          "estado": "chamando",
+          "cliente": "Ana",
+          "olhando": null,
+          "garcom": "Tiago",
+          "minutos": 8
+        },
+        {
+          "numero": 13,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 14,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 15,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 16,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 17,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 18,
+          "estado": "ocupada",
+          "cliente": "Bruno",
+          "olhando": "Picanha",
+          "garcom": "Tiago",
+          "minutos": 63
+        },
+        {
+          "numero": 19,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 20,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 21,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 22,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 23,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 24,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 25,
+          "estado": "ocupada",
+          "cliente": "Carla",
+          "olhando": null,
+          "garcom": null,
+          "minutos": 15
+        },
+        {
+          "numero": 26,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 27,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 28,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 29,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 30,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 31,
+          "estado": "chamando",
+          "cliente": "Diego",
+          "olhando": "Batata frita",
+          "garcom": "Juliana",
+          "minutos": 34
+        },
+        {
+          "numero": 32,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 33,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 34,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 35,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 36,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 37,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 38,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 39,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 40,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 41,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 42,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 43,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 44,
+          "estado": "ocupada",
+          "cliente": "Elis",
+          "olhando": null,
+          "garcom": "Rose",
+          "minutos": 5
+        },
+        {
+          "numero": 45,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 46,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 47,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 48,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 49,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 50,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 51,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 52,
+          "estado": "ocupada",
+          "cliente": "Fabio",
+          "olhando": "Caipirinha",
+          "garcom": null,
+          "minutos": 77
+        },
+        {
+          "numero": 53,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 54,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 55,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 56,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 57,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 58,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 59,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 60,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 61,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 62,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 63,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 64,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 65,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 66,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 67,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 68,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 69,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        },
+        {
+          "numero": 70,
+          "estado": "livre",
+          "cliente": null,
+          "olhando": null,
+          "garcom": null,
+          "minutos": null
+        }
+      ],
       "setoresMudos": []
     }
   },
   "variacoes": {
     "sexta-a-noite": {
-      "rotulo": "sexta à noite, a casa cheia",
+      "rotulo": "sexta à noite, o salão cheio",
       "rotas": {
         "GET /a-casa": {
           "agora": "2026-09-12T23:40:00.000Z",
@@ -376,106 +907,31 @@
           "timezone": "America/Cuiaba",
           "setores": [
             {
-              "id": "doca",
-              "nome": "Doca",
-              "legenda": "Mercadoria entrando e contagem",
-              "modulo": "cmv",
-              "x": 2,
-              "y": 3,
-              "w": 28,
-              "h": 28,
-              "contratado": true,
-              "quantos": 1,
-              "ultimo": {
-                "id": "compra:1",
-                "quando": "2026-09-12T21:10:00.000Z",
-                "setor": "doca",
-                "tipo": "recebimento",
-                "titulo": "Mercadoria recebida",
-                "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
-                "quem": "Seu Nilton",
-                "atencao": false
-              },
-              "minutos_parado": 150
-            },
-            {
-              "id": "cozinha",
-              "nome": "Cozinha",
-              "legenda": "Produção das fichas técnicas",
-              "modulo": "cmv",
-              "x": 32,
-              "y": 3,
-              "w": 34,
-              "h": 28,
-              "contratado": true,
-              "quantos": 1,
-              "ultimo": {
-                "id": "producao:1",
-                "quando": "2026-09-12T23:26:00.000Z",
-                "setor": "cozinha",
-                "tipo": "producao",
-                "titulo": "Produziu 4 lote(s)",
-                "detalhe": "Molho da casa",
-                "quem": "Cida",
-                "atencao": false
-              },
-              "minutos_parado": 14
-            },
-            {
-              "id": "escritorio",
-              "nome": "Escritório",
-              "legenda": "Ponto, escala, gorjeta e avisos",
-              "modulo": "rh",
-              "x": 68,
-              "y": 3,
-              "w": 30,
-              "h": 28,
-              "contratado": true,
-              "quantos": 1,
-              "ultimo": {
-                "id": "ponto:1",
-                "quando": "2026-09-12T21:18:00.000Z",
-                "setor": "escritorio",
-                "tipo": "ponto",
-                "titulo": "Bateu entrada",
-                "detalhe": null,
-                "quem": "Juliana",
-                "atencao": false
-              },
-              "minutos_parado": 142
-            },
-            {
               "id": "salao",
               "nome": "Salão",
               "legenda": "Mesas, garçons e cardápio",
               "modulo": "cardapio-digital",
-              "x": 2,
-              "y": 34,
-              "w": 96,
-              "h": 30,
+              "area": "salao",
               "contratado": true,
               "quantos": 2,
               "ultimo": {
                 "id": "mesa:1",
-                "quando": "2026-09-12T23:34:00.000Z",
+                "quando": "2026-09-12T23:38:00.000Z",
                 "setor": "salao",
-                "tipo": "chamou",
+                "tipo": "chamou_garcom",
                 "titulo": "Mesa 12: Chamou o garçom",
                 "detalhe": null,
                 "quem": "Juliana",
                 "atencao": true
               },
-              "minutos_parado": 6
+              "minutos_parado": 2
             },
             {
               "id": "porta",
-              "nome": "Porta",
+              "nome": "Portaria",
               "legenda": "Reservas e o agente no WhatsApp",
               "modulo": "agentes-ia",
-              "x": 2,
-              "y": 67,
-              "w": 28,
-              "h": 30,
+              "area": "salao",
               "contratado": true,
               "quantos": 2,
               "ultimo": {
@@ -491,14 +947,71 @@
               "minutos_parado": 3
             },
             {
+              "id": "cozinha",
+              "nome": "Cozinha",
+              "legenda": "Produção das fichas técnicas",
+              "modulo": "cmv",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 1,
+              "ultimo": {
+                "id": "producao:1",
+                "quando": "2026-09-12T23:26:00.000Z",
+                "setor": "cozinha",
+                "tipo": "producao",
+                "titulo": "Produziu 4 lote(s)",
+                "detalhe": "Molho da casa",
+                "quem": "Cida",
+                "atencao": false
+              },
+              "minutos_parado": 14
+            },
+            {
+              "id": "doca",
+              "nome": "Doca",
+              "legenda": "Mercadoria entrando e contagem",
+              "modulo": "cmv",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 1,
+              "ultimo": {
+                "id": "compra:1",
+                "quando": "2026-09-12T21:10:00.000Z",
+                "setor": "doca",
+                "tipo": "recebimento",
+                "titulo": "Mercadoria recebida",
+                "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
+                "quem": "Seu Nilton",
+                "atencao": false
+              },
+              "minutos_parado": 150
+            },
+            {
+              "id": "escritorio",
+              "nome": "Escritório",
+              "legenda": "Ponto, escala, gorjeta e avisos",
+              "modulo": "rh",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 1,
+              "ultimo": {
+                "id": "ponto:1",
+                "quando": "2026-09-12T21:18:00.000Z",
+                "setor": "escritorio",
+                "tipo": "ponto",
+                "titulo": "Bateu entrada",
+                "detalhe": null,
+                "quem": "Juliana",
+                "atencao": false
+              },
+              "minutos_parado": 142
+            },
+            {
               "id": "operacao",
               "nome": "Rotinas",
               "legenda": "Checklists do turno",
               "modulo": "checklist",
-              "x": 32,
-              "y": 67,
-              "w": 34,
-              "h": 30,
+              "area": "retaguarda",
               "contratado": true,
               "quantos": 1,
               "ultimo": {
@@ -518,19 +1031,16 @@
               "nome": "Opinião",
               "legenda": "Pesquisa e avaliações",
               "modulo": "clientes",
-              "x": 68,
-              "y": 67,
-              "w": 30,
-              "h": 30,
+              "area": "retaguarda",
               "contratado": true,
-              "quantos": 2,
+              "quantos": 1,
               "ultimo": {
                 "id": "resposta:1",
                 "quando": "2026-09-12T22:45:00.000Z",
                 "setor": "opiniao",
                 "tipo": "pesquisa",
                 "titulo": "Respondeu a pesquisa: nota 9",
-                "detalhe": "Atendimento rápido e comida boa demais",
+                "detalhe": "Comida boa demais",
                 "quem": "Paulo",
                 "atencao": false
               },
@@ -554,36 +1064,26 @@
               "setor": "porta",
               "tipo": "agente-respondeu",
               "titulo": "O agente respondeu",
-              "detalhe": "Temos mesa para 6 às 21h30, posso confirmar?",
+              "detalhe": "Temos mesa para 6 às 21h30?",
               "quem": "Renata Prado",
               "atencao": false
             },
             {
               "id": "mesa:1",
-              "quando": "2026-09-12T23:34:00.000Z",
+              "quando": "2026-09-12T23:38:00.000Z",
               "setor": "salao",
-              "tipo": "chamou",
+              "tipo": "chamou_garcom",
               "titulo": "Mesa 12: Chamou o garçom",
               "detalhe": null,
               "quem": "Juliana",
               "atencao": true
             },
             {
-              "id": "ponto:1",
-              "quando": "2026-09-12T21:18:00.000Z",
-              "setor": "escritorio",
-              "tipo": "ponto",
-              "titulo": "Bateu entrada",
-              "detalhe": null,
-              "quem": "Juliana",
-              "atencao": false
-            },
-            {
               "id": "mesa:2",
               "quando": "2026-09-12T23:31:00.000Z",
               "setor": "salao",
-              "tipo": "curtiu",
-              "titulo": "Mesa 7: Curtiu um item",
+              "tipo": "visualizacao",
+              "titulo": "Mesa 7: Olhou um item",
               "detalhe": "Costela no bafo",
               "quem": "Mesa 7",
               "atencao": false
@@ -596,6 +1096,16 @@
               "titulo": "Produziu 4 lote(s)",
               "detalhe": "Molho da casa",
               "quem": "Cida",
+              "atencao": false
+            },
+            {
+              "id": "ponto:1",
+              "quando": "2026-09-12T21:18:00.000Z",
+              "setor": "escritorio",
+              "tipo": "ponto",
+              "titulo": "Bateu entrada",
+              "detalhe": null,
+              "quem": "Juliana",
               "atencao": false
             },
             {
@@ -614,7 +1124,7 @@
               "setor": "opiniao",
               "tipo": "pesquisa",
               "titulo": "Respondeu a pesquisa: nota 9",
-              "detalhe": "Atendimento rápido e comida boa demais",
+              "detalhe": "Comida boa demais",
               "quem": "Paulo",
               "atencao": false
             },
@@ -627,16 +1137,6 @@
               "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
               "quem": "Seu Nilton",
               "atencao": false
-            },
-            {
-              "id": "google:1",
-              "quando": "2026-09-12T16:40:00.000Z",
-              "setor": "opiniao",
-              "tipo": "google",
-              "titulo": "Avaliação no Google: 2 estrela(s)",
-              "detalhe": "Demorou demais para sair a comida",
-              "quem": "Anderson",
-              "atencao": true
             }
           ],
           "trabalhadores": [
@@ -647,19 +1147,8 @@
               "papel": "Garçonete",
               "setor": "salao",
               "fazendo": "Mesa 12: Chamou o garçom",
-              "desde": "2026-09-12T23:34:00.000Z",
-              "minutos_parado": 6,
-              "em_pausa": false
-            },
-            {
-              "id": "pessoa:2",
-              "nome": "Cida Nogueira",
-              "tipo": "pessoa",
-              "papel": "Cozinha",
-              "setor": "cozinha",
-              "fazendo": "Produziu 4 lote(s)",
-              "desde": "2026-09-12T23:26:00.000Z",
-              "minutos_parado": 14,
+              "desde": "2026-09-12T23:38:00.000Z",
+              "minutos_parado": 2,
               "em_pausa": false
             },
             {
@@ -696,6 +1185,17 @@
               "em_pausa": false
             },
             {
+              "id": "pessoa:2",
+              "nome": "Cida Nogueira",
+              "tipo": "pessoa",
+              "papel": "Cozinha",
+              "setor": "cozinha",
+              "fazendo": "Produziu 4 lote(s)",
+              "desde": "2026-09-12T23:26:00.000Z",
+              "minutos_parado": 14,
+              "em_pausa": false
+            },
+            {
               "id": "pessoa:6",
               "nome": "Val Prado",
               "tipo": "pessoa",
@@ -721,7 +1221,7 @@
               "id": "agente:carteiro",
               "nome": "Carteiro",
               "tipo": "agente",
-              "papel": "Manda os avisos no WhatsApp",
+              "papel": "Manda os avisos",
               "setor": "escritorio",
               "fazendo": null,
               "desde": "2026-09-12T20:40:00.000Z",
@@ -729,12 +1229,574 @@
               "em_pausa": false
             }
           ],
+          "mesas": [
+            {
+              "numero": 1,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 2,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 3,
+              "estado": "ocupada",
+              "cliente": "Renata",
+              "olhando": "Costela no bafo",
+              "garcom": "Juliana",
+              "minutos": 22
+            },
+            {
+              "numero": 4,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 5,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 6,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 7,
+              "estado": "ocupada",
+              "cliente": "Paulo",
+              "olhando": "Chopp Brahma",
+              "garcom": "Juliana",
+              "minutos": 41
+            },
+            {
+              "numero": 8,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 9,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 10,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 11,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 12,
+              "estado": "chamando",
+              "cliente": "Ana",
+              "olhando": null,
+              "garcom": "Tiago",
+              "minutos": 8
+            },
+            {
+              "numero": 13,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 14,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 15,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 16,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 17,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 18,
+              "estado": "ocupada",
+              "cliente": "Bruno",
+              "olhando": "Picanha",
+              "garcom": "Tiago",
+              "minutos": 63
+            },
+            {
+              "numero": 19,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 20,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 21,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 22,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 23,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 24,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 25,
+              "estado": "ocupada",
+              "cliente": "Carla",
+              "olhando": null,
+              "garcom": null,
+              "minutos": 15
+            },
+            {
+              "numero": 26,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 27,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 28,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 29,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 30,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 31,
+              "estado": "chamando",
+              "cliente": "Diego",
+              "olhando": "Batata frita",
+              "garcom": "Juliana",
+              "minutos": 34
+            },
+            {
+              "numero": 32,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 33,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 34,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 35,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 36,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 37,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 38,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 39,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 40,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 41,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 42,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 43,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 44,
+              "estado": "ocupada",
+              "cliente": "Elis",
+              "olhando": null,
+              "garcom": "Rose",
+              "minutos": 5
+            },
+            {
+              "numero": 45,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 46,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 47,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 48,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 49,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 50,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 51,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 52,
+              "estado": "ocupada",
+              "cliente": "Fabio",
+              "olhando": "Caipirinha",
+              "garcom": null,
+              "minutos": 77
+            },
+            {
+              "numero": 53,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 54,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 55,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 56,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 57,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 58,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 59,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 60,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 61,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 62,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 63,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 64,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 65,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 66,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 67,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 68,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 69,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 70,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            }
+          ],
           "setoresMudos": []
         }
       }
     },
-    "tudo-ocioso": {
-      "rotulo": "terça de tarde: todo mundo parado",
+    "salao-vazio": {
+      "rotulo": "abriu agora: as mesas todas livres",
       "rotas": {
         "GET /a-casa": {
           "agora": "2026-09-12T23:40:00.000Z",
@@ -742,14 +1804,814 @@
           "timezone": "America/Cuiaba",
           "setores": [
             {
+              "id": "salao",
+              "nome": "Salão",
+              "legenda": "Mesas, garçons e cardápio",
+              "modulo": "cardapio-digital",
+              "area": "salao",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "porta",
+              "nome": "Portaria",
+              "legenda": "Reservas e o agente no WhatsApp",
+              "modulo": "agentes-ia",
+              "area": "salao",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "cozinha",
+              "nome": "Cozinha",
+              "legenda": "Produção das fichas técnicas",
+              "modulo": "cmv",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
               "id": "doca",
               "nome": "Doca",
               "legenda": "Mercadoria entrando e contagem",
               "modulo": "cmv",
-              "x": 2,
-              "y": 3,
-              "w": 28,
-              "h": 28,
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "escritorio",
+              "nome": "Escritório",
+              "legenda": "Ponto, escala, gorjeta e avisos",
+              "modulo": "rh",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "operacao",
+              "nome": "Rotinas",
+              "legenda": "Checklists do turno",
+              "modulo": "checklist",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "opiniao",
+              "nome": "Opinião",
+              "legenda": "Pesquisa e avaliações",
+              "modulo": "clientes",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            }
+          ],
+          "fatos": [],
+          "trabalhadores": [
+            {
+              "id": "pessoa:1",
+              "nome": "Juliana Barbosa",
+              "tipo": "pessoa",
+              "papel": "Garçonete",
+              "setor": "salao",
+              "fazendo": null,
+              "desde": "2026-09-12T23:38:00.000Z",
+              "minutos_parado": 120,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:3",
+              "nome": "Tiago Menezes",
+              "tipo": "pessoa",
+              "papel": "Barman",
+              "setor": "salao",
+              "fazendo": null,
+              "desde": "2026-09-12T22:48:00.000Z",
+              "minutos_parado": 120,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:4",
+              "nome": "Rose da Silva",
+              "tipo": "pessoa",
+              "papel": "Copa",
+              "setor": "salao",
+              "fazendo": null,
+              "desde": "2026-09-12T22:07:00.000Z",
+              "minutos_parado": 120,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:5",
+              "nome": "Marcos Aurélio",
+              "tipo": "pessoa",
+              "papel": "Segurança",
+              "setor": "porta",
+              "fazendo": null,
+              "desde": "2026-09-12T23:02:00.000Z",
+              "minutos_parado": 120,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:2",
+              "nome": "Cida Nogueira",
+              "tipo": "pessoa",
+              "papel": "Cozinha",
+              "setor": "cozinha",
+              "fazendo": null,
+              "desde": "2026-09-12T23:26:00.000Z",
+              "minutos_parado": 120,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:6",
+              "nome": "Val Prado",
+              "tipo": "pessoa",
+              "papel": "Subgerente",
+              "setor": "escritorio",
+              "fazendo": null,
+              "desde": "2026-09-12T23:20:00.000Z",
+              "minutos_parado": 120,
+              "em_pausa": true
+            },
+            {
+              "id": "agente:atendente",
+              "nome": "Atendente",
+              "tipo": "agente",
+              "papel": "Responde o WhatsApp",
+              "setor": "porta",
+              "fazendo": null,
+              "desde": "2026-09-12T23:36:00.000Z",
+              "minutos_parado": 120,
+              "em_pausa": false
+            },
+            {
+              "id": "agente:carteiro",
+              "nome": "Carteiro",
+              "tipo": "agente",
+              "papel": "Manda os avisos",
+              "setor": "escritorio",
+              "fazendo": null,
+              "desde": "2026-09-12T20:40:00.000Z",
+              "minutos_parado": 120,
+              "em_pausa": false
+            }
+          ],
+          "mesas": [
+            {
+              "numero": 1,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 2,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 3,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": "Juliana",
+              "minutos": null
+            },
+            {
+              "numero": 4,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 5,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 6,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 7,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": "Juliana",
+              "minutos": null
+            },
+            {
+              "numero": 8,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 9,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 10,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 11,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 12,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": "Tiago",
+              "minutos": null
+            },
+            {
+              "numero": 13,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 14,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 15,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 16,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 17,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 18,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": "Tiago",
+              "minutos": null
+            },
+            {
+              "numero": 19,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 20,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 21,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 22,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 23,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 24,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 25,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 26,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 27,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 28,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 29,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 30,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 31,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": "Juliana",
+              "minutos": null
+            },
+            {
+              "numero": 32,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 33,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 34,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 35,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 36,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 37,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 38,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 39,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 40,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 41,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 42,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 43,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 44,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": "Rose",
+              "minutos": null
+            },
+            {
+              "numero": 45,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 46,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 47,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 48,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 49,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 50,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 51,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 52,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 53,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 54,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 55,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 56,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 57,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 58,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 59,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 60,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 61,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 62,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 63,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 64,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 65,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 66,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 67,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 68,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 69,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 70,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            }
+          ],
+          "setoresMudos": []
+        }
+      }
+    },
+    "todo-mundo-chamando": {
+      "rotulo": "oito mesas chamando o garçom ao mesmo tempo",
+      "rotas": {
+        "GET /a-casa": {
+          "agora": "2026-09-12T23:40:00.000Z",
+          "desde": "2026-09-11T23:40:00.000Z",
+          "timezone": "America/Cuiaba",
+          "setores": [
+            {
+              "id": "salao",
+              "nome": "Salão",
+              "legenda": "Mesas, garçons e cardápio",
+              "modulo": "cardapio-digital",
+              "area": "salao",
+              "contratado": true,
+              "quantos": 2,
+              "ultimo": {
+                "id": "mesa:1",
+                "quando": "2026-09-12T23:38:00.000Z",
+                "setor": "salao",
+                "tipo": "chamou_garcom",
+                "titulo": "Mesa 12: Chamou o garçom",
+                "detalhe": null,
+                "quem": "Juliana",
+                "atencao": true
+              },
+              "minutos_parado": 2
+            },
+            {
+              "id": "porta",
+              "nome": "Portaria",
+              "legenda": "Reservas e o agente no WhatsApp",
+              "modulo": "agentes-ia",
+              "area": "salao",
+              "contratado": true,
+              "quantos": 2,
+              "ultimo": {
+                "id": "reserva:1",
+                "quando": "2026-09-12T23:37:00.000Z",
+                "setor": "porta",
+                "tipo": "reserva",
+                "titulo": "Reserva para 6 pessoa(s)",
+                "detalhe": "para 12/09/2026 21:30",
+                "quem": "Renata Prado",
+                "atencao": true
+              },
+              "minutos_parado": 3
+            },
+            {
+              "id": "cozinha",
+              "nome": "Cozinha",
+              "legenda": "Produção das fichas técnicas",
+              "modulo": "cmv",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 1,
+              "ultimo": {
+                "id": "producao:1",
+                "quando": "2026-09-12T23:26:00.000Z",
+                "setor": "cozinha",
+                "tipo": "producao",
+                "titulo": "Produziu 4 lote(s)",
+                "detalhe": "Molho da casa",
+                "quem": "Cida",
+                "atencao": false
+              },
+              "minutos_parado": 14
+            },
+            {
+              "id": "doca",
+              "nome": "Doca",
+              "legenda": "Mercadoria entrando e contagem",
+              "modulo": "cmv",
+              "area": "retaguarda",
               "contratado": true,
               "quantos": 1,
               "ultimo": {
@@ -765,329 +2627,64 @@
               "minutos_parado": 150
             },
             {
-              "id": "cozinha",
-              "nome": "Cozinha",
-              "legenda": "Produção das fichas técnicas",
-              "modulo": "cmv",
-              "x": 32,
-              "y": 3,
-              "w": 34,
-              "h": 28,
-              "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
               "id": "escritorio",
               "nome": "Escritório",
               "legenda": "Ponto, escala, gorjeta e avisos",
               "modulo": "rh",
-              "x": 68,
-              "y": 3,
-              "w": 30,
-              "h": 28,
-              "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
-              "id": "salao",
-              "nome": "Salão",
-              "legenda": "Mesas, garçons e cardápio",
-              "modulo": "cardapio-digital",
-              "x": 2,
-              "y": 34,
-              "w": 96,
-              "h": 30,
-              "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
-              "id": "porta",
-              "nome": "Porta",
-              "legenda": "Reservas e o agente no WhatsApp",
-              "modulo": "agentes-ia",
-              "x": 2,
-              "y": 67,
-              "w": 28,
-              "h": 30,
-              "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
-              "id": "operacao",
-              "nome": "Rotinas",
-              "legenda": "Checklists do turno",
-              "modulo": "checklist",
-              "x": 32,
-              "y": 67,
-              "w": 34,
-              "h": 30,
-              "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
-              "id": "opiniao",
-              "nome": "Opinião",
-              "legenda": "Pesquisa e avaliações",
-              "modulo": "clientes",
-              "x": 68,
-              "y": 67,
-              "w": 30,
-              "h": 30,
+              "area": "retaguarda",
               "contratado": true,
               "quantos": 1,
               "ultimo": {
-                "id": "google:1",
-                "quando": "2026-09-12T16:40:00.000Z",
-                "setor": "opiniao",
-                "tipo": "google",
-                "titulo": "Avaliação no Google: 2 estrela(s)",
-                "detalhe": "Demorou demais para sair a comida",
-                "quem": "Anderson",
-                "atencao": true
+                "id": "ponto:1",
+                "quando": "2026-09-12T21:18:00.000Z",
+                "setor": "escritorio",
+                "tipo": "ponto",
+                "titulo": "Bateu entrada",
+                "detalhe": null,
+                "quem": "Juliana",
+                "atencao": false
               },
-              "minutos_parado": 420
-            }
-          ],
-          "fatos": [
-            {
-              "id": "compra:1",
-              "quando": "2026-09-12T21:10:00.000Z",
-              "setor": "doca",
-              "tipo": "recebimento",
-              "titulo": "Mercadoria recebida",
-              "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
-              "quem": "Seu Nilton",
-              "atencao": false
-            },
-            {
-              "id": "google:1",
-              "quando": "2026-09-12T16:40:00.000Z",
-              "setor": "opiniao",
-              "tipo": "google",
-              "titulo": "Avaliação no Google: 2 estrela(s)",
-              "detalhe": "Demorou demais para sair a comida",
-              "quem": "Anderson",
-              "atencao": true
-            }
-          ],
-          "trabalhadores": [
-            {
-              "id": "pessoa:1",
-              "nome": "Juliana Barbosa",
-              "tipo": "pessoa",
-              "papel": "Garçonete",
-              "setor": "salao",
-              "fazendo": null,
-              "desde": "2026-09-12T23:34:00.000Z",
-              "minutos_parado": 90,
-              "em_pausa": false
-            },
-            {
-              "id": "pessoa:2",
-              "nome": "Cida Nogueira",
-              "tipo": "pessoa",
-              "papel": "Cozinha",
-              "setor": "cozinha",
-              "fazendo": null,
-              "desde": "2026-09-12T23:26:00.000Z",
-              "minutos_parado": 90,
-              "em_pausa": false
-            },
-            {
-              "id": "pessoa:3",
-              "nome": "Tiago Menezes",
-              "tipo": "pessoa",
-              "papel": "Barman",
-              "setor": "salao",
-              "fazendo": null,
-              "desde": "2026-09-12T22:48:00.000Z",
-              "minutos_parado": 90,
-              "em_pausa": false
-            },
-            {
-              "id": "pessoa:4",
-              "nome": "Rose da Silva",
-              "tipo": "pessoa",
-              "papel": "Copa",
-              "setor": "salao",
-              "fazendo": null,
-              "desde": "2026-09-12T22:07:00.000Z",
-              "minutos_parado": 90,
-              "em_pausa": false
-            },
-            {
-              "id": "pessoa:5",
-              "nome": "Marcos Aurélio",
-              "tipo": "pessoa",
-              "papel": "Segurança",
-              "setor": "porta",
-              "fazendo": null,
-              "desde": "2026-09-12T23:02:00.000Z",
-              "minutos_parado": 90,
-              "em_pausa": false
-            },
-            {
-              "id": "pessoa:6",
-              "nome": "Val Prado",
-              "tipo": "pessoa",
-              "papel": "Subgerente",
-              "setor": "escritorio",
-              "fazendo": null,
-              "desde": "2026-09-12T23:20:00.000Z",
-              "minutos_parado": 90,
-              "em_pausa": false
-            },
-            {
-              "id": "agente:atendente",
-              "nome": "Atendente",
-              "tipo": "agente",
-              "papel": "Responde o WhatsApp",
-              "setor": "porta",
-              "fazendo": null,
-              "desde": "2026-09-12T23:36:00.000Z",
-              "minutos_parado": 90,
-              "em_pausa": false
-            },
-            {
-              "id": "agente:carteiro",
-              "nome": "Carteiro",
-              "tipo": "agente",
-              "papel": "Manda os avisos no WhatsApp",
-              "setor": "escritorio",
-              "fazendo": null,
-              "desde": "2026-09-12T20:40:00.000Z",
-              "minutos_parado": 90,
-              "em_pausa": false
-            }
-          ],
-          "setoresMudos": []
-        }
-      }
-    },
-    "so-os-agentes": {
-      "rotulo": "madrugada: só os agentes de software na casa",
-      "rotas": {
-        "GET /a-casa": {
-          "agora": "2026-09-12T23:40:00.000Z",
-          "desde": "2026-09-11T23:40:00.000Z",
-          "timezone": "America/Cuiaba",
-          "setores": [
-            {
-              "id": "doca",
-              "nome": "Doca",
-              "legenda": "Mercadoria entrando e contagem",
-              "modulo": "cmv",
-              "x": 2,
-              "y": 3,
-              "w": 28,
-              "h": 28,
-              "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
-              "id": "cozinha",
-              "nome": "Cozinha",
-              "legenda": "Produção das fichas técnicas",
-              "modulo": "cmv",
-              "x": 32,
-              "y": 3,
-              "w": 34,
-              "h": 28,
-              "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
-              "id": "escritorio",
-              "nome": "Escritório",
-              "legenda": "Ponto, escala, gorjeta e avisos",
-              "modulo": "rh",
-              "x": 68,
-              "y": 3,
-              "w": 30,
-              "h": 28,
-              "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
-              "id": "salao",
-              "nome": "Salão",
-              "legenda": "Mesas, garçons e cardápio",
-              "modulo": "cardapio-digital",
-              "x": 2,
-              "y": 34,
-              "w": 96,
-              "h": 30,
-              "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
-              "id": "porta",
-              "nome": "Porta",
-              "legenda": "Reservas e o agente no WhatsApp",
-              "modulo": "agentes-ia",
-              "x": 2,
-              "y": 67,
-              "w": 28,
-              "h": 30,
-              "contratado": true,
-              "quantos": 2,
-              "ultimo": {
-                "id": "reserva:1",
-                "quando": "2026-09-12T23:37:00.000Z",
-                "setor": "porta",
-                "tipo": "reserva",
-                "titulo": "Reserva para 6 pessoa(s)",
-                "detalhe": "para 12/09/2026 21:30",
-                "quem": "Renata Prado",
-                "atencao": true
-              },
-              "minutos_parado": 3
+              "minutos_parado": 142
             },
             {
               "id": "operacao",
               "nome": "Rotinas",
               "legenda": "Checklists do turno",
               "modulo": "checklist",
-              "x": 32,
-              "y": 67,
-              "w": 34,
-              "h": 30,
+              "area": "retaguarda",
               "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
+              "quantos": 1,
+              "ultimo": {
+                "id": "checklist:1",
+                "quando": "2026-09-12T23:02:00.000Z",
+                "setor": "operacao",
+                "tipo": "checklist",
+                "titulo": "Checklist concluído",
+                "detalhe": "2 ponto(s) de atenção",
+                "quem": "Marcos",
+                "atencao": true
+              },
+              "minutos_parado": 38
             },
             {
               "id": "opiniao",
               "nome": "Opinião",
               "legenda": "Pesquisa e avaliações",
               "modulo": "clientes",
-              "x": 68,
-              "y": 67,
-              "w": 30,
-              "h": 30,
+              "area": "retaguarda",
               "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
+              "quantos": 1,
+              "ultimo": {
+                "id": "resposta:1",
+                "quando": "2026-09-12T22:45:00.000Z",
+                "setor": "opiniao",
+                "tipo": "pesquisa",
+                "titulo": "Respondeu a pesquisa: nota 9",
+                "detalhe": "Comida boa demais",
+                "quem": "Paulo",
+                "atencao": false
+              },
+              "minutos_parado": 55
             }
           ],
           "fatos": [
@@ -1107,12 +2704,148 @@
               "setor": "porta",
               "tipo": "agente-respondeu",
               "titulo": "O agente respondeu",
-              "detalhe": "Temos mesa para 6 às 21h30, posso confirmar?",
+              "detalhe": "Temos mesa para 6 às 21h30?",
               "quem": "Renata Prado",
+              "atencao": false
+            },
+            {
+              "id": "mesa:1",
+              "quando": "2026-09-12T23:38:00.000Z",
+              "setor": "salao",
+              "tipo": "chamou_garcom",
+              "titulo": "Mesa 12: Chamou o garçom",
+              "detalhe": null,
+              "quem": "Juliana",
+              "atencao": true
+            },
+            {
+              "id": "mesa:2",
+              "quando": "2026-09-12T23:31:00.000Z",
+              "setor": "salao",
+              "tipo": "visualizacao",
+              "titulo": "Mesa 7: Olhou um item",
+              "detalhe": "Costela no bafo",
+              "quem": "Mesa 7",
+              "atencao": false
+            },
+            {
+              "id": "producao:1",
+              "quando": "2026-09-12T23:26:00.000Z",
+              "setor": "cozinha",
+              "tipo": "producao",
+              "titulo": "Produziu 4 lote(s)",
+              "detalhe": "Molho da casa",
+              "quem": "Cida",
+              "atencao": false
+            },
+            {
+              "id": "ponto:1",
+              "quando": "2026-09-12T21:18:00.000Z",
+              "setor": "escritorio",
+              "tipo": "ponto",
+              "titulo": "Bateu entrada",
+              "detalhe": null,
+              "quem": "Juliana",
+              "atencao": false
+            },
+            {
+              "id": "checklist:1",
+              "quando": "2026-09-12T23:02:00.000Z",
+              "setor": "operacao",
+              "tipo": "checklist",
+              "titulo": "Checklist concluído",
+              "detalhe": "2 ponto(s) de atenção",
+              "quem": "Marcos",
+              "atencao": true
+            },
+            {
+              "id": "resposta:1",
+              "quando": "2026-09-12T22:45:00.000Z",
+              "setor": "opiniao",
+              "tipo": "pesquisa",
+              "titulo": "Respondeu a pesquisa: nota 9",
+              "detalhe": "Comida boa demais",
+              "quem": "Paulo",
+              "atencao": false
+            },
+            {
+              "id": "compra:1",
+              "quando": "2026-09-12T21:10:00.000Z",
+              "setor": "doca",
+              "tipo": "recebimento",
+              "titulo": "Mercadoria recebida",
+              "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
+              "quem": "Seu Nilton",
               "atencao": false
             }
           ],
           "trabalhadores": [
+            {
+              "id": "pessoa:1",
+              "nome": "Juliana Barbosa",
+              "tipo": "pessoa",
+              "papel": "Garçonete",
+              "setor": "salao",
+              "fazendo": "Mesa 12: Chamou o garçom",
+              "desde": "2026-09-12T23:38:00.000Z",
+              "minutos_parado": 2,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:3",
+              "nome": "Tiago Menezes",
+              "tipo": "pessoa",
+              "papel": "Barman",
+              "setor": "salao",
+              "fazendo": null,
+              "desde": "2026-09-12T22:48:00.000Z",
+              "minutos_parado": 52,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:4",
+              "nome": "Rose da Silva",
+              "tipo": "pessoa",
+              "papel": "Copa",
+              "setor": "salao",
+              "fazendo": null,
+              "desde": "2026-09-12T22:07:00.000Z",
+              "minutos_parado": 93,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:5",
+              "nome": "Marcos Aurélio",
+              "tipo": "pessoa",
+              "papel": "Segurança",
+              "setor": "porta",
+              "fazendo": null,
+              "desde": "2026-09-12T23:02:00.000Z",
+              "minutos_parado": 38,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:2",
+              "nome": "Cida Nogueira",
+              "tipo": "pessoa",
+              "papel": "Cozinha",
+              "setor": "cozinha",
+              "fazendo": "Produziu 4 lote(s)",
+              "desde": "2026-09-12T23:26:00.000Z",
+              "minutos_parado": 14,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:6",
+              "nome": "Val Prado",
+              "tipo": "pessoa",
+              "papel": "Subgerente",
+              "setor": "escritorio",
+              "fazendo": null,
+              "desde": "2026-09-12T23:20:00.000Z",
+              "minutos_parado": 20,
+              "em_pausa": true
+            },
             {
               "id": "agente:atendente",
               "nome": "Atendente",
@@ -1128,7 +2861,7 @@
               "id": "agente:carteiro",
               "nome": "Carteiro",
               "tipo": "agente",
-              "papel": "Manda os avisos no WhatsApp",
+              "papel": "Manda os avisos",
               "setor": "escritorio",
               "fazendo": null,
               "desde": "2026-09-12T20:40:00.000Z",
@@ -1136,12 +2869,574 @@
               "em_pausa": false
             }
           ],
+          "mesas": [
+            {
+              "numero": 1,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 2,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 3,
+              "estado": "chamando",
+              "cliente": "Renata",
+              "olhando": "Costela no bafo",
+              "garcom": "Juliana",
+              "minutos": 22
+            },
+            {
+              "numero": 4,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 5,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 6,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 7,
+              "estado": "chamando",
+              "cliente": "Paulo",
+              "olhando": "Chopp Brahma",
+              "garcom": "Juliana",
+              "minutos": 41
+            },
+            {
+              "numero": 8,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 9,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 10,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 11,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 12,
+              "estado": "chamando",
+              "cliente": "Ana",
+              "olhando": null,
+              "garcom": "Tiago",
+              "minutos": 8
+            },
+            {
+              "numero": 13,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 14,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 15,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 16,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 17,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 18,
+              "estado": "chamando",
+              "cliente": "Bruno",
+              "olhando": "Picanha",
+              "garcom": "Tiago",
+              "minutos": 63
+            },
+            {
+              "numero": 19,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 20,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 21,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 22,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 23,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 24,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 25,
+              "estado": "chamando",
+              "cliente": "Carla",
+              "olhando": null,
+              "garcom": null,
+              "minutos": 15
+            },
+            {
+              "numero": 26,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 27,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 28,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 29,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 30,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 31,
+              "estado": "chamando",
+              "cliente": "Diego",
+              "olhando": "Batata frita",
+              "garcom": "Juliana",
+              "minutos": 34
+            },
+            {
+              "numero": 32,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 33,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 34,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 35,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 36,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 37,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 38,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 39,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 40,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 41,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 42,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 43,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 44,
+              "estado": "chamando",
+              "cliente": "Elis",
+              "olhando": null,
+              "garcom": "Rose",
+              "minutos": 5
+            },
+            {
+              "numero": 45,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 46,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 47,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 48,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 49,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 50,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 51,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 52,
+              "estado": "chamando",
+              "cliente": "Fabio",
+              "olhando": "Caipirinha",
+              "garcom": null,
+              "minutos": 77
+            },
+            {
+              "numero": 53,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 54,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 55,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 56,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 57,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 58,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 59,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 60,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 61,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 62,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 63,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 64,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 65,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 66,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 67,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 68,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 69,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 70,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            }
+          ],
           "setoresMudos": []
         }
       }
     },
-    "casa-vazia": {
-      "rotulo": "ninguém na casa e nada aconteceu",
+    "sem-mesa-cadastrada": {
+      "rotulo": "casa que ainda não cadastrou as mesas",
       "rotas": {
         "GET /a-casa": {
           "agora": "2026-09-12T23:40:00.000Z",
@@ -1149,106 +3444,329 @@
           "timezone": "America/Cuiaba",
           "setores": [
             {
-              "id": "doca",
-              "nome": "Doca",
-              "legenda": "Mercadoria entrando e contagem",
-              "modulo": "cmv",
-              "x": 2,
-              "y": 3,
-              "w": 28,
-              "h": 28,
+              "id": "salao",
+              "nome": "Salão",
+              "legenda": "Mesas, garçons e cardápio",
+              "modulo": "cardapio-digital",
+              "area": "salao",
               "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
+              "quantos": 2,
+              "ultimo": {
+                "id": "mesa:1",
+                "quando": "2026-09-12T23:38:00.000Z",
+                "setor": "salao",
+                "tipo": "chamou_garcom",
+                "titulo": "Mesa 12: Chamou o garçom",
+                "detalhe": null,
+                "quem": "Juliana",
+                "atencao": true
+              },
+              "minutos_parado": 2
+            },
+            {
+              "id": "porta",
+              "nome": "Portaria",
+              "legenda": "Reservas e o agente no WhatsApp",
+              "modulo": "agentes-ia",
+              "area": "salao",
+              "contratado": true,
+              "quantos": 2,
+              "ultimo": {
+                "id": "reserva:1",
+                "quando": "2026-09-12T23:37:00.000Z",
+                "setor": "porta",
+                "tipo": "reserva",
+                "titulo": "Reserva para 6 pessoa(s)",
+                "detalhe": "para 12/09/2026 21:30",
+                "quem": "Renata Prado",
+                "atencao": true
+              },
+              "minutos_parado": 3
             },
             {
               "id": "cozinha",
               "nome": "Cozinha",
               "legenda": "Produção das fichas técnicas",
               "modulo": "cmv",
-              "x": 32,
-              "y": 3,
-              "w": 34,
-              "h": 28,
+              "area": "retaguarda",
               "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
+              "quantos": 1,
+              "ultimo": {
+                "id": "producao:1",
+                "quando": "2026-09-12T23:26:00.000Z",
+                "setor": "cozinha",
+                "tipo": "producao",
+                "titulo": "Produziu 4 lote(s)",
+                "detalhe": "Molho da casa",
+                "quem": "Cida",
+                "atencao": false
+              },
+              "minutos_parado": 14
+            },
+            {
+              "id": "doca",
+              "nome": "Doca",
+              "legenda": "Mercadoria entrando e contagem",
+              "modulo": "cmv",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 1,
+              "ultimo": {
+                "id": "compra:1",
+                "quando": "2026-09-12T21:10:00.000Z",
+                "setor": "doca",
+                "tipo": "recebimento",
+                "titulo": "Mercadoria recebida",
+                "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
+                "quem": "Seu Nilton",
+                "atencao": false
+              },
+              "minutos_parado": 150
             },
             {
               "id": "escritorio",
               "nome": "Escritório",
               "legenda": "Ponto, escala, gorjeta e avisos",
               "modulo": "rh",
-              "x": 68,
-              "y": 3,
-              "w": 30,
-              "h": 28,
+              "area": "retaguarda",
               "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
-              "id": "salao",
-              "nome": "Salão",
-              "legenda": "Mesas, garçons e cardápio",
-              "modulo": "cardapio-digital",
-              "x": 2,
-              "y": 34,
-              "w": 96,
-              "h": 30,
-              "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
-              "id": "porta",
-              "nome": "Porta",
-              "legenda": "Reservas e o agente no WhatsApp",
-              "modulo": "agentes-ia",
-              "x": 2,
-              "y": 67,
-              "w": 28,
-              "h": 30,
-              "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
+              "quantos": 1,
+              "ultimo": {
+                "id": "ponto:1",
+                "quando": "2026-09-12T21:18:00.000Z",
+                "setor": "escritorio",
+                "tipo": "ponto",
+                "titulo": "Bateu entrada",
+                "detalhe": null,
+                "quem": "Juliana",
+                "atencao": false
+              },
+              "minutos_parado": 142
             },
             {
               "id": "operacao",
               "nome": "Rotinas",
               "legenda": "Checklists do turno",
               "modulo": "checklist",
-              "x": 32,
-              "y": 67,
-              "w": 34,
-              "h": 30,
+              "area": "retaguarda",
               "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
+              "quantos": 1,
+              "ultimo": {
+                "id": "checklist:1",
+                "quando": "2026-09-12T23:02:00.000Z",
+                "setor": "operacao",
+                "tipo": "checklist",
+                "titulo": "Checklist concluído",
+                "detalhe": "2 ponto(s) de atenção",
+                "quem": "Marcos",
+                "atencao": true
+              },
+              "minutos_parado": 38
             },
             {
               "id": "opiniao",
               "nome": "Opinião",
               "legenda": "Pesquisa e avaliações",
               "modulo": "clientes",
-              "x": 68,
-              "y": 67,
-              "w": 30,
-              "h": 30,
+              "area": "retaguarda",
               "contratado": true,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
+              "quantos": 1,
+              "ultimo": {
+                "id": "resposta:1",
+                "quando": "2026-09-12T22:45:00.000Z",
+                "setor": "opiniao",
+                "tipo": "pesquisa",
+                "titulo": "Respondeu a pesquisa: nota 9",
+                "detalhe": "Comida boa demais",
+                "quem": "Paulo",
+                "atencao": false
+              },
+              "minutos_parado": 55
             }
           ],
-          "fatos": [],
-          "trabalhadores": [],
+          "fatos": [
+            {
+              "id": "reserva:1",
+              "quando": "2026-09-12T23:37:00.000Z",
+              "setor": "porta",
+              "tipo": "reserva",
+              "titulo": "Reserva para 6 pessoa(s)",
+              "detalhe": "para 12/09/2026 21:30",
+              "quem": "Renata Prado",
+              "atencao": true
+            },
+            {
+              "id": "msg:1",
+              "quando": "2026-09-12T23:36:00.000Z",
+              "setor": "porta",
+              "tipo": "agente-respondeu",
+              "titulo": "O agente respondeu",
+              "detalhe": "Temos mesa para 6 às 21h30?",
+              "quem": "Renata Prado",
+              "atencao": false
+            },
+            {
+              "id": "mesa:1",
+              "quando": "2026-09-12T23:38:00.000Z",
+              "setor": "salao",
+              "tipo": "chamou_garcom",
+              "titulo": "Mesa 12: Chamou o garçom",
+              "detalhe": null,
+              "quem": "Juliana",
+              "atencao": true
+            },
+            {
+              "id": "mesa:2",
+              "quando": "2026-09-12T23:31:00.000Z",
+              "setor": "salao",
+              "tipo": "visualizacao",
+              "titulo": "Mesa 7: Olhou um item",
+              "detalhe": "Costela no bafo",
+              "quem": "Mesa 7",
+              "atencao": false
+            },
+            {
+              "id": "producao:1",
+              "quando": "2026-09-12T23:26:00.000Z",
+              "setor": "cozinha",
+              "tipo": "producao",
+              "titulo": "Produziu 4 lote(s)",
+              "detalhe": "Molho da casa",
+              "quem": "Cida",
+              "atencao": false
+            },
+            {
+              "id": "ponto:1",
+              "quando": "2026-09-12T21:18:00.000Z",
+              "setor": "escritorio",
+              "tipo": "ponto",
+              "titulo": "Bateu entrada",
+              "detalhe": null,
+              "quem": "Juliana",
+              "atencao": false
+            },
+            {
+              "id": "checklist:1",
+              "quando": "2026-09-12T23:02:00.000Z",
+              "setor": "operacao",
+              "tipo": "checklist",
+              "titulo": "Checklist concluído",
+              "detalhe": "2 ponto(s) de atenção",
+              "quem": "Marcos",
+              "atencao": true
+            },
+            {
+              "id": "resposta:1",
+              "quando": "2026-09-12T22:45:00.000Z",
+              "setor": "opiniao",
+              "tipo": "pesquisa",
+              "titulo": "Respondeu a pesquisa: nota 9",
+              "detalhe": "Comida boa demais",
+              "quem": "Paulo",
+              "atencao": false
+            },
+            {
+              "id": "compra:1",
+              "quando": "2026-09-12T21:10:00.000Z",
+              "setor": "doca",
+              "tipo": "recebimento",
+              "titulo": "Mercadoria recebida",
+              "detalhe": "Distribuidora Cuiabá · R$ 3.480,00",
+              "quem": "Seu Nilton",
+              "atencao": false
+            }
+          ],
+          "trabalhadores": [
+            {
+              "id": "pessoa:1",
+              "nome": "Juliana Barbosa",
+              "tipo": "pessoa",
+              "papel": "Garçonete",
+              "setor": "salao",
+              "fazendo": "Mesa 12: Chamou o garçom",
+              "desde": "2026-09-12T23:38:00.000Z",
+              "minutos_parado": 2,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:3",
+              "nome": "Tiago Menezes",
+              "tipo": "pessoa",
+              "papel": "Barman",
+              "setor": "salao",
+              "fazendo": null,
+              "desde": "2026-09-12T22:48:00.000Z",
+              "minutos_parado": 52,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:4",
+              "nome": "Rose da Silva",
+              "tipo": "pessoa",
+              "papel": "Copa",
+              "setor": "salao",
+              "fazendo": null,
+              "desde": "2026-09-12T22:07:00.000Z",
+              "minutos_parado": 93,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:5",
+              "nome": "Marcos Aurélio",
+              "tipo": "pessoa",
+              "papel": "Segurança",
+              "setor": "porta",
+              "fazendo": null,
+              "desde": "2026-09-12T23:02:00.000Z",
+              "minutos_parado": 38,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:2",
+              "nome": "Cida Nogueira",
+              "tipo": "pessoa",
+              "papel": "Cozinha",
+              "setor": "cozinha",
+              "fazendo": "Produziu 4 lote(s)",
+              "desde": "2026-09-12T23:26:00.000Z",
+              "minutos_parado": 14,
+              "em_pausa": false
+            },
+            {
+              "id": "pessoa:6",
+              "nome": "Val Prado",
+              "tipo": "pessoa",
+              "papel": "Subgerente",
+              "setor": "escritorio",
+              "fazendo": null,
+              "desde": "2026-09-12T23:20:00.000Z",
+              "minutos_parado": 20,
+              "em_pausa": true
+            },
+            {
+              "id": "agente:atendente",
+              "nome": "Atendente",
+              "tipo": "agente",
+              "papel": "Responde o WhatsApp",
+              "setor": "porta",
+              "fazendo": "Respondendo Renata",
+              "desde": "2026-09-12T23:36:00.000Z",
+              "minutos_parado": 4,
+              "em_pausa": false
+            },
+            {
+              "id": "agente:carteiro",
+              "nome": "Carteiro",
+              "tipo": "agente",
+              "papel": "Manda os avisos",
+              "setor": "escritorio",
+              "fazendo": null,
+              "desde": "2026-09-12T20:40:00.000Z",
+              "minutos_parado": 180,
+              "em_pausa": false
+            }
+          ],
+          "mesas": [],
           "setoresMudos": []
         }
       }
@@ -1262,56 +3780,11 @@
           "timezone": "America/Cuiaba",
           "setores": [
             {
-              "id": "doca",
-              "nome": "Doca",
-              "legenda": "Mercadoria entrando e contagem",
-              "modulo": "cmv",
-              "x": 2,
-              "y": 3,
-              "w": 28,
-              "h": 28,
-              "contratado": false,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
-              "id": "cozinha",
-              "nome": "Cozinha",
-              "legenda": "Produção das fichas técnicas",
-              "modulo": "cmv",
-              "x": 32,
-              "y": 3,
-              "w": 34,
-              "h": 28,
-              "contratado": false,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
-              "id": "escritorio",
-              "nome": "Escritório",
-              "legenda": "Ponto, escala, gorjeta e avisos",
-              "modulo": "rh",
-              "x": 68,
-              "y": 3,
-              "w": 30,
-              "h": 28,
-              "contratado": false,
-              "quantos": 0,
-              "ultimo": null,
-              "minutos_parado": null
-            },
-            {
               "id": "salao",
               "nome": "Salão",
               "legenda": "Mesas, garçons e cardápio",
               "modulo": "cardapio-digital",
-              "x": 2,
-              "y": 34,
-              "w": 96,
-              "h": 30,
+              "area": "salao",
               "contratado": false,
               "quantos": 0,
               "ultimo": null,
@@ -1319,13 +3792,10 @@
             },
             {
               "id": "porta",
-              "nome": "Porta",
+              "nome": "Portaria",
               "legenda": "Reservas e o agente no WhatsApp",
               "modulo": "agentes-ia",
-              "x": 2,
-              "y": 67,
-              "w": 28,
-              "h": 30,
+              "area": "salao",
               "contratado": true,
               "quantos": 2,
               "ultimo": {
@@ -1341,14 +3811,44 @@
               "minutos_parado": 3
             },
             {
+              "id": "cozinha",
+              "nome": "Cozinha",
+              "legenda": "Produção das fichas técnicas",
+              "modulo": "cmv",
+              "area": "retaguarda",
+              "contratado": false,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "doca",
+              "nome": "Doca",
+              "legenda": "Mercadoria entrando e contagem",
+              "modulo": "cmv",
+              "area": "retaguarda",
+              "contratado": false,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "escritorio",
+              "nome": "Escritório",
+              "legenda": "Ponto, escala, gorjeta e avisos",
+              "modulo": "rh",
+              "area": "retaguarda",
+              "contratado": false,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
               "id": "operacao",
               "nome": "Rotinas",
               "legenda": "Checklists do turno",
               "modulo": "checklist",
-              "x": 32,
-              "y": 67,
-              "w": 34,
-              "h": 30,
+              "area": "retaguarda",
               "contratado": false,
               "quantos": 0,
               "ultimo": null,
@@ -1359,10 +3859,7 @@
               "nome": "Opinião",
               "legenda": "Pesquisa e avaliações",
               "modulo": "clientes",
-              "x": 68,
-              "y": 67,
-              "w": 30,
-              "h": 30,
+              "area": "retaguarda",
               "contratado": false,
               "quantos": 0,
               "ultimo": null,
@@ -1386,7 +3883,7 @@
               "setor": "porta",
               "tipo": "agente-respondeu",
               "titulo": "O agente respondeu",
-              "detalhe": "Temos mesa para 6 às 21h30, posso confirmar?",
+              "detalhe": "Temos mesa para 6 às 21h30?",
               "quem": "Renata Prado",
               "atencao": false
             }
@@ -1402,6 +3899,661 @@
               "desde": "2026-09-12T23:36:00.000Z",
               "minutos_parado": 4,
               "em_pausa": false
+            }
+          ],
+          "mesas": [],
+          "setoresMudos": []
+        }
+      }
+    },
+    "casa-vazia": {
+      "rotulo": "ninguém na casa e nada aconteceu",
+      "rotas": {
+        "GET /a-casa": {
+          "agora": "2026-09-12T23:40:00.000Z",
+          "desde": "2026-09-11T23:40:00.000Z",
+          "timezone": "America/Cuiaba",
+          "setores": [
+            {
+              "id": "salao",
+              "nome": "Salão",
+              "legenda": "Mesas, garçons e cardápio",
+              "modulo": "cardapio-digital",
+              "area": "salao",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "porta",
+              "nome": "Portaria",
+              "legenda": "Reservas e o agente no WhatsApp",
+              "modulo": "agentes-ia",
+              "area": "salao",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "cozinha",
+              "nome": "Cozinha",
+              "legenda": "Produção das fichas técnicas",
+              "modulo": "cmv",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "doca",
+              "nome": "Doca",
+              "legenda": "Mercadoria entrando e contagem",
+              "modulo": "cmv",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "escritorio",
+              "nome": "Escritório",
+              "legenda": "Ponto, escala, gorjeta e avisos",
+              "modulo": "rh",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "operacao",
+              "nome": "Rotinas",
+              "legenda": "Checklists do turno",
+              "modulo": "checklist",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            },
+            {
+              "id": "opiniao",
+              "nome": "Opinião",
+              "legenda": "Pesquisa e avaliações",
+              "modulo": "clientes",
+              "area": "retaguarda",
+              "contratado": true,
+              "quantos": 0,
+              "ultimo": null,
+              "minutos_parado": null
+            }
+          ],
+          "fatos": [],
+          "trabalhadores": [],
+          "mesas": [
+            {
+              "numero": 1,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 2,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 3,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": "Costela no bafo",
+              "garcom": "Juliana",
+              "minutos": null
+            },
+            {
+              "numero": 4,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 5,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 6,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 7,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": "Chopp Brahma",
+              "garcom": "Juliana",
+              "minutos": null
+            },
+            {
+              "numero": 8,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 9,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 10,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 11,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 12,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": "Tiago",
+              "minutos": null
+            },
+            {
+              "numero": 13,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 14,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 15,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 16,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 17,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 18,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": "Picanha",
+              "garcom": "Tiago",
+              "minutos": null
+            },
+            {
+              "numero": 19,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 20,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 21,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 22,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 23,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 24,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 25,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 26,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 27,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 28,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 29,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 30,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 31,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": "Batata frita",
+              "garcom": "Juliana",
+              "minutos": null
+            },
+            {
+              "numero": 32,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 33,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 34,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 35,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 36,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 37,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 38,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 39,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 40,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 41,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 42,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 43,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 44,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": "Rose",
+              "minutos": null
+            },
+            {
+              "numero": 45,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 46,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 47,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 48,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 49,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 50,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 51,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 52,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": "Caipirinha",
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 53,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 54,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 55,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 56,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 57,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 58,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 59,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 60,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 61,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 62,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 63,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 64,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 65,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 66,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 67,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 68,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 69,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
+            },
+            {
+              "numero": 70,
+              "estado": "livre",
+              "cliente": null,
+              "olhando": null,
+              "garcom": null,
+              "minutos": null
             }
           ],
           "setoresMudos": []
